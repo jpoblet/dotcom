@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
+/* Light mode (default) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-sans: var(--font-space-grotesk);
+
+  --apricot-50: oklch(97.44% 0.016 70.54);
+  --apricot-100: oklch(94.43% 0.036 70.02);
+  --apricot-200: oklch(89.04% 0.073 69.35);
+  --apricot-300: oklch(84.46% 0.105 67.45);
+  --apricot-400: oklch(79.43% 0.137 64.77);
+  --apricot-500: oklch(75% 0.162 60.82);
+  --apricot-600: oklch(66.83% 0.16 56.69);
+  --apricot-700: oklch(54.44% 0.129 57.45);
+  --apricot-800: oklch(40.31% 0.093 59.41);
+  --apricot-900: oklch(25.9% 0.056 64.09);
+  --apricot-950: oklch(18.68% 0.037 72.79);
+
+  --boulder-50: oklch(0.985 0.002 247.839);
+  --boulder-100: oklch(0.985 0.002 247.839);
+  --boulder-200: oklch(0.928 0.006 264.531);
+  --boulder-300: oklch(0.872 0.01 258.338);
+  --boulder-400: oklch(0.707 0.022 261.325);
+  --boulder-500: oklch(0.551 0.027 264.364);
+  --boulder-600: oklch(0.446 0.03 256.802);
+  --boulder-700: oklch(0.373 0.034 259.733);
+  --boulder-800: oklch(0.278 0.033 256.848);
+  --boulder-900: oklch(0.21 0.034 264.665);
+  --boulder-950: oklch(0.13 0.028 261.692);
+
+  /* Global tokens */
+  --color-accent: var(--apricot-500);
+  --color-background: oklch(100% 0 0); /* polar */
+  --color-background-secondary: var(--boulder-50);
+  --color-foreground: var(--boulder-950);
+  --color-foreground-secondary: var(--apricot-400);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark mode override using the `.dark` class */
+.dark {
+  --color-accent: var(--apricot-600);
+  --color-background: var(--boulder-900);
+  --color-background-secondary: var(--boulder-800);
+  --color-foreground: var(--apricot-500);
+  --color-foreground-secondary: var(--boulder-300);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
