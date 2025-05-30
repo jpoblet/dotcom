@@ -1,8 +1,10 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* Light mode (default) */
 :root {
   --font-sans: var(--font-space-grotesk);
+
+  --polar: oklch(100% 0 0);
 
   --apricot-50: oklch(97.44% 0.016 70.54);
   --apricot-100: oklch(94.43% 0.036 70.02);
@@ -28,21 +30,27 @@
   --boulder-900: oklch(0.21 0.034 264.665);
   --boulder-950: oklch(0.13 0.028 261.692);
 
-  /* Global tokens */
-  --color-accent: var(--apricot-500);
-  --color-background: oklch(100% 0 0); /* polar */
-  --color-background-secondary: var(--boulder-50);
+@theme {
+  --color-background: var(--polar);
+  --color-background-secondary: var(--boulder-100);
+  --color-background-inverse: var(--polar);
   --color-foreground: var(--boulder-950);
-  --color-foreground-secondary: var(--apricot-400);
+  --color-foreground-secondary: var(--boulder-950);
+  --color-foreground-inverse: var(--polar);
+  --color-accent: var(--apricot-500);
+
+  }
 }
 
-/* Dark mode override using the `.dark` class */
 .dark {
-  --color-accent: var(--apricot-600);
   --color-background: var(--boulder-900);
   --color-background-secondary: var(--boulder-800);
-  --color-foreground: var(--apricot-500);
-  --color-foreground-secondary: var(--boulder-300);
+  --color-background-inverse: var(--polar);
+  --color-foreground: var(--boulder-100);
+  --color-foreground-secondary: var(--boulder-500);
+  --color-foreground-inverse: var(--boulder-950);
+  --color-accent: var(--apricot-600);
+
 }
 
 body {
