@@ -1,0 +1,70 @@
+{
+  "name": "Jordi Poblet",
+  "title": "Product Designer",
+  "location": "Barcelona, Spain",
+  "email": "jordi@example.com",
+  "summary": "Experienced Product Designer with 5+ years of experience creating user-centered digital experiences. Passionate about solving complex problems through thoughtful design and collaboration. I specialize in creating intuitive interfaces that bridge the gap between user needs and business objectives. My approach combines data-driven insights with creative problem-solving to deliver exceptional digital products. I thrive in collaborative environments and enjoy mentoring emerging designers while staying current with the latest design trends and technologies.",
+  "experience": [
+    {
+      "company": "Tech Startup Inc.",
+      "position": "Senior Product Designer",
+      "duration": "2022 - Present",
+      "description": "Lead design for core product features, conducted user research, and collaborated with cross-functional teams to deliver impactful solutions."
+    },
+    {
+      "company": "Design Agency Co.",
+      "position": "Product Designer",
+      "duration": "2020 - 2022",
+      "description": "Designed digital products for various clients, created design systems, and mentored junior designers."
+    }
+  ],
+  "skills": [
+    "User Experience Design",
+    "User Interface Design",
+    "Prototyping",
+    "User Research",
+    "Design Systems",
+    "Figma",
+    "Sketch",
+    "Adobe Creative Suite"
+  ],
+  "education": [
+    {
+      "institution": "Design University",
+      "degree": "Bachelor of Fine Arts in Graphic Design",
+      "year": "2019"
+    }
+  ],
+  "projects": [
+    {
+      "name": "E-commerce Platform Redesign",
+      "description": "Complete redesign of checkout flow resulting in 25% increase in conversion rate",
+      "technologies": ["Figma", "User Testing", "A/B Testing"],
+      "thumbnail": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80"
+    },
+    {
+      "name": "Mobile Banking App",
+      "description": "Designed intuitive mobile banking experience for 100k+ users",
+      "technologies": ["Sketch", "Principle", "User Research"],
+      "thumbnail": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&q=80"
+    },
+    {
+      "name": "SaaS Dashboard Redesign",
+      "description": "Redesigned analytics dashboard improving user engagement by 40% and reducing support tickets",
+      "technologies": ["Figma", "React", "Data Visualization"],
+      "thumbnail": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80"
+    },
+    {
+      "name": "Healthcare Patient Portal",
+      "description": "Created accessible patient portal serving 50k+ users with focus on elderly accessibility",
+      "technologies": ["Adobe XD", "Accessibility Testing", "User Interviews"],
+      "thumbnail": "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&q=80"
+    },
+    {
+      "name": "Travel Booking Platform",
+      "description": "Designed end-to-end booking experience resulting in 30% increase in completed bookings",
+      "technologies": ["Figma", "Prototyping", "Usability Testing"],
+      "thumbnail": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=80"
+    }
+  ]
+}
