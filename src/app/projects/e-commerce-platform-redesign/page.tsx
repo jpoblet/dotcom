@@ -77,7 +77,7 @@ export default function EcommercePlatformRedesign() {
               significantly impacting revenue. Users were dropping off at
               various stages, particularly during payment information entry and
               shipping selection. The interface was cluttered, confusing, and
-              didn't instill confidence in users.
+              didn&apos;t instill confidence in users.
             </p>
           </section>
 

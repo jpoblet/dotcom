@@ -68,11 +68,11 @@ export default function MobileBankingApp() {
               Challenge
             </h2>
             <p className="text-foreground-secondary leading-relaxed">
-              The bank's existing mobile app had poor user ratings (2.1 stars)
-              and low adoption rates. Users complained about complex navigation,
-              slow performance, and difficulty completing basic banking tasks.
-              The app needed a complete overhaul to meet modern user
-              expectations and compete with fintech alternatives.
+              The bank&apos;s existing mobile app had poor user ratings (2.1
+              stars) and low adoption rates. Users complained about complex
+              navigation, slow performance, and difficulty completing basic
+              banking tasks. The app needed a complete overhaul to meet modern
+              user expectations and compete with fintech alternatives.
             </p>
           </section>
 
