@@ -139,7 +139,7 @@ Guidelines:
 
       // Check if it's a quota error and set flag
       if (
-        (openaiError as any).status === 429 ||
+        (openaiError as unknown as { status?: number }).status === 429 ||
         (openaiError as Error).message?.includes("quota")
       ) {
         quotaExhausted = true;
