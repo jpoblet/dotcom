@@ -11,6 +11,7 @@
   "dependencies": {
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
+    "openai": "^5.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -23,6 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4.1.8",
+    "tempo-devtools": "^2.0.106",
     "typescript": "^5"
   }
 }
