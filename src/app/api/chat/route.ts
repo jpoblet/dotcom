@@ -131,13 +131,16 @@ Guidelines:
         "Sorry, I could not generate a response.";
 
       return NextResponse.json({ response });
-    } catch (openaiError: any) {
-      console.warn("OpenAI API error, using fallback:", openaiError.message);
+    } catch (openaiError: unknown) {
+      console.warn(
+        "OpenAI API error, using fallback:",
+        (openaiError as Error).message,
+      );
 
       // Check if it's a quota error and set flag
       if (
-        openaiError.status === 429 ||
-        openaiError.message?.includes("quota")
+        (openaiError as any).status === 429 ||
+        (openaiError as Error).message?.includes("quota")
       ) {
         quotaExhausted = true;
         lastQuotaCheck = now;

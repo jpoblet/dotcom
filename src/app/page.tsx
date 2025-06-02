@@ -21,13 +21,15 @@ export default function Home() {
     const savedMessages = localStorage.getItem("chat-history");
     if (savedMessages) {
       try {
-        const parsedMessages = JSON.parse(savedMessages).map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        }));
+        const parsedMessages = JSON.parse(savedMessages).map(
+          (msg: Message & { timestamp: string }) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          }),
+        );
         setMessages(parsedMessages);
-      } catch (error) {
-        console.error("Failed to parse saved messages:", error);
+      } catch {
+        console.error("Failed to parse saved messages");
         // If parsing fails, start with default message
         setMessages([
           {

@@ -59,7 +59,7 @@ export default function ChatBot() {
       } else {
         throw new Error(data.error || "Failed to get response");
       }
-    } catch (error) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: "Sorry, I encountered an error. Please try again.",
