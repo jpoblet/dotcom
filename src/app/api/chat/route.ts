@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import cvData from "../../../data/cv.json";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 // Simple keyword-based response function
 function generateFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
@@ -107,6 +103,10 @@ Guidelines:
 - You can use HTML formatting in responses for links and basic styling`;
 
     try {
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
