@@ -24,7 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4.1.8",
-    "tempo-devtools": "^2.0.106",
+    "tempo-devtools": "^2.0.109",
     "typescript": "^5"
   }
 }

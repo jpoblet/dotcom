@@ -2,11 +2,11 @@
   "name": "Jordi Poblet",
   "title": "Product Designer",
   "location": "Barcelona, Spain",
-  "email": "jordi@example.com",
+  "email": "hello@jordipoblet.com",
   "summary": "Experienced Product Designer with 5+ years of experience creating user-centered digital experiences. Passionate about solving complex problems through thoughtful design and collaboration. I specialize in creating intuitive interfaces that bridge the gap between user needs and business objectives. My approach combines data-driven insights with creative problem-solving to deliver exceptional digital products. I thrive in collaborative environments and enjoy mentoring emerging designers while staying current with the latest design trends and technologies.",
   "experience": [
     {
-      "company": "Tech Startup Inc.",
+      "company": "Veriff",
       "position": "Senior Product Designer",
       "duration": "2022 - Present",
       "description": "Lead design for core product features, conducted user research, and collaborated with cross-functional teams to deliver impactful solutions."
@@ -26,9 +26,16 @@
     "Design Systems",
     "Figma",
     "Sketch",
-    "Adobe Creative Suite"
+    "Adobe Creative Suite",
+    "Paint houses",
+    "Build furniture"
   ],
   "education": [
+    {
+      "institution": "ELISAVA School of Design and Engineering",
+      "degree": "Degree in Design",
+      "year": "2004 - 2009"
+    },
     {
       "institution": "Design University",
       "degree": "Bachelor of Fine Arts in Graphic Design",

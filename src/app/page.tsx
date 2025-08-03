@@ -149,82 +149,74 @@ export default function Home() {
     const lastMessages = messages.slice(-3).map((m) => m.text.toLowerCase());
     const allText = lastMessages.join(" ");
 
+    let questions: string[] = [];
+
     // Default questions for initial state
     if (messages.length <= 1) {
-      return [
+      questions = [
         "Where have you worked?",
         "What tools do you use?",
         "How many languages do you speak?",
-        "What&apos;s your design philosophy?",
-        "Tell me about your experience",
+        "What's your design philosophy?",
       ];
     }
-
     // Adapt questions based on conversation context
-    if (
+    else if (
       allText.includes("work") ||
       allText.includes("job") ||
       allText.includes("company")
     ) {
-      return [
+      questions = [
         "What was your favorite project?",
         "Tell me about your leadership experience",
         "What challenges did you face?",
         "How do you collaborate with teams?",
-        "What&apos;s your management style?",
       ];
-    }
-
-    if (
+    } else if (
       allText.includes("design") ||
       allText.includes("ui") ||
       allText.includes("ux")
     ) {
-      return [
-        "What&apos;s your design process?",
+      questions = [
+        "What's your design process?",
         "How do you approach user research?",
         "What design tools do you prefer?",
         "Tell me about your design philosophy",
-        "How do you handle design feedback?",
       ];
-    }
-
-    if (
+    } else if (
       allText.includes("skill") ||
       allText.includes("tool") ||
       allText.includes("technology")
     ) {
-      return [
-        "What&apos;s your strongest skill?",
+      questions = [
+        "What's your strongest skill?",
         "How do you stay updated with trends?",
         "What would you like to learn next?",
         "Tell me about your technical background",
-        "How do you approach learning?",
       ];
-    }
-
-    if (
+    } else if (
       allText.includes("language") ||
       allText.includes("speak") ||
       allText.includes("communication")
     ) {
-      return [
+      questions = [
         "How do you handle international projects?",
         "Tell me about cross-cultural experiences",
-        "What&apos;s your communication style?",
+        "What's your communication style?",
         "How do you present to stakeholders?",
-        "Any interesting cultural insights?",
+      ];
+    } else {
+      // General follow-up questions
+      questions = [
+        "Can you elaborate on that?",
+        "What's your proudest achievement?",
+        "How do you handle challenges?",
+        "What motivates you?",
       ];
     }
 
-    // General follow-up questions
-    return [
-      "Can you elaborate on that?",
-      "What&apos;s your proudest achievement?",
-      "How do you handle challenges?",
-      "What motivates you?",
-      "Tell me about your future goals",
-    ];
+    // Ensure maximum 4 questions
+    return questions.slice(0, 4);
   };
 
   const handleSampleQuestion = (question: string) => {
@@ -308,9 +300,9 @@ export default function Home() {
 
       {/* Floating Input and Suggestions Section */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="p-6">
           {/* Input Section */}
-          <div className="bg-background rounded-full p-4 mb-4 shadow-lg border border-foreground/10">
+          <div className="bg-background rounded-full p-4 mb-4 shadow-lg border border-foreground/10 max-w-4xl mx-auto">
             <div className="flex space-x-3">
               <input
                 type="text"
@@ -345,13 +337,13 @@ export default function Home() {
             <div className="text-sm text-foreground-secondary mb-3">
               {messages.length === 1 ? "Try asking:" : "You might also ask:"}
             </div>
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap justify-center gap-2">
               {getContextualQuestions().map((question, index) => (
                 <button
                   key={`${messages.length}-${index}`}
                   onClick={() => handleSampleQuestion(question)}
                   disabled={isLoading}
-                  className="px-4 py-2 text-sm bg-accent/30 text-foreground rounded-full hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-2 text-sm bg-accent/30 text-foreground rounded-full hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed text-center leading-tight whitespace-nowrap"
                 >
                   {question}
                 </button>
