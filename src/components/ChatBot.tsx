@@ -15,7 +15,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "Hi, I am <b><a href='/' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Jordi</a></b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>.<br>I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
+      text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
       isUser: false,
       timestamp: new Date(),
     },
@@ -82,7 +82,7 @@ export default function ChatBot() {
   const resetChat = () => {
     const initialMessage = {
       id: "1",
-      text: "Hi, I am <b><a href='/' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Jordi</a></b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>.<br>I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
+      text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
       isUser: false,
       timestamp: new Date(),
     };
