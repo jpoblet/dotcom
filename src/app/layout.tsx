@@ -1,7 +1,5 @@
 import "./globals.css";
 import { Space_Grotesk } from "next/font/google";
-import Header from "../components/Header";
-import { ThemeProvider } from "../components/ThemeProvider";
 import Script from "next/script";
 
 const spaceGrotesk = Space_Grotesk({
@@ -26,10 +24,7 @@ export default function RootLayout({
         <Script src="https://api.tempo.new/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
       </head>
       <body className="font-sans">
-        <ThemeProvider>
-          <Header />
-          <main className="pt-0">{children}</main>
-        </ThemeProvider>
+        <main className="pt-0">{children}</main>
       </body>
     </html>
   );

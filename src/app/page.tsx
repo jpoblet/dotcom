@@ -34,7 +34,7 @@ export default function Home() {
         setMessages([
           {
             id: "1",
-            text: "Hi, I am <b><a href=&apos;/&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 2px solid var(--color-accent); line-height: 0.75;&apos;>Jordi</a></b>, <b>Lead Product Designer</b> at <a href=&apos;https://veriff.com&apos; target=&apos;_blank&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 2px solid var(--color-accent); line-height: 0.75;&apos;>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
+            text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
             isUser: false,
             timestamp: new Date(),
           },
@@ -45,7 +45,7 @@ export default function Home() {
       setMessages([
         {
           id: "1",
-          text: "Hi, I am <b><a href=&apos;/&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 2px solid var(--color-accent); line-height: 0.75;&apos;>Jordi</a></b>, <b>Lead Product Designer</b> at <a href=&apos;https://veriff.com&apos; target=&apos;_blank&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 2px solid var(--color-accent); line-height: 0.75;&apos;>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
+          text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
           isUser: false,
           timestamp: new Date(),
         },
@@ -235,7 +235,7 @@ export default function Home() {
   const resetChat = () => {
     const initialMessage = {
       id: "1",
-      text: "Hi, I am <b><a href=&apos;/&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;&apos;>Jordi</a></b>, <b>Lead Product Designer</b> at <a href=&apos;https://veriff.com&apos; target=&apos;_blank&apos; style=&apos;color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;&apos;>Veriff</a>.<br>I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
+      text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
       isUser: false,
       timestamp: new Date(),
     };
