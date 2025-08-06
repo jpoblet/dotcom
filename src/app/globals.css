@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: var(--font-space-grotesk);
+  --font-sans: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
 
@@ -50,10 +50,32 @@
   --color-accent: var(--apricot-700);
 }
 
+* {
+  font-weight: 300 !important;
+}
+
 body {
   background: var(--color-background-secondary);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+}
+
+/* Ensure all text elements use font-weight 300 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+button,
+input,
+textarea,
+label,
+a {
+  font-weight: 300 !important;
 }
 
 @keyframes fade-in {
@@ -76,6 +98,29 @@ body {
   }
 }
 
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  50% {
+    width: 100%;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out forwards;
 }
@@ -83,4 +128,32 @@ body {
 .animate-slide-up {
   animation: slide-up 0.5s ease-out 0.15s forwards;
   opacity: 0;
+}
+
+.typing-placeholder {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.typing-placeholder::after {
+  content: "|";
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+/* Input wrapper for cursor positioning */
+.input-wrapper {
+  position: relative;
+}
+
+.typing-cursor {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  animation: blink 1s infinite;
+  pointer-events: none;
+  color: var(--color-foreground-secondary);
+  font-size: 14px;
 }

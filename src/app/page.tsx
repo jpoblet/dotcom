@@ -3,6 +3,7 @@
 import { TempoDevtools } from "tempo-devtools";
 import { useEffect, useState } from "react";
 import { Send, RotateCcw } from "lucide-react";
+import cvData from "../data/cv.json";
 
 interface Message {
   id: string;
@@ -15,6 +16,10 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInputActive, setIsInputActive] = useState(false);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -30,26 +35,12 @@ export default function Home() {
         setMessages(parsedMessages);
       } catch {
         console.error("Failed to parse saved messages");
-        // If parsing fails, start with default message
-        setMessages([
-          {
-            id: "1",
-            text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
-            isUser: false,
-            timestamp: new Date(),
-          },
-        ]);
+        // If parsing fails, start with empty messages
+        setMessages([]);
       }
     } else {
-      // No saved history, start with default message
-      setMessages([
-        {
-          id: "1",
-          text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
-          isUser: false,
-          timestamp: new Date(),
-        },
-      ]);
+      // No saved history, start with empty messages
+      setMessages([]);
     }
 
     // Scroll to bottom after messages are loaded and rendered
@@ -87,6 +78,52 @@ export default function Home() {
       TempoDevtools.init();
     }
   }, []);
+
+  // Typing animation effect for placeholder - only when no messages exist
+  useEffect(() => {
+    // Don't run typing animation if messages exist
+    if (messages.length > 0) {
+      setDisplayedText("");
+      return;
+    }
+
+    const phrases = [
+      "I fed my CV to this AI so it can answer for me...",
+      "You can ask me anything...",
+    ];
+    const currentPhrase = phrases[currentPlaceholder];
+
+    if (isTyping) {
+      // Typing effect
+      if (displayedText.length < currentPhrase.length) {
+        const timeout = setTimeout(() => {
+          setDisplayedText(currentPhrase.slice(0, displayedText.length + 1));
+        }, 50);
+        return () => clearTimeout(timeout);
+      } else {
+        // Finished typing, wait then start erasing
+        const timeout = setTimeout(() => {
+          setIsTyping(false);
+        }, 2000);
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      // Erasing effect
+      if (displayedText.length > 0) {
+        const timeout = setTimeout(() => {
+          setDisplayedText(displayedText.slice(0, -1));
+        }, 25);
+        return () => clearTimeout(timeout);
+      } else {
+        // Finished erasing, switch to next phrase
+        const timeout = setTimeout(() => {
+          setCurrentPlaceholder((prev) => (prev + 1) % phrases.length);
+          setIsTyping(true);
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [currentPlaceholder, displayedText, isTyping, messages.length]);
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputMessage;
@@ -152,7 +189,7 @@ export default function Home() {
     let questions: string[] = [];
 
     // Default questions for initial state
-    if (messages.length <= 1) {
+    if (messages.length === 0) {
       questions = [
         "Where have you worked?",
         "What tools do you use?",
@@ -233,19 +270,25 @@ export default function Home() {
   };
 
   const resetChat = () => {
-    const initialMessage = {
-      id: "1",
-      text: "Hi, I am <b>Jordi</b>, <b>Lead Product Designer</b> at <a href='https://veriff.com' target='_blank' style='color: inherit; text-decoration: none; border-bottom: 4px solid var(--color-accent); line-height: 0.75;'>Veriff</a>. I built this AI and fed it my CV. Ask it anything about my background, skills, projects, experience, hobbies...",
-      isUser: false,
-      timestamp: new Date(),
-    };
-    setMessages([initialMessage]);
+    setMessages([]);
     setInputMessage("");
-    localStorage.setItem("chat-history", JSON.stringify([initialMessage]));
+    localStorage.setItem("chat-history", JSON.stringify([]));
   };
 
   return (
     <main className="w-full h-screen flex flex-col overflow-hidden relative">
+      {/* Hero Section */}
+      {messages.length === 0 && (
+        <section className="absolute inset-0 flex items-center justify-center z-30 bg-background-secondary">
+          <div className="text-center px-6">
+            <div
+              className="text-3xl leading-snug max-w-4xl mx-auto"
+              dangerouslySetInnerHTML={{ __html: cvData.initialMessage }}
+            />
+          </div>
+        </section>
+      )}
+
       {/* AI Chat Section */}
       <section className="w-full flex-1 flex flex-col overflow-hidden">
         <div className="flex flex-col h-full">
@@ -259,16 +302,12 @@ export default function Home() {
                 <div
                   className={`max-w-[60%] p-4 ${
                     message.isUser
-                      ? "bg-accent text-foreground rounded-full px-6"
+                      ? "bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6"
                       : "text-foreground rounded-lg"
                   }`}
                 >
                   <div
-                    className={`${
-                      message.id === "1" && !message.isUser
-                        ? "text-5xl leading-snug"
-                        : "text-lg leading-relaxed"
-                    } ${message.text.includes("<a ") || message.text.includes("</a>") ? "[&_div:has(img)]:bg-background [&_div:has(img)]:p-4 [&_div:has(img)]:rounded-lg [&_div:has(img)]:shadow-md [&_div:has(img)]:hover:shadow-lg [&_div:has(img)]:transition-shadow [&_div:has(img)]:duration-200" : ""}`}
+                    className={`text-sm leading-relaxed ${message.text.includes("<a ") || message.text.includes("</a>") ? "[&_div:has(img)]:bg-background [&_div:has(img)]:p-4 [&_div:has(img)]:rounded-lg [&_div:has(img)]:shadow-md [&_div:has(img)]:hover:shadow-lg [&_div:has(img)]:transition-shadow [&_div:has(img)]:duration-200" : ""}`}
                     dangerouslySetInnerHTML={{ __html: message.text }}
                   />
                 </div>
@@ -298,56 +337,83 @@ export default function Home() {
       {/* Gradient Overlay */}
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
-      {/* Floating Input and Suggestions Section */}
+      {/* Floating Input Section */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         <div className="p-6">
-          {/* Input Section */}
-          <div className="bg-background rounded-full p-4 mb-4 shadow-lg border border-foreground/10 max-w-4xl mx-auto">
-            <div className="flex space-x-3">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                className="flex-1 p-3 border-none rounded-full bg-background text-foreground placeholder-foreground-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                disabled={isLoading}
-              />
-              <button
-                onClick={resetChat}
-                disabled={isLoading}
-                className="bg-background-secondary text-foreground px-4 py-3 rounded-full hover:bg-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
-                title="Reset chat"
-              >
-                <RotateCcw size={18} />
-              </button>
-              <button
-                onClick={() => sendMessage()}
-                disabled={!inputMessage.trim() || isLoading}
-                className="bg-background-inverse text-foreground-inverse px-4 py-3 rounded-full hover:opacity-90 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
-                title="Send"
-              >
-                <Send size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* Sample Questions */}
-          <div className="text-center">
-            <div className="text-sm text-foreground-secondary mb-3">
-              {messages.length === 1 ? "Try asking:" : "You might also ask:"}
-            </div>
-            <div className="flex flex-wrap justify-center gap-2">
-              {getContextualQuestions().map((question, index) => (
+          {/* Enhanced Input Section with Integrated Suggestions */}
+          <div
+            className={`bg-background rounded-3xl p-6 shadow-lg border transition-all duration-300 mx-auto ${
+              isInputActive
+                ? "border-background-inverse max-w-4xl"
+                : "border-foreground/10 max-w-3xl"
+            } ${isLoading ? "opacity-50" : "opacity-100"}`}
+          >
+            <div className="flex flex-col space-y-4">
+              {/* Input Row */}
+              <div className="flex space-x-3">
+                <div className="flex-1 relative">
+                  <div className="input-wrapper">
+                    <input
+                      type="text"
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      onClick={() => setIsInputActive(true)}
+                      onBlur={() =>
+                        !inputMessage.trim() && setIsInputActive(false)
+                      }
+                      placeholder={
+                        messages.length > 0
+                          ? "Ask me anything..."
+                          : displayedText
+                      }
+                      className={`w-full p-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-sm transition-all duration-300 bg-transparent ${
+                        isLoading
+                          ? "placeholder:text-foreground-secondary/50 cursor-not-allowed"
+                          : "placeholder:text-foreground-secondary"
+                      }`}
+                      disabled={isLoading}
+                    />
+                    {messages.length === 0 &&
+                      !isInputActive &&
+                      displayedText && <div className="typing-cursor">|</div>}
+                  </div>
+                </div>
                 <button
-                  key={`${messages.length}-${index}`}
-                  onClick={() => handleSampleQuestion(question)}
+                  onClick={resetChat}
                   disabled={isLoading}
-                  className="px-3 py-2 text-sm bg-accent/30 text-foreground rounded-full hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed text-center leading-tight whitespace-nowrap"
+                  className="bg-background-secondary text-foreground px-4 py-4 rounded-full hover:bg-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+                  title="Reset chat"
                 >
-                  {question}
+                  <RotateCcw size={20} />
                 </button>
-              ))}
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!inputMessage.trim() || isLoading}
+                  className="bg-background-inverse text-background px-6 py-4 rounded-full hover:opacity-90 disabled:cursor-not-allowed transition-all duration-200 flex items-center font-medium"
+                  title="Send"
+                >
+                  <Send size={20} />
+                </button>
+              </div>
+
+              {/* Integrated Suggestions */}
+              {!inputMessage.trim() && (
+                <div className="flex flex-col space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {getContextualQuestions().map((question, index) => (
+                      <button
+                        key={`${messages.length}-${index}`}
+                        onClick={() => handleSampleQuestion(question)}
+                        disabled={isLoading}
+                        className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0 hover:border-background-inverse/50"
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
