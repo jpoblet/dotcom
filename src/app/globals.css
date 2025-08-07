@@ -36,7 +36,7 @@
     --color-foreground: var(--boulder-950);
     --color-foreground-secondary: var(--boulder-500);
     --color-foreground-inverse: var(--polar);
-    --color-accent: var(--apricot-500);
+    --color-accent: var(--boulder-950);
   }
 }
 
@@ -47,7 +47,7 @@
   --color-foreground: var(--boulder-100);
   --color-foreground-secondary: var(--boulder-500);
   --color-foreground-inverse: var(--boulder-950);
-  --color-accent: var(--apricot-700);
+  --color-accent: var(--polar);
 }
 
 body {

@@ -2,7 +2,7 @@
 
 import { TempoDevtools } from "tempo-devtools";
 import { useEffect, useState } from "react";
-import { Send, RotateCcw } from "lucide-react";
+import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import cvData from "../data/cv.json";
 
 interface Message {
@@ -21,6 +21,8 @@ export default function Home() {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [isBoxExpanded, setIsBoxExpanded] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -74,29 +76,90 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
-  // Handle clicks outside the floating box to collapse it
+  // Handle clicks outside the floating box and theme menu to collapse them
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const floatingBox = document.querySelector("[data-floating-box]");
+      const themeMenu = document.querySelector("[data-theme-menu]");
+
       if (floatingBox && !floatingBox.contains(event.target as Node)) {
         setIsBoxExpanded(false);
       }
+
+      if (themeMenu && !themeMenu.contains(event.target as Node)) {
+        setIsThemeMenuOpen(false);
+      }
     };
 
-    if (isBoxExpanded) {
+    if (isBoxExpanded || isThemeMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isBoxExpanded]);
+  }, [isBoxExpanded, isThemeMenuOpen]);
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_TEMPO) {
       TempoDevtools.init();
     }
   }, []);
+
+  // Theme management
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") as
+      | "light"
+      | "dark"
+      | "system"
+      | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const root = document.documentElement;
+
+      if (theme === "system") {
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        if (systemPrefersDark) {
+          root.classList.add("dark");
+        } else {
+          root.classList.remove("dark");
+        }
+      } else if (theme === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    };
+
+    applyTheme();
+    localStorage.setItem("theme", theme);
+
+    // Listen for system theme changes when in system mode
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => applyTheme();
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, [theme]);
+
+  const getThemeIcon = () => {
+    if (theme === "light") return <Sun size={16} />;
+    if (theme === "dark") return <Moon size={16} />;
+    return <Monitor size={16} />;
+  };
+
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
+    setTheme(newTheme);
+    setIsThemeMenuOpen(false);
+  };
 
   // Typing animation effect for placeholder - only when no messages exist
   useEffect(() => {
@@ -334,10 +397,85 @@ export default function Home() {
 
   return (
     <main className="w-full h-screen flex flex-col overflow-hidden relative">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 bg-background lg:bg-transparent border-none lg:border-b lg:border-background-inverse/10 z-50">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Brand */}
+          <button
+            onClick={resetChat}
+            className="flex cursor-pointer items-center justify-center text-foreground hover:opacity-70 transition-opacity duration-200"
+            title="Reset chat"
+          >
+            <svg
+              width="20"
+              height="223"
+              viewBox="0 0 120 223"
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-foregrounud h-9 fill-current"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M25.2026 38.6127H109.732V8.14453H25.2026V38.6127Z"
+              />
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.5 106.619L36.8689 101.319V115.667C37.0907 131.784 46.1389 139.071 58.5075 139.071C71.3164 139.071 79.2621 130.019 79.2621 116.333V8.14307H109.734V116.333C109.734 144.59 89.1975 167.999 58.7293 167.999C27.8143 167.999 7.5 147.682 7.5 116.995V106.619Z"
+              />
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M4.28564 212.212H112.392V188.143H4.28564V212.212Z"
+              />
+            </svg>
+          </button>
+
+          {/* Theme Switcher */}
+          <div className="relative" data-theme-menu>
+            <button
+              onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+              className={`flex items-center gap-2 px-4 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${isThemeMenuOpen ? "border-background-inverse" : "border-background-inverse/10"}`}
+            >
+              {getThemeIcon()}
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-200 ${isThemeMenuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isThemeMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-in fade-in-0 slide-in-from-top-2 duration-200">
+                <button
+                  onClick={() => handleThemeChange("light")}
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-xs hover:bg-background-secondary transition-colors ${theme === "light" ? "text-foreground-secondary cursor-not-allowed" : "text-foreground"}`}
+                >
+                  <Sun size={16} />
+                  Light
+                </button>
+                <button
+                  onClick={() => handleThemeChange("dark")}
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-xs hover:bg-background-secondary transition-colors ${theme === "dark" ? "text-foreground-secondary cursor-not-allowed" : "text-foreground"}`}
+                >
+                  <Moon size={16} />
+                  Dark
+                </button>
+                <button
+                  onClick={() => handleThemeChange("system")}
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-xs hover:bg-background-secondary transition-colors ${theme === "system" ? "text-foreground-secondary cursor-not-allowed" : "text-foreground"}`}
+                >
+                  <Monitor size={16} />
+                  System
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
       {/* Hero Section */}
       {messages.length === 0 && (
-        <section className="absolute inset-0 flex items-center justify-center z-30">
-          <div className="text-center px-6 pb-60">
+        <section className="absolute inset-0 flex items-center justify-center z-30 pt-20">
+          <div className="text-center px-6 pb-60 md:max-w-[1200px]">
             <div
               className="text-3xl leading-snug max-w-4xl mx-auto"
               dangerouslySetInnerHTML={{ __html: cvData.initialMessage }}
@@ -347,46 +485,48 @@ export default function Home() {
       )}
 
       {/* AI Chat Section */}
-      <section className="w-full flex-1 flex flex-col overflow-hidden">
+      <section className="w-full flex-1 flex flex-col overflow-hidden self-center">
         <div className="flex flex-col h-full">
           {/* Messages - Scrollable Area with bottom padding for floating input */}
-          <div className="flex-1 overflow-y-auto p-10 space-y-4 pb-80">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
-              >
+          <div className="flex flex-1 flex-col items-center overflow-y-auto space-y-4 px-8 lg:px-32 mt-0 pb-96">
+            <div className="flex flex-col md:max-w-[1200px] container">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-[60%] p-4 ${
-                    message.isUser
-                      ? "bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6"
-                      : "text-foreground bg-background rounded-lg"
-                  }`}
+                  key={message.id}
+                  className={`flex ${message.isUser ? "justify-end pt-18 pb-8" : "justify-start"}`}
                 >
                   <div
-                    className={`text-sm leading-relaxed ${message.text.includes("<a ") || message.text.includes("</a>") ? "[&_div:has(img)]:bg-background [&_div:has(img)]:p-4 [&_div:has(img)]:rounded-lg [&_div:has(img)]:shadow-md [&_div:has(img)]:hover:shadow-lg [&_div:has(img)]:transition-shadow [&_div:has(img)]:duration-200" : ""}`}
-                    dangerouslySetInnerHTML={{ __html: message.text }}
-                  />
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="text-foreground p-4">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"></div>
+                    className={`sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] ${
+                      message.isUser
+                        ? "bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6 py-3"
+                        : "text-foreground"
+                    }`}
+                  >
                     <div
-                      className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
+                      className={`text-sm leading-relaxed ${message.text.includes("<a ") || message.text.includes("</a>") ? "[&_div:has(img)]:bg-background [&_div:has(img)]:p-4 [&_div:has(img)]:rounded-lg [&_div:has(img)]:shadow-md [&_div:has(img)]:hover:shadow-lg [&_div:has(img)]:transition-shadow [&_div:has(img)]:duration-200" : ""}`}
+                      dangerouslySetInnerHTML={{ __html: message.text }}
+                    />
                   </div>
                 </div>
-              </div>
-            )}
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="text-foreground p-4">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -396,7 +536,7 @@ export default function Home() {
 
       {/* Static Footer */}
       <footer className="fixed bottom-0 left-0 right-0 bg-background px-14 py-10 z-40 text-xs text-foreground">
-        <div className="flex justify-between items-center">
+        <div className="flex sm:flex-row flex-col-reverse gap-8  justify-between items-center">
           <div className="font-normal">hello@jordipoblet.com</div>
           <div className="flex gap-4 space-x-6">
             <a
@@ -462,17 +602,6 @@ export default function Home() {
                     autoFocus
                   />
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    resetChat();
-                  }}
-                  disabled={isLoading}
-                  className="text-xs bg-background-secondary text-foreground px-5 py-3 rounded-full hover:bg-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
-                  title="Reset chat"
-                >
-                  <RotateCcw size={16} />
-                </button>
                 <button
                   onClick={() => sendMessage()}
                   disabled={!inputMessage.trim() || isLoading}
