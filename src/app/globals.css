@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: var(--font-space-grotesk);
+  --font-sans: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
 
@@ -36,7 +36,7 @@
     --color-foreground: var(--boulder-950);
     --color-foreground-secondary: var(--boulder-500);
     --color-foreground-inverse: var(--polar);
-    --color-accent: var(--apricot-500);
+    --color-accent: var(--boulder-950);
   }
 }
 
@@ -47,13 +47,14 @@
   --color-foreground: var(--boulder-100);
   --color-foreground-secondary: var(--boulder-500);
   --color-foreground-inverse: var(--boulder-950);
-  --color-accent: var(--apricot-700);
+  --color-accent: var(--polar);
 }
 
 body {
-  background: var(--color-background-secondary);
+  background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  font-weight: 300;
 }
 
 @keyframes fade-in {
@@ -74,6 +75,46 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  50% {
+    width: 100%;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.blinking-cursor::before {
+  content: "|";
+  animation: cursor-blink 1s infinite;
+  margin-right: 2px;
 }
 
 .animate-fade-in {
