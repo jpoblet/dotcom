@@ -16,10 +16,11 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isInputActive, setIsInputActive] = useState(false);
+
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const [isBoxExpanded, setIsBoxExpanded] = useState(false);
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -73,6 +74,24 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
+  // Handle clicks outside the floating box to collapse it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const floatingBox = document.querySelector("[data-floating-box]");
+      if (floatingBox && !floatingBox.contains(event.target as Node)) {
+        setIsBoxExpanded(false);
+      }
+    };
+
+    if (isBoxExpanded) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isBoxExpanded]);
+
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_TEMPO) {
       TempoDevtools.init();
@@ -88,7 +107,7 @@ export default function Home() {
     }
 
     const phrases = [
-      "I fed my CV to this AI so it can answer for me...",
+      "I fed my CV to this AI so it can answer for me.",
       "You can ask me anything...",
     ];
     const currentPhrase = phrases[currentPlaceholder];
@@ -140,6 +159,16 @@ export default function Home() {
     setInputMessage("");
     setIsLoading(true);
 
+    // Ensure input stays focused after clearing
+    setTimeout(() => {
+      const inputElement = document.querySelector(
+        'input[type="text"]',
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    }, 0);
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -172,6 +201,15 @@ export default function Home() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Ensure input regains focus after loading is complete
+      setTimeout(() => {
+        const inputElement = document.querySelector(
+          'input[type="text"]',
+        ) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
+        }
+      }, 100);
     }
   };
 
@@ -267,20 +305,39 @@ export default function Home() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
     }, 100);
+
+    // Ensure input regains focus after sample question is sent
+    setTimeout(() => {
+      const inputElement = document.querySelector(
+        'input[type="text"]',
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    }, 200);
   };
 
   const resetChat = () => {
     setMessages([]);
     setInputMessage("");
+    setIsBoxExpanded(false);
     localStorage.setItem("chat-history", JSON.stringify([]));
+
+    // Force the input to lose focus to ensure the box collapses
+    const inputElement = document.querySelector(
+      'input[type="text"]',
+    ) as HTMLInputElement;
+    if (inputElement) {
+      inputElement.blur();
+    }
   };
 
   return (
     <main className="w-full h-screen flex flex-col overflow-hidden relative">
       {/* Hero Section */}
       {messages.length === 0 && (
-        <section className="absolute inset-0 flex items-center justify-center z-30 bg-background-secondary">
-          <div className="text-center px-6">
+        <section className="absolute inset-0 flex items-center justify-center z-30">
+          <div className="text-center px-6 pb-60">
             <div
               className="text-3xl leading-snug max-w-4xl mx-auto"
               dangerouslySetInnerHTML={{ __html: cvData.initialMessage }}
@@ -303,7 +360,7 @@ export default function Home() {
                   className={`max-w-[60%] p-4 ${
                     message.isUser
                       ? "bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6"
-                      : "text-foreground rounded-lg"
+                      : "text-foreground bg-background rounded-lg"
                   }`}
                 >
                   <div
@@ -337,83 +394,110 @@ export default function Home() {
       {/* Gradient Overlay */}
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
+      {/* Static Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-background px-14 py-10 z-40 text-xs text-foreground">
+        <div className="flex justify-between items-center">
+          <div className="font-normal">hello@jordipoblet.com</div>
+          <div className="flex gap-4 space-x-6">
+            <a
+              href="https://linkedin.com/in/jordipoblet"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Linkedin
+            </a>
+            <a
+              href="https://github.com/jpoblet"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://medium.com/@jordipoblet"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Medium
+            </a>
+          </div>
+        </div>
+      </footer>
+
       {/* Floating Input Section */}
-      <div className="fixed bottom-6 left-6 right-6 z-50">
+      <div className="fixed bottom-28 left-6 right-6 z-50">
         <div className="p-6">
           {/* Enhanced Input Section with Integrated Suggestions */}
           <div
-            className={`bg-background rounded-3xl p-6 shadow-lg border transition-all duration-300 mx-auto ${
-              isInputActive
-                ? "border-background-inverse max-w-4xl"
-                : "border-foreground/10 max-w-3xl"
-            } ${isLoading ? "opacity-50" : "opacity-100"}`}
+            data-floating-box
+            onClick={() => setIsBoxExpanded(true)}
+            className={`bg-background hover:bg-background-secondary rounded-3xl p-6 shadow-lg border border-background-inverse/10 transition-all duration-200 mx-auto ${isBoxExpanded ? "max-w-4xl border border-background-inverse/100 shadow-xl bg-background hover:bg-background" : "max-w-3xl"} ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
             <div className="flex flex-col space-y-4">
               {/* Input Row */}
-              <div className="flex space-x-3">
+              <div className="flex mb-9 space-x-3 items-center">
                 <div className="flex-1 relative">
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      onClick={() => setIsInputActive(true)}
-                      onBlur={() =>
-                        !inputMessage.trim() && setIsInputActive(false)
+                  <input
+                    type="text"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    onBlur={(e) => {
+                      if (!isLoading) {
+                        setTimeout(() => e.target.focus(), 0);
                       }
-                      placeholder={
-                        messages.length > 0
-                          ? "Ask me anything..."
-                          : displayedText
-                      }
-                      className={`w-full p-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-sm transition-all duration-300 bg-transparent ${
-                        isLoading
-                          ? "placeholder:text-foreground-secondary/50 cursor-not-allowed"
-                          : "placeholder:text-foreground-secondary"
-                      }`}
-                      disabled={isLoading}
-                    />
-                    {messages.length === 0 &&
-                      !isInputActive &&
-                      displayedText && <div className="typing-cursor">|</div>}
-                  </div>
+                    }}
+                    placeholder={
+                      messages.length > 0 ? "Ask me anything..." : displayedText
+                    }
+                    className={`w-full px-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-sm transition-all duration-300 bg-transparent ${
+                      isLoading
+                        ? "placeholder:text-foreground-secondary/50 cursor-not-allowed"
+                        : "placeholder:text-foreground-secondary"
+                    }`}
+                    disabled={isLoading}
+                    autoFocus
+                  />
                 </div>
                 <button
-                  onClick={resetChat}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetChat();
+                  }}
                   disabled={isLoading}
-                  className="bg-background-secondary text-foreground px-4 py-4 rounded-full hover:bg-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+                  className="text-xs bg-background-secondary text-foreground px-5 py-3 rounded-full hover:bg-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
                   title="Reset chat"
                 >
-                  <RotateCcw size={20} />
+                  <RotateCcw size={16} />
                 </button>
                 <button
                   onClick={() => sendMessage()}
                   disabled={!inputMessage.trim() || isLoading}
-                  className="bg-background-inverse text-background px-6 py-4 rounded-full hover:opacity-90 disabled:cursor-not-allowed transition-all duration-200 flex items-center font-medium"
+                  className="bg-background-inverse text-background px-5 py-3 rounded-full hover:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
                   title="Send"
                 >
-                  <Send size={20} />
+                  <Send size={16} />
                 </button>
               </div>
 
               {/* Integrated Suggestions */}
-              {!inputMessage.trim() && (
-                <div className="flex flex-col space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {getContextualQuestions().map((question, index) => (
-                      <button
-                        key={`${messages.length}-${index}`}
-                        onClick={() => handleSampleQuestion(question)}
-                        disabled={isLoading}
-                        className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0 hover:border-background-inverse/50"
-                      >
-                        {question}
-                      </button>
-                    ))}
-                  </div>
+              <div className="flex flex-col space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {getContextualQuestions().map((question, index) => (
+                    <button
+                      key={`${messages.length}-${index}`}
+                      onClick={() => handleSampleQuestion(question)}
+                      disabled={isLoading}
+                      className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0"
+                    >
+                      {question}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
