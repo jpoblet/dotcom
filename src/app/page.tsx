@@ -620,7 +620,7 @@ export default function Home() {
                       key={`${messages.length}-${index}`}
                       onClick={() => handleSampleQuestion(question)}
                       disabled={isLoading}
-                      className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0"
+                      className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0"
                     >
                       {question}
                     </button>
