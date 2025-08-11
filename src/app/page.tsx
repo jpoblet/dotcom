@@ -4,6 +4,11 @@ import { TempoDevtools } from "tempo-devtools";
 import { useEffect, useState } from "react";
 import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import cvData from "../data/cv.json";
+import dynamic from "next/dynamic";
+
+const OrganicBlob = dynamic(() => import("@/components/OrganicBlob"), {
+  ssr: false,
+});
 
 interface Message {
   id: string;
@@ -472,10 +477,15 @@ export default function Home() {
           </div>
         </div>
       </header>
+      {messages.length === 0 && (
+        <div className="w-full -top-32 fixed flex items-center">
+          <OrganicBlob color={0x00bfff} speed={0.01} noiseStrength={0.1} />
+        </div>
+      )}
       {/* Hero Section */}
       {messages.length === 0 && (
-        <section className="absolute inset-0 flex items-center justify-center z-30 pt-20">
-          <div className="text-center px-6 pb-60 md:max-w-[1200px]">
+        <section className="absolute inset-0 flex items-center justify-center z-30">
+          <div className="text-center -top-32 px-6 md:max-w-[1200px] relative z-10">
             <div
               className="text-3xl leading-snug max-w-4xl mx-auto"
               dangerouslySetInnerHTML={{ __html: cvData.initialMessage }}
