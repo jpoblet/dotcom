@@ -28,6 +28,8 @@ export default function Home() {
   const [isBoxExpanded, setIsBoxExpanded] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(true);
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -385,6 +387,15 @@ export default function Home() {
     }, 200);
   };
 
+  const handleSuggestionsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const scrollLeft = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
+    setShowLeftShadow(scrollLeft > 0);
+    setShowRightShadow(scrollLeft < maxScrollLeft);
+  };
+
   const resetChat = () => {
     setMessages([]);
     setInputMessage("");
@@ -478,9 +489,9 @@ export default function Home() {
         </div>
       </header>
       {messages.length === 0 && (
-        <div className="w-full -top-32 fixed flex items-center">
+        <section className="w-full -top-32 fixed flex items-center justify-center">
           <OrganicBlob color={0x00bfff} speed={0.01} noiseStrength={0.1} />
-        </div>
+        </section>
       )}
       {/* Hero Section */}
       {messages.length === 0 && (
@@ -545,8 +556,8 @@ export default function Home() {
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
       {/* Static Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background px-14 py-10 z-40 text-xs text-foreground">
-        <div className="flex sm:flex-row flex-col-reverse gap-8  justify-between items-center">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background px-2 sm:px-10 py-5 sm:py-10 z-40 text-xs text-foreground">
+        <div className="flex sm:flex-row flex-col-reverse gap-3 sm:gap-8  justify-between items-center">
           <div className="font-normal">hello@jordipoblet.com</div>
           <div className="flex gap-4 space-x-6">
             <a
@@ -578,13 +589,13 @@ export default function Home() {
       </footer>
 
       {/* Floating Input Section */}
-      <div className="fixed bottom-28 left-6 right-6 z-50">
-        <div className="p-6">
+      <div className="fixed bottom-16 sm:bottom-28 left-0 right-0 z-50">
+        <div className="p-0 sm:p-6">
           {/* Enhanced Input Section with Integrated Suggestions */}
           <div
             data-floating-box
             onClick={() => setIsBoxExpanded(true)}
-            className={`bg-background hover:bg-background-secondary rounded-3xl p-6 shadow-lg border border-background-inverse/10 transition-all duration-200 mx-auto ${isBoxExpanded ? "max-w-4xl border border-background-inverse/100 shadow-xl bg-background hover:bg-background" : "max-w-3xl"} ${isLoading ? "opacity-80" : "opacity-100"}`}
+            className={`bg-background hover:bg-background-secondary rounded-t-4xl rounded-b-none sm:rounded-3xl p-6 shadow-none sm:shadow-lg border border-b-0 sm:border-b border-background-inverse/10 transition-all duration-200 mx-auto ${isBoxExpanded ? "max-w-4xl border border-background-inverse/100 shadow-xl bg-background hover:bg-background" : "max-w-3xl"} ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
             <div className="flex flex-col space-y-4">
               {/* Input Row */}
@@ -624,17 +635,24 @@ export default function Home() {
 
               {/* Integrated Suggestions */}
               <div className="flex flex-col space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {getContextualQuestions().map((question, index) => (
-                    <button
-                      key={`${messages.length}-${index}`}
-                      onClick={() => handleSampleQuestion(question)}
-                      disabled={isLoading}
-                      className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0"
-                    >
-                      {question}
-                    </button>
-                  ))}
+                <div
+                  className={`relative ${showLeftShadow ? "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-8 before:bg-gradient-to-r before:from-background before:via-background/80 before:to-transparent before:pointer-events-none before:z-10" : ""} ${showRightShadow ? "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-background after:via-background/80 after:to-transparent after:pointer-events-none after:z-10" : ""}`}
+                >
+                  <div
+                    className="flex gap-2 overflow-x-auto scrollbar-hide"
+                    onScroll={handleSuggestionsScroll}
+                  >
+                    {getContextualQuestions().map((question, index) => (
+                      <button
+                        key={`${messages.length}-${index}`}
+                        onClick={() => handleSampleQuestion(question)}
+                        disabled={isLoading}
+                        className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0 whitespace-nowrap flex-shrink-0"
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
