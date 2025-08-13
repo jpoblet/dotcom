@@ -2,29 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { createNoise3D } from "simplex-noise";
-
-// Declare module for OrbitControls types if not already present in your project
-declare module "three/examples/jsm/controls/OrbitControls.js" {
-  import * as THREE from "three";
-  class OrbitControls extends THREE.EventDispatcher {
-    object: THREE.Camera;
-    domElement: HTMLElement | Document;
-    enableZoom: boolean;
-    enablePan: boolean;
-    enableRotate: boolean;
-    constructor(object: THREE.Camera, domElement?: HTMLElement);
-    update(): void;
-  }
-  export { OrbitControls };
-}
 
 export default function OrganicBlob({
   color = 0xff6b6b,
-  size = 1,
-  speed = 0.005,
-  noiseStrength = 0.23,
+  size = 1, // sphere radius
+  speed = 0.005, // animation speed
+  noiseStrength = 0.23, // displacement amount
 }: {
   color?: number;
   size?: number;
@@ -61,11 +45,13 @@ export default function OrganicBlob({
   }
 
   useEffect(() => {
-    const mountEl = mountRef.current; // capture once for cleanup safety
+    const mountEl = mountRef.current; // capture once for safe cleanup
     if (!mountEl) return;
 
+    // Scene
     const scene = new THREE.Scene();
 
+    // Camera
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -74,18 +60,13 @@ export default function OrganicBlob({
     );
     camera.position.z = 4;
 
+    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountEl.appendChild(renderer.domElement);
 
-    // OrbitControls fully disabled for interaction
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableRotate = false;
-    controls.enableZoom = false;
-    controls.enablePan = false;
-
-    // Create sphere geometry & particles
+    // Geometry (dense sphere -> many points)
     const sphereGeometry = new THREE.SphereGeometry(size, 128, 128);
     const vertices = sphereGeometry.getAttribute("position")
       .array as Float32Array;
@@ -96,8 +77,8 @@ export default function OrganicBlob({
       new THREE.BufferAttribute(vertices, 3),
     );
 
+    // Material (soft circular sprite per point)
     const circleTexture = createCircleTexture();
-
     const pointsMaterial = new THREE.PointsMaterial({
       color,
       size: 0.015,
@@ -112,11 +93,14 @@ export default function OrganicBlob({
     const points = new THREE.Points(pointsGeometry, pointsMaterial);
     scene.add(points);
 
+    // Noise + animation
     const noise3D = createNoise3D();
     const originalPositions = Float32Array.from(vertices);
 
+    let rafId = 0;
     let time = 0;
-    function animate() {
+
+    const animate = () => {
       time += speed;
 
       const positions = pointsGeometry.attributes.position
@@ -128,6 +112,7 @@ export default function OrganicBlob({
 
         const noise = noise3D(x * 1.5, y * 1.5, z * 1.5 + time);
         const factor = 1 + noiseStrength * noise;
+
         positions[i] = x * factor;
         positions[i + 1] = y * factor;
         positions[i + 2] = z * factor;
@@ -135,23 +120,32 @@ export default function OrganicBlob({
       pointsGeometry.attributes.position.needsUpdate = true;
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
+      rafId = requestAnimationFrame(animate);
+    };
 
     animate();
 
-    function onResize() {
+    // Resize handling
+    const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+    };
     window.addEventListener("resize", onResize);
 
+    // Cleanup
     return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
       if (mountEl.contains(renderer.domElement)) {
         mountEl.removeChild(renderer.domElement);
       }
-      window.removeEventListener("resize", onResize);
+      // Dispose resources
+      circleTexture.dispose();
+      pointsGeometry.dispose();
+      pointsMaterial.dispose();
+      sphereGeometry.dispose();
+      renderer.dispose();
     };
   }, [color, size, speed, noiseStrength]);
 
