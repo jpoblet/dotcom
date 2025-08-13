@@ -615,7 +615,7 @@ export default function Home() {
                     placeholder={
                       messages.length > 0 ? "Ask me anything..." : displayedText
                     }
-                    className={`w-full px-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-sm transition-all duration-300 bg-transparent ${
+                    className={`w-full px-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-base sm:text-sm transition-all duration-300 bg-transparent ${
                       isLoading
                         ? "placeholder:text-foreground-secondary/50 cursor-not-allowed"
                         : "placeholder:text-foreground-secondary"
