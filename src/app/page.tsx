@@ -490,7 +490,7 @@ export default function Home() {
       </header>
       {messages.length === 0 && (
         <section className="w-full -top-32 fixed flex items-center justify-center">
-          <OrganicBlob color={0x00bfff} speed={0.01} noiseStrength={0.1} />
+          <OrganicBlob color={0x00bfff} speed={0.015} noiseStrength={0.15} />
         </section>
       )}
       {/* Hero Section */}

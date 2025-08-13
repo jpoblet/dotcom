@@ -6,33 +6,37 @@ import { createNoise3D } from "simplex-noise";
 
 export default function OrganicBlob({
   color = 0xff6b6b,
-  size = 1.5,
+  size = 1,
+  speed = 0.005,
+  noiseStrength = 0.23,
 }: {
   color?: number;
   size?: number;
+  speed?: number;
+  noiseStrength?: number;
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   function createCircleTexture() {
-    const size = 64;
+    const canvasSize = 64;
     const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
     const ctx = canvas.getContext("2d")!;
 
     const gradient = ctx.createRadialGradient(
-      size / 2,
-      size / 2,
-      size / 8,
-      size / 2,
-      size / 2,
-      size / 2,
+      canvasSize / 2,
+      canvasSize / 2,
+      canvasSize / 8,
+      canvasSize / 2,
+      canvasSize / 2,
+      canvasSize / 2,
     );
     gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
@@ -42,6 +46,7 @@ export default function OrganicBlob({
 
   useEffect(() => {
     const scene = new THREE.Scene();
+
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -52,14 +57,17 @@ export default function OrganicBlob({
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current?.appendChild(renderer.domElement);
 
+    // OrbitControls but fully locked
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableRotate = false; // disable rotation
-    controls.enableZoom = false; // disable zoom
-    controls.enablePan = false; // disable panning
+    controls.enableRotate = false;
+    controls.enableZoom = false;
+    controls.enablePan = false;
 
-    const sphereGeometry = new THREE.SphereGeometry(1, 128, 128);
+    // Geometry
+    const sphereGeometry = new THREE.SphereGeometry(size, 128, 128);
     const vertices = sphereGeometry.getAttribute("position")
       .array as Float32Array;
 
@@ -90,7 +98,7 @@ export default function OrganicBlob({
 
     let time = 0;
     function animate() {
-      time += 0.005;
+      time += speed;
 
       const positions = pointsGeometry.attributes.position
         .array as Float32Array;
@@ -100,14 +108,13 @@ export default function OrganicBlob({
         const z = originalPositions[i + 2];
 
         const noise = noise3D(x * 1.5, y * 1.5, z * 1.5 + time);
-        const factor = 1 + 0.23 * noise;
+        const factor = 1 + noiseStrength * noise;
         positions[i] = x * factor;
         positions[i + 1] = y * factor;
         positions[i + 2] = z * factor;
       }
       pointsGeometry.attributes.position.needsUpdate = true;
 
-      controls.update();
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
@@ -125,7 +132,7 @@ export default function OrganicBlob({
       mountRef.current?.removeChild(renderer.domElement);
       window.removeEventListener("resize", onResize);
     };
-  }, [color, size]);
+  }, [color, size, speed, noiseStrength]);
 
   return <div ref={mountRef} />;
 }
