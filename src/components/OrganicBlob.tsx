@@ -1,8 +1,24 @@
 "use client";
+
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { createNoise3D } from "simplex-noise";
+
+// Declare module for OrbitControls types if not already present in your project
+declare module "three/examples/jsm/controls/OrbitControls.js" {
+  import * as THREE from "three";
+  class OrbitControls extends THREE.EventDispatcher {
+    object: THREE.Camera;
+    domElement: HTMLElement | Document;
+    enableZoom: boolean;
+    enablePan: boolean;
+    enableRotate: boolean;
+    constructor(object: THREE.Camera, domElement?: HTMLElement);
+    update(): void;
+  }
+  export { OrbitControls };
+}
 
 export default function OrganicBlob({
   color = 0xff6b6b,
@@ -45,6 +61,9 @@ export default function OrganicBlob({
   }
 
   useEffect(() => {
+    const mountEl = mountRef.current; // capture once for cleanup safety
+    if (!mountEl) return;
+
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(
@@ -58,15 +77,15 @@ export default function OrganicBlob({
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    mountRef.current?.appendChild(renderer.domElement);
+    mountEl.appendChild(renderer.domElement);
 
-    // OrbitControls but fully locked
+    // OrbitControls fully disabled for interaction
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableRotate = false;
     controls.enableZoom = false;
     controls.enablePan = false;
 
-    // Geometry
+    // Create sphere geometry & particles
     const sphereGeometry = new THREE.SphereGeometry(size, 128, 128);
     const vertices = sphereGeometry.getAttribute("position")
       .array as Float32Array;
@@ -129,7 +148,9 @@ export default function OrganicBlob({
     window.addEventListener("resize", onResize);
 
     return () => {
-      mountRef.current?.removeChild(renderer.domElement);
+      if (mountEl.contains(renderer.domElement)) {
+        mountEl.removeChild(renderer.domElement);
+      }
       window.removeEventListener("resize", onResize);
     };
   }, [color, size, speed, noiseStrength]);
