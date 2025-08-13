@@ -13,6 +13,12 @@ const dmMono = DM_Mono({
 export const metadata = {
   title: "Jordi Poblet | Product Designer & Design Engineer",
   description: "Portfolio of Jordi Poblet, Product Designer & Design Engineer.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
