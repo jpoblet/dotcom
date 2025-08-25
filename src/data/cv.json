@@ -4,19 +4,114 @@
   "location": "Barcelona, Spain",
   "email": "hello@jordipoblet.com",
   "initialMessage": "Hi, <strong style='font-weight: 500!important;'>Jordi Poblet</strong> here,</br>Lead Product Designer & Design Engineer.",
+  
   "summary": "Experienced Product Designer with 5+ years of experience creating user-centered digital experiences. Passionate about solving complex problems through thoughtful design and collaboration. I specialize in creating intuitive interfaces that bridge the gap between user needs and business objectives. My approach combines data-driven insights with creative problem-solving to deliver exceptional digital products. I thrive in collaborative environments and enjoy mentoring emerging designers while staying current with the latest design trends and technologies.",
+  
+  "about": "I'm a creative thinker driven by curiosity, intuition, and a desire to challenge the status quo. For me, rules are a starting point — not a limit. I consistently push boundaries and think beyond the conventional to uncover innovative solutions and ideas. Thinking outside the box isn't just a method I use — it's my default mode. Over the years, I've been recognized for my strong intuition, clarity of thought, and ability to organize complex ideas into simple, impactful outcomes. Whether I'm designing, building, or strategizing, I bring both imagination and structure to everything I do.",
+
+  "personal": "From a young age, I was fascinated by building and creating. One of my favorite childhood toys was a LEGO set — a gateway into the world of making, imagining, and iterating. That natural curiosity eventually grew into a career, but it was always accompanied by another constant in my life: sport. I started playing roller hockey at the age of 3, and I've barely missed a season since. The team sport culture — the camaraderie, discipline, and strategic thinking — has been deeply ingrained in me for as long as I can remember. At 13, I won the Spanish National Championships, a major early milestone. Years later, after moving to Australia, I had the honor of representing the country at four World Championships. One of my proudest moments came in 2018, when I was part of the team that won the Asian Championships in Namwon, South Korea — wearing the Green and Gold. As a child, roller hockey shared the stage with alpine skiing as my two main sports. Over time, hockey took the lead, but that love for movement and competition never left. Today, I still play in the veteran roller hockey league, but I've also embraced endurance sports. I regularly compete in trail running races, triathlons, half-marathons, and local events. My endurance peak came in 2022, completing the Barcelona Half Marathon and the Olympic-distance Triathlon in the same city. But it all started at Melbourne's Elwood Beach, where I competed in my first triathlon with Tri-Alliance, a local club that ignited my passion for the sport. Sport has never just been a hobby — it's been a source of balance, discipline, and identity throughout my life. While living in Lanzarote I met my now wife Chiara. Our paths crossed at a moment where we were both looking for the same thing, a companion to our life journey. From Sicily, in love with everything, she provides me piece in mooments of stress. She has been living in Barcelona since 2016, so she understands my culture and speaks perfectly my language. I also started speaking italian, and also some sicilian, because of her. Learning about her culture is a way of knowing her more and more everyday. She is the most beautiful person in the world.",
+
+  "background": "My background is rooted in Industrial Design. I began my academic journey with a BA in Arts at ELISAVA, School of Design in Barcelona, followed by a second degree in Design. This dual foundation allowed me to merge industrial knowledge with creative processes, laying the groundwork for a multidisciplinary approach to design. From 2006 to 2011, I immersed myself in the world of design academia. But in late 2011, with a backpack and a sense of curiosity, I moved to Melbourne — initially just for a few months. That temporary move turned into eight transformative years. In Melbourne, I encountered experience design in a way that was completely new to me — especially in the digital space. I shifted from designing physical objects, such as furniture at Tubeworks Furniture, and creating visual identities for local brands like North East Coffee and Naked Espresso, to solving digital user experience problems. What was then known simply as “UX design” became my new focus. My curiosity led me to enroll in two 6-week courses at Tractor Design School. Before even completing them, I was offered my first opportunity in the field — a one-week contract at Tigerspike. Initially hesitant about the risk, a conversation with Tristan Hewat, then Head of Design at Tigerspike Melbourne, convinced me to leave my job as a Production Coordinator at a local sportswear manufacturer. That one-week contract turned into two, then three, and eventually a full-time role. I had cracked into the world of product design. As the most junior designer in the office, I approached the role with humility — listening, observing, and learning from everyone around me. My visual design skills sharpened immensely during this time. After leaving Tigerspike in 2018, I joined Isobar in Melbourne as a UI designer on a month-to-month contract, which continued until April 2019. At Isobar, I worked on projects for clients like Bridgestone and the Australian Gas Network. The high-paced agency environment taught me the value of working smart, managing expectations, and handling stakeholders. Between Tigerspike and Isobar, I took a break and followed an unexpected path: working at a summer camp in Hawai'i. Kayaking in Kealakekua Bay among wild dolphins, swimming alongside honu (Hawaiian for turtle) at Kua Bay, hiking Mauna Kea, and surfing the waves at Kona Beach — those few months were nothing short of magic.",
+
+  "travels": "Travel has always been a constant thread in my life — a way to explore cultures, challenge comfort zones, and live stories worth telling. Among many adventures, the most transformative was a five-month overland journey across Africa. Starting in northern Ethiopia in October 2019, I traveled all the way to Cape Town, South Africa in early 2020 — entirely by land. No flights, only local transport, and border crossings on foot. The route took me through Kenya, Tanzania (including Zanzibar), Mozambique, Zimbabwe, Zambia, Botswana, Namibia, and finally into South Africa. This wasn't just a personal adventure — it also shaped my professional journey. Along the way, I continued working remotely as a designer, collaborating with local businesses and initiatives. In Ewaso Ngiro, a small Maasai community near the edge of the Masai Mara, I ran prioritisation workshops and created websites for two local organisations. The image of peeling post-it notes with the Maasai in the shadow of the savannah is something I'll never forget. Later in Namibia, while staying at Okasewa Ranch near Witvlei, I lived a dual rhythm: moving horses and herding cattle by day, and designing the ranch's website by night — all while keeping an eye out for baboons. Beyond Africa, I've been fortunate to explore a wide range of cultures and terrains: Lanzarote in the Canary Islands, Vietnam, Cambodia, South Korea, Bali, New Zealand, Eastern Australia, Tasmania, Mexico, India, and the Maldives. More recently, together with my wife and our Weimaraner, Ringo, we've been traveling in our camper van. It's become our little weekend escape — taking us across Spain, Italy, France, Portugal, Slovenia, Croatia, and all the way to Sardinia and Sicily. It's how we recharge and reconnect with nature, people, and each other. The list of future destinations continues to grow. At the top: Iceland, Patagonia, the Altiplano of Bolivia and Peru — and hopefully, another chapter in Africa, this time exploring its western regions.",
+
   "experience": [
     {
-      "company": "Veriff",
-      "position": "Senior Product Designer",
-      "duration": "2022 - Present",
-      "description": "Lead design for core product features, conducted user research, and collaborated with cross-functional teams to deliver impactful solutions."
+      "company": "Tigerspike",
+      "position": "UX/UI Designer (Contractor)",
+      "duration": "November 2016 - December 2016",
+      "location": "Melbourne, Australia",
+      "website": "https://en.wikipedia.org/wiki/Tigerspike",
+      "description": "Joined to help out on a specific internal PID-type project that required digital and industrial design skills."
     },
     {
-      "company": "Design Agency Co.",
-      "position": "Product Designer",
-      "duration": "2020 - 2022",
-      "description": "Designed digital products for various clients, created design systems, and mentored junior designers."
+      "company": "Tigerspike",
+      "position": "Associate UX/UI Designer",
+      "duration": "January 2017 - April 2017 ",
+      "location": "Melbourne, Australia",
+      "website": "https://en.wikipedia.org/wiki/Tigerspike",
+      "description": "Started as a full-timer as the more junior member of the team to learn from the best. My focus was in UX and UI working on PID and e-commerce projects"
+    },
+    {
+      "company": "Tigerspike",
+      "position": "UX/UI Designer",
+      "duration": "May 2017 - August 2018 ",
+      "location": "Melbourne, Australia",
+      "website": "https://en.wikipedia.org/wiki/Tigerspike",
+      "description": "As a midweight, responsibilities took a lift everywhere allowing me to learn even more from my peers. Got better at deliviering quality in shorter deadlines and managiing stakeholders. I also started woorking for Government projects as I was moved to a specific pod to develop a digital product from the ground up."
+      },
+      {
+      "company": "Isobar - Dentsu Creative",
+      "position": "UI Designer (Contractor)",
+      "duration": "November 2018 - April 2019",
+      "location": "Melbourne, Australia",
+      "website": "https://www.dentsucreative.com/",
+      "description": "Joined as a contractor to provide assistance with UI and strategic work. The environment was high-paced and allowed me to work with high end corporates. Some of the clients I worked for were Bridgestone, Jetstar and The Australian Gas Network."
+      },
+      {
+      "company": "Glovo",
+      "position": "Mid-Weight Product Designer",
+      "duration": "April 2020 - November 2021",
+      "location": "Remotely from Barcelona, Spain",
+      "website": "https://glovoapp.com/",
+      "description": ""
+      },
+      {
+      "company": "Rillet",
+      "position": "Senior Product Designer",
+      "duration": "November 2021 - August 2024",
+      "location": "Remotely from Barcelona, Spain",
+      "website": "https://www.rillet.com/",
+      "description": "Joined as member number 6 of the team as founding Product Designer. My job was clear, create a product and brand that could scale in the future. Setting up the bases of a solid Design System and clear design patterns guaranteed a long-lasting impact, even after I was gone."
+      },
+      {
+      "company": "Veriff",
+      "position": "Lead Product Designer",
+      "duration": "October 2024 - Present",
+      "location": "Remotely from arcelona, Spain",
+      "website": "https://www.veriff.com/",
+      "description": "Joined a small but groowing team of talented designers to lead the expansion area of the product. I have an influencing role over innovation and projects that make the back-bone of the companies product portfolio."
+      }
+  ],
+  "education": [
+    {
+      "institution": "ELISAVA School of Design and Engineering",
+      "degree": "Bachelor of Arts (BA), Engineering in Industrial Design",
+      "year": "2006 - 2009",
+      "location": "Barcelona, Spain",
+      "description": "We teach students to be able to design and develop products, systems and services that bring value to industry, society and the environment, making use of the latest technological advances in the field."
+    },
+    {
+      "institution": "ELISAVA School of Design and Engineering",
+      "degree": "Degree, Product Design",
+      "year": "2009 - 2011",
+      "location": "Barcelona, Spain",
+      "description": "We train designers with a creative profile, able to apply critical thinking and an exploratory vision of the world, and capable of questioning and dialoguing across disciplines with other people from the social, production, scientific or cultural environments."
+    },
+    {
+      "institution": "Tractor Design School",
+      "degree": "Course, UX Design",
+      "year": "2016",
+      "location": "Melbourne, Australia",
+      "description": "We train students to finding solutions and opportunities to real experience problems. Mentored by Luke Chambers & Ben Ralph."
+    }
+  ],
+   "languages": [
+    {
+      "language": "catalan",
+      "level": "Native or bilingual proficiency"
+    },
+    {
+      "language": "spanish",
+      "level": "Native or bilingual proficiency"
+    },
+    {
+      "language": "english",
+      "level": "Native or bilingual proficiency"
+    },
+    {
+      "language": "italian",
+      "level": "Professional working proficiency"
     }
   ],
   "skills": [
@@ -26,53 +121,57 @@
     "User Research",
     "Design Systems",
     "Figma",
-    "Sketch",
-    "Adobe Creative Suite",
-    "Paint houses",
-    "Build furniture"
-  ],
-  "education": [
-    {
-      "institution": "ELISAVA School of Design and Engineering",
-      "degree": "Degree in Design",
-      "year": "2004 - 2009"
-    },
-    {
-      "institution": "Design University",
-      "degree": "Bachelor of Fine Arts in Graphic Design",
-      "year": "2019"
-    }
+    "Figjam",
+    "React",
+    "Next JS",
+    "Vercel",
+    "Github",
+    "Cook some delicious tortlla",
+    "Great wildlife spotter",
+    "Run at 5min/km for 21km"
   ],
   "projects": [
     {
-      "name": "E-commerce Platform Redesign",
-      "description": "Complete redesign of checkout flow resulting in 25% increase in conversion rate",
-      "technologies": ["Figma", "User Testing", "A/B Testing"],
-      "thumbnail": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80"
+      "name": "Medal",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
     },
     {
-      "name": "Mobile Banking App",
-      "description": "Designed intuitive mobile banking experience for 100k+ users",
-      "technologies": ["Sketch", "Principle", "User Research"],
-      "thumbnail": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&q=80"
+      "name": "What The Flag",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
     },
     {
-      "name": "SaaS Dashboard Redesign",
-      "description": "Redesigned analytics dashboard improving user engagement by 40% and reducing support tickets",
-      "technologies": ["Figma", "React", "Data Visualization"],
-      "thumbnail": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80"
+      "name": "Huakai",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
     },
     {
-      "name": "Healthcare Patient Portal",
-      "description": "Created accessible patient portal serving 50k+ users with focus on elderly accessibility",
-      "technologies": ["Adobe XD", "Accessibility Testing", "User Interviews"],
-      "thumbnail": "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&q=80"
+      "name": "Poranaga",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
     },
     {
-      "name": "Travel Booking Platform",
-      "description": "Designed end-to-end booking experience resulting in 30% increase in completed bookings",
-      "technologies": ["Figma", "Prototyping", "Usability Testing"],
-      "thumbnail": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=80"
+      "name": "Okasewa",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
+    },
+    {
+      "name": "Glovo - Delivery Flow",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
+    },
+    {
+      "name": "Veriff - Workflows",
+      "description": "",
+      "technologies": ["", "", ""],
+      "thumbnail": ""
     }
   ]
 }

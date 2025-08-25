@@ -232,8 +232,8 @@ export default function Home() {
     // Ensure input stays focused after clearing
     setTimeout(() => {
       const inputElement = document.querySelector(
-        'input[type="text"]',
-      ) as HTMLInputElement;
+        "textarea",
+      ) as HTMLTextAreaElement;
       if (inputElement) {
         inputElement.focus();
       }
@@ -274,8 +274,8 @@ export default function Home() {
       // Ensure input regains focus after loading is complete
       setTimeout(() => {
         const inputElement = document.querySelector(
-          'input[type="text"]',
-        ) as HTMLInputElement;
+          "textarea",
+        ) as HTMLTextAreaElement;
         if (inputElement) {
           inputElement.focus();
         }
@@ -379,8 +379,8 @@ export default function Home() {
     // Ensure input regains focus after sample question is sent
     setTimeout(() => {
       const inputElement = document.querySelector(
-        'input[type="text"]',
-      ) as HTMLInputElement;
+        "textarea",
+      ) as HTMLTextAreaElement;
       if (inputElement) {
         inputElement.focus();
       }
@@ -404,10 +404,13 @@ export default function Home() {
 
     // Force the input to lose focus to ensure the box collapses
     const inputElement = document.querySelector(
-      'input[type="text"]',
-    ) as HTMLInputElement;
+      "textarea",
+    ) as HTMLTextAreaElement;
     if (inputElement) {
       inputElement.blur();
+      // Reset textarea height
+      inputElement.style.height = "auto";
+      inputElement.style.height = "2.5rem";
     }
   };
 
@@ -596,14 +599,13 @@ export default function Home() {
           <div
             data-floating-box
             onClick={() => setIsBoxExpanded(true)}
-            className={`mb-12 sm:mb-28 bg-background hover:bg-background-secondary rounded-t-4xl rounded-b-0 sm:rounded-3xl p-6 shadow-none sm:shadow-lg border border-b-0 sm:border-b border-background-inverse/10 transition-all duration-200 mx-auto ${isBoxExpanded ? "mb-15 max-w-4xl border border-b-1 rounded-4xl sm:rounded-3xl border-background-inverse/100 shadow-none sm:shadow-xl bg-background hover:bg-background" : "max-w-3xl"} ${isLoading ? "opacity-80" : "opacity-100"}`}
+            className={`mb-12 sm:mb-28 bg-background hover:bg-background-secondary rounded-t-4xl rounded-b-0 sm:rounded-3xl p-6 shadow-none sm:shadow-lg border border-b-0 sm:border-b border-background-inverse/10 transition-all duration-200 mx-auto min-h-fit ${isBoxExpanded ? "mb-15 max-w-4xl border border-b-1 rounded-4xl sm:rounded-3xl border-background-inverse/100 shadow-none sm:shadow-xl bg-background hover:bg-background" : "max-w-3xl"} ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4 min-h-fit">
               {/* Input Row */}
-              <div className="flex mb-9 space-x-3 items-center">
+              <div className="flex mb-9 space-x-3 items-start">
                 <div className="flex-1 relative">
-                  <input
-                    type="text"
+                  <textarea
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -615,13 +617,23 @@ export default function Home() {
                     placeholder={
                       messages.length > 0 ? "Ask me anything..." : displayedText
                     }
-                    className={`w-full px-4 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-base sm:text-sm transition-all duration-300 bg-transparent ${
+                    className={`w-full px-4 py-3 border-none rounded-2xl text-foreground focus:outline-none focus:ring-0 text-base sm:text-sm transition-all duration-300 bg-transparent resize-none min-h-[2.5rem] overflow-y-auto ${
                       isLoading
                         ? "placeholder:text-foreground-secondary/50 cursor-not-allowed"
                         : "placeholder:text-foreground-secondary"
                     }`}
                     disabled={isLoading}
-                    autoFocus
+                    autoFocus={false}
+                    rows={1}
+                    style={{
+                      height: "auto",
+                      minHeight: "2.5rem",
+                    }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = "auto";
+                      target.style.height = `${Math.min(target.scrollHeight, 128)}px`;
+                    }}
                   />
                 </div>
                 <button
