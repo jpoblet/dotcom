@@ -560,7 +560,7 @@ export default function Home() {
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
       {/* Static Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background px-5 sm:px-10 py-5 sm:py-10 z-40 text-[0.6250rem] sm:text-xs text-foreground">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background px-5 sm:px-10 py-5 sm:py-10 z-50 text-[0.6250rem] sm:text-xs text-foreground">
         <div className="flex flex-row gap-2 sm:gap-8 justify-between items-center">
           <div className="font-normal">hello@jordipoblet.com</div>
           <div className="flex gap sm:gap-4 space-x-6">
@@ -593,7 +593,7 @@ export default function Home() {
       </footer>
 
       {/* Floating Input Section */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="fixed bottom-0 left-0 right-0 z-40">
         <div className="p-0 sm:p-6">
           {/* Enhanced Input Section with Integrated Suggestions */}
           <div
