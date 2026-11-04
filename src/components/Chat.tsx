@@ -3,17 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
+import ChatMarkdown from "@/components/ChatMarkdown";
+import {
+  type Message,
+  loadMessages,
+  saveMessages,
+  streamChat,
+  toApiHistory,
+} from "@/lib/chat-client";
 
 const OrganicBlob = dynamic(() => import("@/components/OrganicBlob"), {
   ssr: false,
 });
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-}
 
 type Theme = "light" | "dark" | "system";
 
@@ -43,6 +44,9 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 /** Touch devices: don't auto-focus the input, it pops the keyboard open. */
 const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
 
+const REFUSAL_TEXT =
+  "That's not something I can help with here. Ask me about my work, my projects or my life instead!";
+
 export default function Chat({ name, title, email, links }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -64,6 +68,9 @@ export default function Chat({ name, title, email, links }: ChatProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  /** Follow new text only while the visitor is at the bottom of the chat. */
+  const stickToBottomRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = useCallback(() => {
     const el = messagesRef.current;
@@ -86,20 +93,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
   // (Reading them during render would mismatch the server-rendered HTML.)
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    const savedMessages = localStorage.getItem("chat-history");
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages).map(
-          (msg: Message & { timestamp: string }) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          }),
-        );
-        setMessages(parsedMessages);
-      } catch {
-        console.error("Failed to parse saved messages");
-      }
-    }
+    setMessages(loadMessages());
 
     const savedTheme = localStorage.getItem("theme");
     setTheme(
@@ -110,18 +104,28 @@ export default function Chat({ name, title, email, links }: ChatProps) {
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Save chat history whenever messages change
+  // Save chat history once a reply has finished streaming
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem("chat-history", JSON.stringify(messages));
-    }
-  }, [messages]);
+    if (messages.length > 0 && !isLoading) saveMessages(messages);
+  }, [messages, isLoading]);
 
-  // Auto-scroll to bottom when messages change or the loader appears
+  // Keep the newest text in view while it streams in, unless the visitor
+  // has scrolled up to read something.
   useEffect(() => {
-    const timeoutId = setTimeout(scrollToBottom, 100);
-    return () => clearTimeout(timeoutId);
+    if (!stickToBottomRef.current) return;
+    const frame = requestAnimationFrame(scrollToBottom);
+    return () => cancelAnimationFrame(frame);
   }, [messages, isLoading, scrollToBottom]);
+
+  const handleMessagesScroll = () => {
+    const el = messagesRef.current;
+    if (!el) return;
+    stickToBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  };
+
+  // Stop any in-flight reply if the page unmounts
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Collapse the floating box and theme menu on outside taps/clicks
   useEffect(() => {
@@ -246,56 +250,64 @@ export default function Chat({ name, title, email, links }: ChatProps) {
   }, [messages.length]);
 
   const sendMessage = async (messageText?: string) => {
-    const textToSend = messageText || inputMessage;
-    if (!textToSend.trim() || isLoading) return;
+    const textToSend = (messageText ?? inputMessage).trim();
+    if (!textToSend || isLoading) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       text: textToSend,
       isUser: true,
       timestamp: new Date(),
     };
+    const replyId = crypto.randomUUID();
+    const history = toApiHistory([...messages, userMessage]);
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      { id: replyId, text: "", isUser: false, timestamp: new Date() },
+    ]);
     setInputMessage("");
     resetInputHeight();
     setIsLoading(true);
+    stickToBottomRef.current = true;
     settleInputFocus();
 
+    const updateReply = (update: (reply: Message) => Message) =>
+      setMessages((prev) =>
+        prev.map((m) => (m.id === replyId ? update(m) : m)),
+      );
+    const failReply = (text: string) =>
+      updateReply((m) => ({ ...m, text, isError: true }));
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: textToSend }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: data.response,
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-      } else {
-        throw new Error(data.error || "Failed to get response");
+      for await (const event of streamChat(history, controller.signal)) {
+        if (event.type === "text") {
+          updateReply((m) => ({ ...m, text: m.text + event.text }));
+        } else if (event.type === "refusal") {
+          failReply(REFUSAL_TEXT);
+        } else if (event.type === "error") {
+          failReply(event.message);
+        }
       }
     } catch {
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Sorry, I encountered an error. Please try again.",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      if (!controller.signal.aborted) {
+        failReply(
+          `Sorry, I couldn't connect. Please try again, or email me at ${email}.`,
+        );
+      }
     } finally {
-      setIsLoading(false);
-      // The textarea was disabled while loading; refocus once it's enabled.
-      setTimeout(() => {
-        if (!isTouchDevice()) textareaRef.current?.focus();
-      }, 0);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setIsLoading(false);
+        // The textarea was disabled while loading; refocus once it's enabled.
+        setTimeout(() => {
+          if (!isTouchDevice()) textareaRef.current?.focus();
+        }, 0);
+      }
     }
   };
 
@@ -396,10 +408,13 @@ export default function Chat({ name, title, email, links }: ChatProps) {
   }, [messages.length, updateSuggestionShadows]);
 
   const resetChat = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
     setMessages([]);
     setInputMessage("");
     setIsBoxExpanded(false);
-    localStorage.setItem("chat-history", JSON.stringify([]));
+    saveMessages([]);
     textareaRef.current?.blur();
     resetInputHeight();
   };
@@ -510,29 +525,40 @@ export default function Chat({ name, title, email, links }: ChatProps) {
           {/* Messages - Scrollable Area with bottom padding for floating input */}
           <div
             ref={messagesRef}
+            onScroll={handleMessagesScroll}
             className="flex flex-1 flex-col items-center overflow-y-auto space-y-4 px-8 lg:px-32 mt-0 pb-96"
           >
             <div className="flex flex-col md:max-w-[1200px] container">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUser ? "justify-end pt-18 pb-8" : "justify-start"}`}
-                >
+              {messages.map((message) =>
+                // The empty reply placeholder is shown as the typing dots
+                !message.isUser && !message.text ? null : (
                   <div
-                    className={`sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] ${
-                      message.isUser
-                        ? "max-w-[85%] bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6 py-3"
-                        : "text-foreground"
-                    }`}
+                    key={message.id}
+                    className={`flex ${message.isUser ? "justify-end pt-18 pb-8" : "justify-start"}`}
                   >
                     <div
-                      className="chat-message text-sm leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: message.text }}
-                    />
+                      className={`sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] ${
+                        message.isUser
+                          ? "max-w-[85%] bg-background-inverse text-foreground-inverse rounded-t-2xl rounded-bl-2xl rounded-br-sm px-6 py-3"
+                          : "text-foreground"
+                      }`}
+                    >
+                      {message.isUser ? (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {message.text}
+                        </p>
+                      ) : (
+                        <div
+                          className={`chat-message text-sm leading-relaxed ${message.isError ? "text-foreground-secondary" : ""}`}
+                        >
+                          <ChatMarkdown text={message.text} />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {isLoading && (
+                ),
+              )}
+              {isLoading && !messages.at(-1)?.text && (
                 <div className="flex justify-start" aria-label="Thinking">
                   <div className="text-foreground p-4">
                     <div className="flex space-x-1">

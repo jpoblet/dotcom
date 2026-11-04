@@ -155,3 +155,29 @@ body {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* Markdown in chat answers: same text style as before, with spacing for
+   paragraphs and lists. */
+.chat-message > * + * {
+  margin-top: 0.75rem;
+}
+.chat-message ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.chat-message ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.chat-message li + li {
+  margin-top: 0.25rem;
+}
+.chat-message strong {
+  font-weight: 500;
+}
+.chat-message code {
+  font-size: 0.9em;
+  padding: 0.1em 0.3em;
+  border-radius: 0.25rem;
+  background: color-mix(in oklab, var(--color-background-inverse) 8%, transparent);
+}

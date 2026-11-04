@@ -5,6 +5,15 @@ Next.js 16 (App Router) · React 19 · Tailwind CSS 4 · three.js.
 
 ## Develop
 
+The chat calls Claude, so you need an Anthropic API key
+([console.anthropic.com](https://console.anthropic.com)). Create `.env.local`:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+On Vercel, add the same variable under Project → Settings → Environment Variables.
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000
@@ -27,3 +36,11 @@ Everything the site and the AI know about me lives in [`content/`](content):
 
 [`src/lib/content.ts`](src/lib/content.ts) loads these files and builds the AI's
 knowledge base. No code changes are needed to add or edit content.
+
+## How the chat works
+
+[`src/app/api/chat/route.ts`](src/app/api/chat/route.ts) sends the conversation
+to Claude Opus 5.5 with the knowledge base in the system prompt and streams the
+reply back as newline-delimited JSON. The knowledge base is prompt-cached, so
+repeat visits within a few minutes read it at a fraction of the input price.
+In development the server logs token and cache usage for every reply.
