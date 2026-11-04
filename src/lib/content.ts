@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
+import type { ProjectCardData } from "./widgets";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
@@ -127,12 +128,46 @@ export function getProjects(): Project[] {
   });
 }
 
+export function getProject(slug: string): Project | undefined {
+  return getProjects().find((project) => project.slug === slug);
+}
+
+/**
+ * Whether a project's page is built. Drafts are previewable with `npm run
+ * dev` but never published, linked or shown to the AI as a page.
+ */
+export function hasPage(project: Project): boolean {
+  return !project.draft || process.env.NODE_ENV === "development";
+}
+
+export function projectMeta(project: Project): string {
+  return [project.company, project.role, project.year]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** Projects the AI may show as a card: published, or a draft with a summary. */
+export function getCardProjects(): Project[] {
+  return getProjects().filter((p) => !p.draft || p.summary);
+}
+
+export function toProjectCard(project: Project): ProjectCardData {
+  return {
+    slug: project.slug,
+    name: project.name,
+    summary: project.summary,
+    meta: projectMeta(project),
+    thumbnail: project.thumbnail,
+    href: project.draft ? undefined : `/projects/${project.slug}`,
+  };
+}
+
 export function getCurrentRole(): Role | undefined {
   return getExperience().find((role) => role.end === "Present");
 }
 
 /** Markdown headings with no text under them (unfilled template sections). */
-function stripEmptySections(markdown: string): string {
+export function stripEmptySections(markdown: string): string {
   return markdown
     .split(/\n(?=#{1,6} )/)
     .filter((chunk) => chunk.replace(/^#{1,6} .*$/m, "").trim() !== "")
@@ -188,9 +223,7 @@ export function buildKnowledgeBase(): string {
 
   parts.push("\n## Projects");
   for (const project of getProjects()) {
-    const meta = [project.company, project.role, project.year]
-      .filter(Boolean)
-      .join(" · ");
+    const meta = projectMeta(project);
     parts.push(`\n### ${project.name}`);
     if (meta) parts.push(meta);
     parts.push(

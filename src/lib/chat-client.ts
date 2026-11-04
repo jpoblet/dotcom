@@ -3,6 +3,7 @@
  * reading the streamed /api/chat response.
  */
 import type { ChatStreamEvent } from "@/app/api/chat/route";
+import type { Widget } from "@/lib/widgets";
 
 export interface Message {
   id: string;
@@ -12,6 +13,8 @@ export interface Message {
   timestamp: Date;
   /** Error/refusal notices are shown but never sent back to the model. */
   isError?: boolean;
+  /** Cards the AI showed under this reply (project, timeline, contact). */
+  widgets?: Widget[];
 }
 
 export const STORAGE_KEY = "chat-history";
@@ -54,16 +57,33 @@ export function saveMessages(messages: Message[]) {
  * Conversation history for the API. Skips error/refusal notices together
  * with the question that caused them, so a failed turn isn't re-sent.
  */
+function describeWidget(widget: Widget): string {
+  switch (widget.kind) {
+    case "project":
+      return `project card "${widget.project.name}"`;
+    case "timeline":
+      return "career timeline";
+    case "contact":
+      return "contact card";
+  }
+}
+
 export function toApiHistory(messages: Message[]) {
   const history: { role: "user" | "assistant"; content: string }[] = [];
   messages.forEach((message, index) => {
-    if (message.isError || !message.text.trim()) return;
+    if (message.isError) return;
     const next = messages[index + 1];
     if (message.isUser && next?.isError) return;
-    history.push({
-      role: message.isUser ? "user" : "assistant",
-      content: message.text,
-    });
+
+    // Keep a note of the cards shown, so follow-ups ("tell me more about
+    // that one") have context.
+    const shown = message.widgets?.length
+      ? `[Shown to the visitor: ${message.widgets.map(describeWidget).join(", ")}]`
+      : "";
+    const content = [shown, message.text.trim()].filter(Boolean).join("\n\n");
+    if (!content) return;
+
+    history.push({ role: message.isUser ? "user" : "assistant", content });
   });
   return history;
 }

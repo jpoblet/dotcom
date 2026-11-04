@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { NextRequest } from "next/server";
+import { buildTools, runTool } from "@/lib/chat-tools";
 import { buildKnowledgeBase, getProfile } from "@/lib/content";
+import type { Widget } from "@/lib/widgets";
 
 export const maxDuration = 60;
 
@@ -9,6 +11,8 @@ const MODEL = "claude-opus-5-5";
 const MAX_HISTORY = 20;
 /** Longest visitor message accepted, in characters. */
 const MAX_MESSAGE_CHARS = 2000;
+/** Model calls per reply: display tools first, then the written answer. */
+const MAX_STEPS = 3;
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -18,6 +22,7 @@ interface ChatMessage {
 /** Newline-delimited JSON events streamed to the browser. */
 export type ChatStreamEvent =
   | { type: "text"; text: string }
+  | { type: "widget"; widget: Widget }
   | { type: "done" }
   | { type: "refusal" }
   | { type: "error"; message: string };
@@ -32,6 +37,8 @@ How to answer:
 - Keep replies short, usually one to three sentences, leading with the most relevant specifics (companies, roles, dates, places). Go longer only when the visitor asks for detail.
 - Only state what the knowledge base below supports. If something isn't covered, say you haven't written about it here yet and suggest emailing ${profile.email}. Never invent projects, employers, metrics or opinions.
 - Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
+- You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
+- Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
 - If asked, be upfront that you are an AI answering from ${first}'s own notes, not ${first} typing live.
 - Stay on topic: ${first}, his work, design, and the things he would happily chat about. Politely steer unrelated requests (coding help, homework, general assistant tasks) back to ${first}.
 - Reply in the visitor's language.
@@ -41,14 +48,34 @@ ${buildKnowledgeBase()}
 </knowledge_base>`;
 }
 
-// The knowledge base only changes on deploy, so build the prompt once per
-// server instance in production. In development, rebuild it on every request
-// so edits in /content show up without a restart.
-let cachedSystemPrompt: string | undefined;
-function getSystemPrompt(): string {
-  if (process.env.NODE_ENV !== "production") return buildSystemPrompt();
-  cachedSystemPrompt ??= buildSystemPrompt();
-  return cachedSystemPrompt;
+// The knowledge base and tools only change on deploy, so build them once per
+// server instance in production. In development, rebuild them on every
+// request so edits in /content show up without a restart.
+let cached: { system: string; tools: Anthropic.Beta.BetaTool[] } | undefined;
+function getPromptAndTools() {
+  if (process.env.NODE_ENV !== "production") {
+    return { system: buildSystemPrompt(), tools: buildTools() };
+  }
+  cached ??= { system: buildSystemPrompt(), tools: buildTools() };
+  return cached;
+}
+
+/**
+ * Assistant content to send back for the next step. After a mid-output
+ * fallback, model-internal blocks from before the switch must be dropped.
+ */
+function contentToEcho(
+  content: Anthropic.Beta.BetaContentBlock[],
+): Anthropic.Beta.BetaContentBlockParam[] {
+  const lastFallback = content.findLastIndex((b) => b.type === "fallback");
+  if (lastFallback === -1) return content;
+  return content.filter(
+    (block, index) =>
+      index > lastFallback ||
+      (block.type !== "thinking" &&
+        block.type !== "redacted_thinking" &&
+        block.type !== "tool_use"),
+  );
 }
 
 /** Validates the request body and returns a history the API will accept. */
@@ -113,46 +140,74 @@ export async function POST(request: NextRequest) {
       try {
         // Reads ANTHROPIC_API_KEY (or another configured credential).
         const client = new Anthropic();
+        const { system, tools } = getPromptAndTools();
+        const conversation: Anthropic.Beta.BetaMessageParam[] = [...messages];
+        let sentText = false;
+        let lastStop: string | null = null;
 
-        const stream = client.beta.messages.stream(
-          {
-            model: MODEL,
-            max_tokens: 16000,
-            // Chat replies are short: low effort keeps them fast and cheap.
-            output_config: { effort: "low" },
-            // If the safety classifiers decline a (benign) question, retry it
-            // on Anthropic's recommended fallback model instead of failing.
-            betas: ["server-side-fallback-2026-07-01"],
-            fallbacks: "default",
-            // Cache the knowledge base (shared by every visitor) and,
-            // automatically, the growing conversation.
-            system: [
-              {
-                type: "text",
-                text: getSystemPrompt(),
-                cache_control: { type: "ephemeral" },
-              },
-            ],
-            cache_control: { type: "ephemeral" },
-            messages,
-          },
-          { signal: request.signal },
-        );
+        for (let step = 0; step < MAX_STEPS; step++) {
+          const stream = client.beta.messages.stream(
+            {
+              model: MODEL,
+              max_tokens: 16000,
+              // Chat replies are short: low effort keeps them fast and cheap.
+              output_config: { effort: "low" },
+              // If the safety classifiers decline a (benign) question, retry
+              // it on Anthropic's recommended fallback model instead.
+              betas: ["server-side-fallback-2026-07-01"],
+              fallbacks: "default",
+              tools,
+              // Cache tools + knowledge base (shared by every visitor) and,
+              // automatically, the growing conversation.
+              system: [
+                { type: "text", text: system, cache_control: { type: "ephemeral" } },
+              ],
+              cache_control: { type: "ephemeral" },
+              messages: conversation,
+            },
+            { signal: request.signal },
+          );
+          abortStream = () => stream.abort();
 
-        abortStream = () => stream.abort();
-        stream.on("text", (text) => send({ type: "text", text }));
+          let stepHasText = false;
+          stream.on("text", (text) => {
+            // Separate text written in different steps into paragraphs.
+            if (!stepHasText && sentText) send({ type: "text", text: "\n\n" });
+            stepHasText = sentText = true;
+            send({ type: "text", text });
+          });
 
-        const final = await stream.finalMessage();
+          const final = await stream.finalMessage();
+          lastStop = final.stop_reason;
 
-        if (process.env.NODE_ENV !== "production") {
-          const { input_tokens, output_tokens, cache_read_input_tokens, cache_creation_input_tokens } =
-            final.usage;
-          console.log(
-            `[chat] ${final.model} stop=${final.stop_reason} in=${input_tokens} out=${output_tokens} cache_read=${cache_read_input_tokens} cache_write=${cache_creation_input_tokens}`,
+          if (process.env.NODE_ENV !== "production") {
+            const u = final.usage;
+            console.log(
+              `[chat] step=${step} ${final.model} stop=${final.stop_reason} in=${u.input_tokens} out=${u.output_tokens} cache_read=${u.cache_read_input_tokens} cache_write=${u.cache_creation_input_tokens}`,
+            );
+          }
+
+          if (final.stop_reason !== "tool_use") break;
+
+          const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
+          for (const block of final.content) {
+            if (block.type !== "tool_use") continue;
+            const outcome = runTool(block.name, block.input);
+            if (outcome.widget) send({ type: "widget", widget: outcome.widget });
+            results.push({
+              type: "tool_result",
+              tool_use_id: block.id,
+              content: outcome.result,
+              is_error: outcome.isError,
+            });
+          }
+          conversation.push(
+            { role: "assistant", content: contentToEcho(final.content) },
+            { role: "user", content: results },
           );
         }
 
-        send(final.stop_reason === "refusal" ? { type: "refusal" } : { type: "done" });
+        send(lastStop === "refusal" ? { type: "refusal" } : { type: "done" });
       } catch (error) {
         if (request.signal.aborted) return;
         console.error("[chat] Claude request failed:", error);

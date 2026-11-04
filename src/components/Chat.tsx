@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import ChatMarkdown from "@/components/ChatMarkdown";
+import ChatWidgets from "@/components/ChatWidgets";
+import Logo from "@/components/Logo";
+import SiteFooter from "@/components/SiteFooter";
 import {
   type Message,
   loadMessages,
@@ -287,6 +290,11 @@ export default function Chat({ name, title, email, links }: ChatProps) {
       for await (const event of streamChat(history, controller.signal)) {
         if (event.type === "text") {
           updateReply((m) => ({ ...m, text: m.text + event.text }));
+        } else if (event.type === "widget") {
+          updateReply((m) => ({
+            ...m,
+            widgets: [...(m.widgets ?? []), event.widget],
+          }));
         } else if (event.type === "refusal") {
           failReply(REFUSAL_TEXT);
         } else if (event.type === "error") {
@@ -310,6 +318,21 @@ export default function Chat({ name, title, email, links }: ChatProps) {
       }
     }
   };
+
+  // Arriving from a project page ("Ask me about this project") with ?ask=...
+  // sends that question straight away.
+  useEffect(() => {
+    const ask = new URLSearchParams(window.location.search).get("ask");
+    if (!ask) return;
+    // Next tick, after the saved history has been restored.
+    const timeout = setTimeout(() => {
+      window.history.replaceState(null, "", window.location.pathname);
+      void sendMessage(ask.slice(0, 500));
+    }, 0);
+    return () => clearTimeout(timeout);
+    // Runs once on arrival; sendMessage is intentionally not a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // isComposing: don't send while an IME (e.g. Japanese input) is active
@@ -433,30 +456,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
             title="Reset chat"
             aria-label="Reset chat"
           >
-            <svg
-              width="20"
-              height="36"
-              viewBox="0 0 120 223"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-9 fill-current"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M25.2026 38.6127H109.732V8.14453H25.2026V38.6127Z"
-              />
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M7.5 106.619L36.8689 101.319V115.667C37.0907 131.784 46.1389 139.071 58.5075 139.071C71.3164 139.071 79.2621 130.019 79.2621 116.333V8.14307H109.734V116.333C109.734 144.59 89.1975 167.999 58.7293 167.999C27.8143 167.999 7.5 147.682 7.5 116.995V106.619Z"
-              />
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4.28564 212.212H112.392V188.143H4.28564V212.212Z"
-              />
-            </svg>
+            <Logo className="h-9 fill-current" />
           </button>
 
           {/* Theme Switcher */}
@@ -531,7 +531,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
             <div className="flex flex-col md:max-w-[1200px] container">
               {messages.map((message) =>
                 // The empty reply placeholder is shown as the typing dots
-                !message.isUser && !message.text ? null : (
+                !message.isUser && !message.text && !message.widgets?.length ? null : (
                   <div
                     key={message.id}
                     className={`flex ${message.isUser ? "justify-end pt-18 pb-8" : "justify-start"}`}
@@ -548,11 +548,18 @@ export default function Chat({ name, title, email, links }: ChatProps) {
                           {message.text}
                         </p>
                       ) : (
-                        <div
-                          className={`chat-message text-sm leading-relaxed ${message.isError ? "text-foreground-secondary" : ""}`}
-                        >
-                          <ChatMarkdown text={message.text} />
-                        </div>
+                        <>
+                          {message.text && (
+                            <div
+                              className={`chat-message text-sm leading-relaxed ${message.isError ? "text-foreground-secondary" : ""}`}
+                            >
+                              <ChatMarkdown text={message.text} />
+                            </div>
+                          )}
+                          {message.widgets?.length ? (
+                            <ChatWidgets widgets={message.widgets} />
+                          ) : null}
+                        </>
                       )}
                     </div>
                   </div>
@@ -584,26 +591,11 @@ export default function Chat({ name, title, email, links }: ChatProps) {
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
       {/* Static Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background px-5 sm:px-10 pt-5 sm:pt-10 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(2.5rem+env(safe-area-inset-bottom))] z-50 text-[0.6250rem] sm:text-xs text-foreground">
-        <div className="flex flex-row gap-2 sm:gap-8 justify-between items-center">
-          <a href={`mailto:${email}`} className="font-normal py-2 -my-2">
-            {email}
-          </a>
-          <div className="flex gap-6 sm:gap-10">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline py-2 -my-2"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <SiteFooter
+        email={email}
+        links={links}
+        className="fixed bottom-0 left-0 right-0 z-50 pt-5 sm:pt-10 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(2.5rem+env(safe-area-inset-bottom))]"
+      />
 
       {/* Floating Input Section */}
       <div className="fixed bottom-0 left-0 right-0 z-40">

@@ -1,0 +1,29 @@
+/** The "J" mark. Colour comes from currentColor. */
+export default function Logo({ className }: { className?: string }) {
+  return (
+    <svg
+      width="20"
+      height="36"
+      viewBox="0 0 120 223"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M25.2026 38.6127H109.732V8.14453H25.2026V38.6127Z"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7.5 106.619L36.8689 101.319V115.667C37.0907 131.784 46.1389 139.071 58.5075 139.071C71.3164 139.071 79.2621 130.019 79.2621 116.333V8.14307H109.734V116.333C109.734 144.59 89.1975 167.999 58.7293 167.999C27.8143 167.999 7.5 147.682 7.5 116.995V106.619Z"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4.28564 212.212H112.392V188.143H4.28564V212.212Z"
+      />
+    </svg>
+  );
+}
