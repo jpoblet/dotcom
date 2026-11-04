@@ -1,7 +1,7 @@
 import "./globals.css";
+import type { Metadata, Viewport } from "next";
 import { DM_Mono } from "next/font/google";
-
-import Script from "next/script";
+import { getProfile } from "@/lib/content";
 
 const dmMono = DM_Mono({
   subsets: ["latin"],
@@ -10,16 +10,27 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
-export const metadata = {
-  title: "Jordi Poblet | Product Designer & Design Engineer",
-  description: "Portfolio of Jordi Poblet, Product Designer & Design Engineer.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+const profile = getProfile();
+
+export const metadata: Metadata = {
+  title: `${profile.name} | ${profile.title}`,
+  description: `Portfolio of ${profile.name}, ${profile.title}.`,
 };
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Let the page draw under the iPhone notch / home indicator; the header,
+  // footer and input box pad themselves with env(safe-area-inset-*).
+  viewportFit: "cover",
+  // On Android, shrink the layout when the keyboard opens so the fixed input
+  // box stays above it.
+  interactiveWidget: "resizes-content",
+};
+
+// Applies the saved theme before first paint, so dark-mode visitors don't see
+// a white flash. Must stay in sync with the theme switcher in Chat.tsx.
+const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -29,11 +40,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmMono.variable} suppressHydrationWarning>
       <head>
-        <Script src="https://api.tempo.new/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="font-sans">
-        <main className="pt-0">{children}</main>
-      </body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

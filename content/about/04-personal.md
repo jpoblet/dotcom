@@ -1,0 +1,11 @@
+---
+title: Personal life and sport
+---
+
+From a young age, I was fascinated by building and creating. One of my favorite childhood toys was a LEGO set — a gateway into the world of making, imagining, and iterating. That natural curiosity eventually grew into a career, but it was always accompanied by another constant in my life: sport.
+
+I started playing roller hockey at the age of 3, and I've barely missed a season since. The team sport culture — the camaraderie, discipline, and strategic thinking — has been deeply ingrained in me for as long as I can remember. At 13, I won the Spanish National Championships, a major early milestone. Years later, after moving to Australia, I had the honor of representing the country at four World Championships. One of my proudest moments came in 2018, when I was part of the team that won the Asian Championships in Namwon, South Korea — wearing the Green and Gold.
+
+As a child, roller hockey shared the stage with alpine skiing as my two main sports. Over time, hockey took the lead, but that love for movement and competition never left. Today, I still play in the veteran roller hockey league, but I've also embraced endurance sports. I regularly compete in trail running races, triathlons, half-marathons, and local events. My endurance peak came in 2022, completing the Barcelona Half Marathon and the Olympic-distance Triathlon in the same city. But it all started at Melbourne's Elwood Beach, where I competed in my first triathlon with Tri-Alliance, a local club that ignited my passion for the sport. Sport has never just been a hobby — it's been a source of balance, discipline, and identity throughout my life.
+
+While living in Lanzarote I met my now wife, Chiara. Our paths crossed at a moment when we were both looking for the same thing: a companion for our life journey. From Sicily, and in love with everything, she brings me peace in moments of stress. She has been living in Barcelona since 2016, so she understands my culture and speaks my language perfectly. I also started speaking Italian, and some Sicilian, because of her. Learning about her culture is a way of knowing her more and more every day. She is the most beautiful person in the world.

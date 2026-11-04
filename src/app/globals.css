@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by the .dark class on <html> (set before paint by the
+   inline script in layout.tsx), not by the OS media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --font-sans: var(--font-dm-mono);
 
@@ -28,16 +32,18 @@
   --boulder-800: oklch(0.278 0.033 256.848);
   --boulder-900: oklch(0.21 0.034 264.665);
   --boulder-950: oklch(0.13 0.028 261.692);
+}
 
-  @theme {
-    --color-background: var(--polar);
-    --color-background-secondary: var(--boulder-100);
-    --color-background-inverse: var(--boulder-950);
-    --color-foreground: var(--boulder-950);
-    --color-foreground-secondary: var(--boulder-500);
-    --color-foreground-inverse: var(--polar);
-    --color-accent: var(--boulder-950);
-  }
+/* Semantic tokens. Utilities reference these variables, so the .dark
+   override below swaps every colour at once. */
+@theme {
+  --color-background: var(--polar);
+  --color-background-secondary: var(--boulder-100);
+  --color-background-inverse: var(--boulder-950);
+  --color-foreground: var(--boulder-950);
+  --color-foreground-secondary: var(--boulder-500);
+  --color-foreground-inverse: var(--polar);
+  --color-accent: var(--boulder-950);
 }
 
 .dark {
@@ -48,6 +54,13 @@
   --color-foreground-secondary: var(--boulder-500);
   --color-foreground-inverse: var(--boulder-950);
   --color-accent: var(--polar);
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
 }
 
 body {
@@ -133,4 +146,12 @@ body {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+
+/* Links inside chat answers follow the theme, like the footer links.
+   !important overrides inline colours stored in older chat history. */
+.chat-message a {
+  color: inherit !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

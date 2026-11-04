@@ -1,61 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import cvData from "../../../data/cv.json";
+import {
+  buildKnowledgeBase,
+  getCurrentRole,
+  getEducation,
+  getProfile,
+  getProjects,
+} from "@/lib/content";
 
-// Fallback response when OpenAI is unavailable
+// Fallback response when the AI provider is unavailable
 function generateFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
+  const profile = getProfile();
+  const current = getCurrentRole();
 
   if (lowerMessage.includes("experience") || lowerMessage.includes("work")) {
-    return `Jordi has experience as a Product Designer. Currently, he's a ${cvData.experience[0].position} at ${cvData.experience[0].company}.`;
+    return current
+      ? `Jordi is currently ${current.role} at ${current.company}.`
+      : `Jordi is a ${profile.title}.`;
   }
 
   if (lowerMessage.includes("skill")) {
-    return `Jordi's key skills include ${cvData.skills.slice(0, 5).join(", ")}.`;
+    return `Jordi's key skills include ${profile.skills.slice(0, 5).join(", ")}.`;
   }
 
   if (lowerMessage.includes("project")) {
-    const projectLinks = cvData.projects
-      .map((p) => {
-        const slug = p.name
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "");
-        return `<a href="/projects/${slug}" style="color: #0066cc; text-decoration: underline;">${p.name}</a>`;
-      })
+    const projects = getProjects()
+      .map((p) => (p.draft ? p.name : `<a href="/projects/${p.slug}">${p.name}</a>`))
       .join(", ");
-    return `Jordi has worked on projects including: ${projectLinks}.`;
+    return `Jordi has worked on projects including: ${projects}.`;
   }
 
   if (lowerMessage.includes("education")) {
-    return `Jordi studied ${cvData.education[0].degree} at ${cvData.education[0].institution}.`;
+    const first = getEducation().at(-1);
+    return first
+      ? `Jordi studied ${first.degree} at ${first.institution}.`
+      : `You can reach Jordi at ${profile.email}.`;
   }
 
   if (lowerMessage.includes("contact") || lowerMessage.includes("email")) {
-    return `You can reach Jordi at ${cvData.email}. He's based in ${cvData.location}.`;
+    return `You can reach Jordi at ${profile.email}. He's based in ${profile.location}.`;
   }
 
   if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-    return `Hello! I'm here to help you learn about ${cvData.name}, a ${cvData.title} based in ${cvData.location}. Feel free to ask about his experience, skills, or projects!`;
+    return `Hello! I'm here to help you learn about ${profile.name}, a ${profile.title} based in ${profile.location}. Feel free to ask about his experience, skills, or projects!`;
   }
 
-  return `Thanks for your question about ${cvData.name}! He's a ${cvData.title} with expertise in ${cvData.skills.slice(0, 3).join(", ")}. Feel free to ask about his experience, skills, projects, or education!`;
+  return `Thanks for your question about ${profile.name}! He's a ${profile.title} with expertise in ${profile.skills.slice(0, 3).join(", ")}. Feel free to ask about his experience, skills, projects, or education!`;
 }
 
-const systemPrompt = `You are Jordi Poblet, a Product Designer. Give sharp, relevant responses that provide meaningful detail without being verbose. Keep responses to a maximum of 3 sentences.
+function buildSystemPrompt(): string {
+  const profile = getProfile();
+  return `You are ${profile.name}, ${profile.title}. Give sharp, relevant responses that provide meaningful detail without being verbose. Keep responses to a maximum of 3 sentences.
 
-CV Data:
-${JSON.stringify(cvData, null, 2)}
+Knowledge base:
+${buildKnowledgeBase()}
 
 Instructions:
-- Speak in first person as Jordi
+- Speak in first person as ${profile.name.split(" ")[0]}
 - Provide enough detail to be helpful and informative
 - Be direct and engaging - avoid corporate speak
 - Include specific examples, metrics, or context when relevant
-- For projects, create links like: <a href="/projects/project-slug" style="color: #0066cc; text-decoration: underline;">Project Name</a>
+- Only link to a project when the knowledge base gives it a page, like: <a href="/projects/project-slug">Project Name</a>
 - Focus on what matters most to the question
 - Show personality while staying professional
 - Maximum 3 sentences per response`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: buildSystemPrompt() },
           { role: "user", content: message },
         ],
         max_tokens: 500,
