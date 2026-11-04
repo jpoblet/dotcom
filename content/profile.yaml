@@ -1,0 +1,39 @@
+# Core facts about me. Used by the hero, the footer, page metadata and the AI.
+name: Jordi Poblet
+title: Lead Product Designer & Design Engineer
+location: Barcelona, Spain
+email: hello@jordipoblet.com
+
+links:
+  - label: Linkedin
+    href: https://linkedin.com/in/jordipoblet
+  - label: GitHub
+    href: https://github.com/jpoblet
+  - label: Medium
+    href: https://medium.com/@jordipoblet
+
+languages:
+  - language: Catalan
+    level: Native or bilingual proficiency
+  - language: Spanish
+    level: Native or bilingual proficiency
+  - language: English
+    level: Native or bilingual proficiency
+  - language: Italian
+    level: Professional working proficiency
+
+skills:
+  - User Experience Design
+  - User Interface Design
+  - Prototyping
+  - User Research
+  - Design Systems
+  - Figma
+  - FigJam
+  - React
+  - Next.js
+  - Vercel
+  - GitHub
+  - Cooking a delicious tortilla
+  - Great wildlife spotter
+  - Running at 5 min/km for 21 km

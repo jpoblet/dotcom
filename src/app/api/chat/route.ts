@@ -1,126 +1,234 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import cvData from "../../../data/cv.json";
+import Anthropic from "@anthropic-ai/sdk";
+import type { NextRequest } from "next/server";
+import { buildTools, runTool } from "@/lib/chat-tools";
+import { buildKnowledgeBase, getProfile } from "@/lib/content";
+import type { Widget } from "@/lib/widgets";
 
-// Fallback response when OpenAI is unavailable
-function generateFallbackResponse(message: string): string {
-  const lowerMessage = message.toLowerCase();
+export const maxDuration = 60;
 
-  if (lowerMessage.includes("experience") || lowerMessage.includes("work")) {
-    return `Jordi has experience as a Product Designer. Currently, he's a ${cvData.experience[0].position} at ${cvData.experience[0].company}.`;
-  }
+const MODEL = "claude-opus-5-5";
+/** Most recent messages sent to the model (older turns are dropped). */
+const MAX_HISTORY = 20;
+/** Longest visitor message accepted, in characters. */
+const MAX_MESSAGE_CHARS = 2000;
+/** Model calls per reply: display tools first, then the written answer. */
+const MAX_STEPS = 3;
 
-  if (lowerMessage.includes("skill")) {
-    return `Jordi's key skills include ${cvData.skills.slice(0, 5).join(", ")}.`;
-  }
-
-  if (lowerMessage.includes("project")) {
-    const projectLinks = cvData.projects
-      .map((p) => {
-        const slug = p.name
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "");
-        return `<a href="/projects/${slug}" style="color: #0066cc; text-decoration: underline;">${p.name}</a>`;
-      })
-      .join(", ");
-    return `Jordi has worked on projects including: ${projectLinks}.`;
-  }
-
-  if (lowerMessage.includes("education")) {
-    return `Jordi studied ${cvData.education[0].degree} at ${cvData.education[0].institution}.`;
-  }
-
-  if (lowerMessage.includes("contact") || lowerMessage.includes("email")) {
-    return `You can reach Jordi at ${cvData.email}. He's based in ${cvData.location}.`;
-  }
-
-  if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-    return `Hello! I'm here to help you learn about ${cvData.name}, a ${cvData.title} based in ${cvData.location}. Feel free to ask about his experience, skills, or projects!`;
-  }
-
-  return `Thanks for your question about ${cvData.name}! He's a ${cvData.title} with expertise in ${cvData.skills.slice(0, 3).join(", ")}. Feel free to ask about his experience, skills, projects, or education!`;
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
-const systemPrompt = `You are Jordi Poblet, a Product Designer. Give sharp, relevant responses that provide meaningful detail without being verbose. Keep responses to a maximum of 3 sentences.
+/** Newline-delimited JSON events streamed to the browser. */
+export type ChatStreamEvent =
+  | { type: "text"; text: string }
+  | { type: "widget"; widget: Widget }
+  | { type: "done" }
+  | { type: "refusal" }
+  | { type: "error"; message: string };
 
-CV Data:
-${JSON.stringify(cvData, null, 2)}
+function buildSystemPrompt(): string {
+  const profile = getProfile();
+  const first = profile.name.split(" ")[0];
+  return `You are the AI on ${profile.name}'s portfolio website. Instead of browsing case studies, visitors (often recruiters, hiring managers and fellow designers) ask about ${first}'s work, background and life, and you answer in the first person as ${first}.
 
-Instructions:
-- Speak in first person as Jordi
-- Provide enough detail to be helpful and informative
-- Be direct and engaging - avoid corporate speak
-- Include specific examples, metrics, or context when relevant
-- For projects, create links like: <a href="/projects/project-slug" style="color: #0066cc; text-decoration: underline;">Project Name</a>
-- Focus on what matters most to the question
-- Show personality while staying professional
-- Maximum 3 sentences per response`;
+How to answer:
+- Speak as ${first}: warm, direct and a little playful, like a relaxed conversation over coffee. No corporate speak.
+- Keep replies short, usually one to three sentences, leading with the most relevant specifics (companies, roles, dates, places). Go longer only when the visitor asks for detail.
+- Only state what the knowledge base below supports. If something isn't covered, say you haven't written about it here yet and suggest emailing ${profile.email}. Never invent projects, employers, metrics or opinions.
+- Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
+- You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
+- Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
+- If asked, be upfront that you are an AI answering from ${first}'s own notes, not ${first} typing live.
+- Stay on topic: ${first}, his work, design, and the things he would happily chat about. Politely steer unrelated requests (coding help, homework, general assistant tasks) back to ${first}.
+- Reply in the visitor's language.
+
+<knowledge_base>
+${buildKnowledgeBase()}
+</knowledge_base>`;
+}
+
+// The knowledge base and tools only change on deploy, so build them once per
+// server instance in production. In development, rebuild them on every
+// request so edits in /content show up without a restart.
+let cached: { system: string; tools: Anthropic.Beta.BetaTool[] } | undefined;
+function getPromptAndTools() {
+  if (process.env.NODE_ENV !== "production") {
+    return { system: buildSystemPrompt(), tools: buildTools() };
+  }
+  cached ??= { system: buildSystemPrompt(), tools: buildTools() };
+  return cached;
+}
+
+/**
+ * Assistant content to send back for the next step. After a mid-output
+ * fallback, model-internal blocks from before the switch must be dropped.
+ */
+function contentToEcho(
+  content: Anthropic.Beta.BetaContentBlock[],
+): Anthropic.Beta.BetaContentBlockParam[] {
+  const lastFallback = content.findLastIndex((b) => b.type === "fallback");
+  if (lastFallback === -1) return content;
+  return content.filter(
+    (block, index) =>
+      index > lastFallback ||
+      (block.type !== "thinking" &&
+        block.type !== "redacted_thinking" &&
+        block.type !== "tool_use"),
+  );
+}
+
+/** Validates the request body and returns a history the API will accept. */
+function parseMessages(body: unknown): ChatMessage[] | string {
+  const raw = (body as { messages?: unknown })?.messages;
+  if (!Array.isArray(raw) || raw.length === 0) return "messages is required";
+
+  const messages: ChatMessage[] = [];
+  for (const item of raw) {
+    const { role, content } = (item ?? {}) as Record<string, unknown>;
+    if ((role !== "user" && role !== "assistant") || typeof content !== "string") {
+      return "Invalid message format";
+    }
+    if (!content.trim()) continue;
+    messages.push({ role, content });
+  }
+
+  const last = messages.at(-1);
+  if (!last || last.role !== "user") return "The last message must be from the user";
+  if (last.content.length > MAX_MESSAGE_CHARS) {
+    return `Messages are limited to ${MAX_MESSAGE_CHARS} characters`;
+  }
+
+  // Keep the most recent turns, starting on a user message.
+  const recent = messages.slice(-MAX_HISTORY);
+  while (recent.length && recent[0].role !== "user") recent.shift();
+  return recent;
+}
+
+function friendlyError(error: unknown): string {
+  const email = getProfile().email;
+  if (error instanceof Anthropic.RateLimitError) {
+    return "Lots of people are asking me things right now. Give it a few seconds and try again.";
+  }
+  if (error instanceof Anthropic.APIError && error.status === 529) {
+    return "The AI is a bit overloaded right now. Please try again in a moment.";
+  }
+  return `Sorry, something went wrong on my side. Try again, or email me at ${email}.`;
+}
 
 export async function POST(request: NextRequest) {
+  let body: unknown;
   try {
-    const { message } = await request.json();
-
-    if (!message) {
-      return NextResponse.json(
-        { error: "Message is required" },
-        { status: 400 },
-      );
-    }
-
-    // Check if OpenAI API key is properly configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn(
-        "OpenAI API key is not configured. Using fallback responses.",
-      );
-      return NextResponse.json({
-        response: generateFallbackResponse(message),
-        warning: "OpenAI API key not configured - using basic responses",
-      });
-    }
-
-    // Validate API key format
-    if (!process.env.OPENAI_API_KEY.startsWith("sk-")) {
-      console.error("Invalid OpenAI API key format detected");
-      return NextResponse.json(
-        {
-          error:
-            "OpenAI API key appears to be invalid. Please check your configuration.",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Try OpenAI API
-    try {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      });
-
-      const response =
-        completion.choices[0]?.message?.content ||
-        "Sorry, I could not generate a response.";
-      return NextResponse.json({ response });
-    } catch (openaiError) {
-      console.warn(
-        "OpenAI API error, using fallback:",
-        (openaiError as Error).message,
-      );
-      return NextResponse.json({ response: generateFallbackResponse(message) });
-    }
-  } catch (error) {
-    console.error("Error in chat API:", error);
-    return NextResponse.json(
-      { error: "Failed to process your request" },
-      { status: 500 },
-    );
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  const messages = parseMessages(body);
+  if (typeof messages === "string") {
+    return Response.json({ error: messages }, { status: 400 });
+  }
+
+  const encoder = new TextEncoder();
+  let abortStream: (() => void) | undefined;
+
+  const responseBody = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (event: ChatStreamEvent) =>
+        controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+
+      try {
+        // Reads ANTHROPIC_API_KEY (or another configured credential).
+        const client = new Anthropic();
+        const { system, tools } = getPromptAndTools();
+        const conversation: Anthropic.Beta.BetaMessageParam[] = [...messages];
+        let sentText = false;
+        let lastStop: string | null = null;
+
+        for (let step = 0; step < MAX_STEPS; step++) {
+          const stream = client.beta.messages.stream(
+            {
+              model: MODEL,
+              max_tokens: 16000,
+              // Chat replies are short: low effort keeps them fast and cheap.
+              output_config: { effort: "low" },
+              // If the safety classifiers decline a (benign) question, retry
+              // it on Anthropic's recommended fallback model instead.
+              betas: ["server-side-fallback-2026-07-01"],
+              fallbacks: "default",
+              tools,
+              // Cache tools + knowledge base (shared by every visitor) and,
+              // automatically, the growing conversation.
+              system: [
+                { type: "text", text: system, cache_control: { type: "ephemeral" } },
+              ],
+              cache_control: { type: "ephemeral" },
+              messages: conversation,
+            },
+            { signal: request.signal },
+          );
+          abortStream = () => stream.abort();
+
+          let stepHasText = false;
+          stream.on("text", (text) => {
+            // Separate text written in different steps into paragraphs.
+            if (!stepHasText && sentText) send({ type: "text", text: "\n\n" });
+            stepHasText = sentText = true;
+            send({ type: "text", text });
+          });
+
+          const final = await stream.finalMessage();
+          lastStop = final.stop_reason;
+
+          if (process.env.NODE_ENV !== "production") {
+            const u = final.usage;
+            console.log(
+              `[chat] step=${step} ${final.model} stop=${final.stop_reason} in=${u.input_tokens} out=${u.output_tokens} cache_read=${u.cache_read_input_tokens} cache_write=${u.cache_creation_input_tokens}`,
+            );
+          }
+
+          if (final.stop_reason !== "tool_use") break;
+
+          const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
+          for (const block of final.content) {
+            if (block.type !== "tool_use") continue;
+            const outcome = runTool(block.name, block.input);
+            if (outcome.widget) send({ type: "widget", widget: outcome.widget });
+            results.push({
+              type: "tool_result",
+              tool_use_id: block.id,
+              content: outcome.result,
+              is_error: outcome.isError,
+            });
+          }
+          conversation.push(
+            { role: "assistant", content: contentToEcho(final.content) },
+            { role: "user", content: results },
+          );
+        }
+
+        send(lastStop === "refusal" ? { type: "refusal" } : { type: "done" });
+      } catch (error) {
+        if (request.signal.aborted) return;
+        console.error("[chat] Claude request failed:", error);
+        send({ type: "error", message: friendlyError(error) });
+      } finally {
+        try {
+          controller.close();
+        } catch {
+          // Already closed because the visitor navigated away.
+        }
+      }
+    },
+    cancel() {
+      abortStream?.();
+    },
+  });
+
+  return new Response(responseBody, {
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
 }

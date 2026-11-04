@@ -1,75 +1,85 @@
-"use client";
-
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import cvData from "../../data/cv.json";
+import PageHeader from "@/components/PageHeader";
+import SiteFooter from "@/components/SiteFooter";
+import { getProfile, getProjects, hasPage, projectMeta } from "@/lib/content";
+
+export function generateMetadata(): Metadata {
+  return { title: `Projects | ${getProfile().name}` };
+}
 
 export default function ProjectsPage() {
+  const { email, links } = getProfile();
+  const projects = getProjects().filter(hasPage);
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-accent hover:opacity-80 mb-8"
-        >
-          <ArrowLeft size={20} />
-          Back to Home
-        </Link>
+    <div className="min-h-dvh flex flex-col">
+      <PageHeader />
 
-        <h1 className="text-3xl font-bold text-foreground mb-8">Projects</h1>
+      <main className="flex-1 w-full max-w-3xl mx-auto px-6 pt-10 sm:pt-16 pb-24">
+        <h1 className="text-2xl sm:text-3xl leading-snug font-medium">Projects</h1>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cvData.projects.map((project, index) => (
-            <div
-              key={index}
-              className="bg-background-secondary border border-foreground/10 rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-200 hover:shadow-lg group"
-            >
-              <div className="relative">
-                <img
-                  src={project.thumbnail}
-                  alt={project.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-200"></div>
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <h2 className="text-lg font-semibold text-foreground line-clamp-2">
-                    {project.name}
-                  </h2>
+        {projects.length === 0 ? (
+          <p className="mt-6 text-sm leading-relaxed text-foreground-secondary">
+            Case studies are on their way. In the meantime,{" "}
+            <Link href="/" className="underline underline-offset-2 text-foreground">
+              ask me about my work
+            </Link>
+            .
+          </p>
+        ) : (
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+            {projects.map((project) => {
+              const meta = projectMeta(project);
+              return (
+                <li key={project.slug}>
                   <Link
-                    href={`/projects/${project.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")
-                      .replace(/[^a-z0-9-]/g, "")}`}
-                    className="text-accent hover:opacity-80 flex items-center gap-1 ml-2 flex-shrink-0"
+                    href={`/projects/${project.slug}`}
+                    className="block h-full overflow-hidden rounded-3xl border border-background-inverse/10 hover:bg-background-secondary transition-colors duration-200"
                   >
-                    <ExternalLink size={16} />
+                    {project.thumbnail && (
+                      <div className="relative aspect-[16/9] bg-background-secondary">
+                        <Image
+                          src={project.thumbnail}
+                          alt=""
+                          fill
+                          sizes="(min-width: 640px) 24rem, 100vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 space-y-2">
+                      {meta && (
+                        <p className="text-xs text-foreground-secondary">{meta}</p>
+                      )}
+                      <h2 className="text-base font-medium">
+                        {project.name}
+                        {project.draft && (
+                          <span className="ml-2 align-middle rounded-full bg-background-inverse/8 px-2 py-0.5 text-[0.6875rem] font-normal text-foreground-secondary">
+                            Draft
+                          </span>
+                        )}
+                      </h2>
+                      {project.summary && (
+                        <p className="text-sm leading-relaxed text-foreground-secondary line-clamp-3">
+                          {project.summary}
+                        </p>
+                      )}
+                    </div>
                   </Link>
-                </div>
-                <p className="text-foreground-secondary mb-4 text-sm line-clamp-3">
-                  {project.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                    <span
-                      key={techIndex}
-                      className="bg-accent/10 text-accent px-2 py-1 rounded-full text-xs"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                  {project.technologies.length > 3 && (
-                    <span className="bg-foreground/10 text-foreground-secondary px-2 py-1 rounded-full text-xs">
-                      +{project.technologies.length - 3}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </main>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </main>
+
+      <SiteFooter
+        email={email}
+        links={links}
+        className="pt-5 sm:pt-10 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(2.5rem+env(safe-area-inset-bottom))]"
+      />
+    </div>
   );
 }
