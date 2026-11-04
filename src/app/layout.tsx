@@ -12,9 +12,36 @@ const dmMono = DM_Mono({
 
 const profile = getProfile();
 
+// Absolute base for the Open Graph / Twitter image URLs. Set NEXT_PUBLIC_SITE_URL
+// to override; on Vercel the production domain is picked up automatically.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://jordipoblet.com");
+
+const title = `${profile.name} | ${profile.title}`;
+const description = `Portfolio of ${profile.name}, ${profile.title}.`;
+
+// Icons and preview images come from the file conventions in this folder:
+// icon.svg, favicon.ico, apple-icon.tsx, opengraph-image.tsx, twitter-image.tsx.
 export const metadata: Metadata = {
-  title: `${profile.name} | ${profile.title}`,
-  description: `Portfolio of ${profile.name}, ${profile.title}.`,
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: profile.name,
+    title,
+    description,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 
 export const viewport: Viewport = {
