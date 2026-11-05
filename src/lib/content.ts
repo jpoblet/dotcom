@@ -71,6 +71,9 @@ export interface Project {
   thumbnail: string;
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
+  /** Brand logo and the background it sits on, for the projects page. */
+  logo: string;
+  brandBackground: string;
   /** Public URL when the project itself is live (website, app). */
   liveUrl: string;
   draft: boolean;
@@ -248,6 +251,8 @@ function readProjects(): Project[] {
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
       accent: str(data.accent) || "#64748B",
+      logo: str(data.logo),
+      brandBackground: str(data.brand_background) || "#FFFFFF",
       liveUrl: str(data.live_url),
       draft: data.draft !== false,
       body,
@@ -286,6 +291,8 @@ export function toProjectCard(project: Project): ProjectCardData {
     meta: projectMeta(project),
     thumbnail: project.thumbnail,
     accent: project.accent,
+    logo: project.logo,
+    brandBackground: project.brandBackground,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };
 }

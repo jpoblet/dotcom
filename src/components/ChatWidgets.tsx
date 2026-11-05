@@ -1,32 +1,34 @@
 import Link from "next/link";
-import ProjectCover from "@/components/ProjectCover";
+import ProjectLogoTile from "@/components/ProjectLogoTile";
 import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
+/** Horizontal card: brand tile on the left, details on the right. */
 function ProjectCard({ project }: { project: ProjectCardData }) {
   const body = (
     <>
-      <ProjectCover
-        name={project.name}
-        accent={project.accent}
-        thumbnail={project.thumbnail}
-        sizes="(min-width: 640px) 18rem, 100vw"
-        className="aspect-[16/9] border-0"
+      <ProjectLogoTile
+        project={project}
+        sizes="8rem"
+        compact
+        className="w-24 sm:w-32 shrink-0 self-stretch min-h-24 border-0 border-r"
       />
-      <div className="p-4 space-y-1.5">
+      <div className="min-w-0 flex-1 p-4 space-y-1">
         {project.meta && (
-          <p className="text-[0.6875rem] text-foreground-secondary">
+          <p className="text-[0.6875rem] text-foreground-secondary truncate">
             {project.meta}
           </p>
         )}
         <p className="text-sm font-medium">{project.name}</p>
         {project.summary && (
-          <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-3">
+          <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-2">
             {project.summary}
           </p>
         )}
         <p className="pt-1 text-xs">
           {project.href ? (
-            <span className="underline underline-offset-2">View project</span>
+            <span className="inline-flex items-center gap-1 underline underline-offset-2">
+              View project
+            </span>
           ) : (
             <span className="text-foreground-secondary">
               Case study coming soon
@@ -38,7 +40,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
   );
 
   const className =
-    "group block w-full sm:w-72 overflow-hidden rounded-sm border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
+    "group flex w-full sm:w-[28rem] overflow-hidden rounded-sm border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
 
   return project.href ? (
     <Link

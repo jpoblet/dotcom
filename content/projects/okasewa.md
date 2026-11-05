@@ -12,6 +12,9 @@ tags: [Website]
 thumbnail: "/images/projects/okasewa.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#B45309"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/okasewa.png"
+brand_background: "#DBF0DE"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://okasewa.com"

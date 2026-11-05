@@ -12,6 +12,9 @@ tags: [iOS app, SwiftUI, Game design, Privacy first]
 thumbnail: "/images/projects/what-the-flag.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#E63946"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/what-the-flag.png"
+brand_background: "#BDCCD6"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://whattheflag.co"

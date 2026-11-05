@@ -6,12 +6,15 @@ type: work
 summary: "Workflows lets Veriff's clients design their own identity verification flows, with conditions, screens and outcomes, instead of waiting for a Veriff engineer to build them by hand."
 company: "Veriff"
 role: "Lead Product Designer"
-year: "2024 - Present"
+year: "2024 - 2025"
 tags: [B2B SaaS, Admin platform, Complex logic, Redesign]
 # Path under /public, e.g. /images/projects/veriff-workflows.jpg
 thumbnail: ""
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#0F766E"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/veriff-workflows.svg"
+brand_background: "#FFFFFF"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: ""

@@ -12,6 +12,9 @@ tags: [Branding, Logo, Landing page]
 thumbnail: "/images/projects/wgic26.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#65A30D"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/wgic26.svg"
+brand_background: "#2B4739"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://wgic26.vercel.app"

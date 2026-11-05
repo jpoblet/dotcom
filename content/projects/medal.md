@@ -12,6 +12,9 @@ tags: [Social network, Sport]
 thumbnail: "/images/projects/medal.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#D4A017"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/medal.png"
+brand_background: "#1C2229"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://medal.io"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import ProjectCover from "@/components/ProjectCover";
+import ProjectLogoTile from "@/components/ProjectLogoTile";
 import { type Project, getProjects, hasPage, projectMeta } from "@/lib/content";
 
 /** "www.example.com/" -> "example.com" */
@@ -26,11 +26,9 @@ function CaseStudyCard({ project }: { project: Project }) {
   return (
     <div className="flex flex-col">
       <Link href={`/projects/${project.slug}`} className="group block">
-        <ProjectCover
-          name={project.name}
-          accent={project.accent}
-          thumbnail={project.thumbnail}
-          sizes="(min-width: 848px) 388px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+        <ProjectLogoTile
+          project={project}
+          sizes="(min-width: 1008px) 468px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
           className="aspect-[3/2] rounded-sm"
         />
         <div className="mt-4">
@@ -72,12 +70,11 @@ function CaseStudyCard({ project }: { project: Project }) {
 function WebsiteRow({ project }: { project: Project }) {
   const content = (
     <>
-      <ProjectCover
-        name={project.name}
-        accent={project.accent}
-        thumbnail={project.thumbnail}
+      <ProjectLogoTile
+        project={project}
         sizes="96px"
-        className="hidden sm:block w-24 aspect-[16/10] rounded-sm"
+        compact
+        className="hidden sm:flex w-24 aspect-[16/10] rounded-sm"
       />
       <span className="min-w-0">
         <span className="block text-sm font-medium">{project.name}</span>
@@ -126,7 +123,7 @@ function DraftBadge() {
   );
 }
 
-/** The /projects page body. Same 800px content width as the case studies. */
+/** The /projects page body, up to 960px wide. */
 export default function ProjectsIndex() {
   // Most recent first (getProjects sorts them).
   const projects = getProjects();
@@ -141,7 +138,7 @@ export default function ProjectsIndex() {
     <div className="min-h-dvh flex flex-col">
       <PageHeader />
 
-      <main className="flex-1 w-full max-w-[calc(50rem+3rem)] mx-auto px-6 pt-12 sm:pt-20 pb-40 sm:pb-48">
+      <main className="flex-1 w-full max-w-[calc(60rem+3rem)] mx-auto px-6 pt-12 sm:pt-20 pb-40 sm:pb-48">
         <h1 className="text-4xl sm:text-6xl font-medium leading-[1.05] tracking-tight">
           Projects
         </h1>
