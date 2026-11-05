@@ -1,20 +1,29 @@
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+
 interface SiteFooterProps {
   email: string;
   links: { label: string; href: string }[];
-  /** Positioning and vertical padding, which differ per page. */
-  className?: string;
 }
 
-export default function SiteFooter({ email, links, className = "" }: SiteFooterProps) {
+/**
+ * The site footer, fixed to the bottom of the screen on every page
+ * (rendered once in layout.tsx): email on the left, theme switcher in the
+ * centre, profiles on the right. Pages leave room for it at the bottom.
+ */
+export default function SiteFooter({ email, links }: SiteFooterProps) {
   return (
-    <footer
-      className={`bg-background px-5 sm:px-10 text-[0.6250rem] sm:text-xs text-foreground ${className}`}
-    >
-      <div className="flex flex-row gap-2 sm:gap-8 justify-between items-center">
-        <a href={`mailto:${email}`} className="font-normal py-2 -my-2">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-background before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent px-4 sm:px-10 pt-5 sm:pt-10 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(2.5rem+env(safe-area-inset-bottom))] text-[0.6250rem] sm:text-xs text-foreground">
+      {/* Phones: spread evenly (a perfectly centred switcher would crop the
+          email). Larger screens: switcher exactly in the centre. */}
+      <div className="flex justify-between items-center gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-3">
+        <a
+          href={`mailto:${email}`}
+          className="justify-self-start font-normal py-2 -my-2 whitespace-nowrap"
+        >
           {email}
         </a>
-        <div className="flex gap-6 sm:gap-10">
+        <ThemeSwitcher />
+        <div className="justify-self-end flex gap-2.5 sm:gap-10">
           {links.map((link) => (
             <a
               key={link.href}

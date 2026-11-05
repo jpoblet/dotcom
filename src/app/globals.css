@@ -8,6 +8,10 @@
   --font-sans: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
+  /* Light theme background: a soft warm cream instead of pure white, and a
+     slightly deeper cream for hover states and secondary surfaces. */
+  --cream: oklch(98.2% 0.013 85);
+  --cream-200: oklch(95.4% 0.018 85);
 
   --apricot-50: oklch(97.44% 0.016 70.54);
   --apricot-100: oklch(94.43% 0.036 70.02);
@@ -37,12 +41,12 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
-  --color-background: var(--polar);
-  --color-background-secondary: var(--boulder-100);
+  --color-background: var(--cream);
+  --color-background-secondary: var(--cream-200);
   --color-background-inverse: var(--boulder-950);
   --color-foreground: var(--boulder-950);
   --color-foreground-secondary: var(--boulder-500);
-  --color-foreground-inverse: var(--polar);
+  --color-foreground-inverse: var(--cream);
   --color-accent: var(--boulder-950);
 }
 

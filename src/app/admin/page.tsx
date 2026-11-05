@@ -102,7 +102,7 @@ export default async function AdminPage({ searchParams }: Props) {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <main className="w-full max-w-3xl mx-auto px-6 py-12 sm:py-16">
+    <main className="w-full max-w-3xl mx-auto px-6 pt-12 sm:pt-16 pb-40 sm:pb-48">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-medium">Chat log</h1>
         <Link href="/" className="text-xs underline underline-offset-2">
