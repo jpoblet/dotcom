@@ -9,7 +9,7 @@ role: "Branding, design and development"
 year: "2026"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/wgic26.jpg
-thumbnail: ""
+thumbnail: "/images/projects/wgic26.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#65A30D"
 # Public URL if the project is live (website, App Store page...). Live projects are

@@ -9,7 +9,7 @@ role: "Naming, branding and art direction"
 year: "2025 - Present"
 tags: [Naming, Logo, Branding, Art direction, Merch]
 # Path under /public, e.g. /images/projects/sottobosco.jpg
-thumbnail: ""
+thumbnail: "/images/projects/sottobosco.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#4D7C0F"
 # Public URL if the project is live (website, App Store page...). Live projects are

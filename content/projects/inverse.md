@@ -9,7 +9,7 @@ role: "Branding, design and development"
 year: "2025"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/inverse.jpg
-thumbnail: ""
+thumbnail: "/images/projects/inverse.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#7C3AED"
 # Public URL if the project is live (website, App Store page...). Live projects are

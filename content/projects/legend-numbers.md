@@ -9,7 +9,7 @@ role: "Design and development"
 year: "2026"
 tags: [Chrome extension, Sport, Data curation, Privacy first]
 # Path under /public, e.g. /images/projects/legend-numbers.jpg
-thumbnail: ""
+thumbnail: "/images/projects/legend-numbers.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#16A34A"
 # Public URL if the project is live (website, App Store page...). Live projects are

@@ -210,7 +210,29 @@ export function getAboutSections(): AboutSection[] {
   });
 }
 
+/**
+ * How recent a project is, from its `year` ("2026", "2020 - 2021",
+ * "2024 - Present"): [end year, start year]. Ongoing projects count as the
+ * most recent; projects without a year come last.
+ */
+function recency(project: Project): [number, number] {
+  const years = project.year.match(/\d{4}/g)?.map(Number) ?? [];
+  const ongoing = /present/i.test(project.year);
+  const start = years[0] ?? -1;
+  const end = ongoing ? Infinity : (years.at(-1) ?? -1);
+  return [end, start];
+}
+
+/** All projects, most recent first. */
 export function getProjects(): Project[] {
+  return readProjects().sort((a, b) => {
+    const [aEnd, aStart] = recency(a);
+    const [bEnd, bStart] = recency(b);
+    return bEnd - aEnd || bStart - aStart || a.name.localeCompare(b.name);
+  });
+}
+
+function readProjects(): Project[] {
   return listMarkdown("projects").map((file) => {
     const { data, body } = readMarkdown("projects", file);
     return {
@@ -361,7 +383,7 @@ export function buildKnowledgeBase(): string {
   const intro: Record<ProjectType, string> = {
     work: "Case studies from my jobs.",
     personal: "Products I designed and built myself.",
-    client: "Websites I designed and built for clients and for people close to me.",
+    client: "Websites I designed and built: for clients, for people close to me and for my own ventures. They have no case-study page.",
   };
   for (const { type, title } of PROJECT_TYPES) {
     const group = projects.filter((p) => p.type === type);

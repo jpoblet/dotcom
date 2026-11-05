@@ -9,7 +9,7 @@ role: "Design and development"
 year: "2026"
 tags: [Product, Web app, Chrome extension, Design system, Sport]
 # Path under /public, e.g. /images/projects/athleteid.jpg
-thumbnail: ""
+thumbnail: "/images/projects/athleteid.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#2563EB"
 # Public URL if the project is live (website, App Store page...). Live projects are

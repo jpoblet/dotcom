@@ -9,7 +9,7 @@ role: "Design and development"
 year: "2020"
 tags: [Website]
 # Path under /public, e.g. /images/projects/okasewa.jpg
-thumbnail: ""
+thumbnail: "/images/projects/okasewa.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#B45309"
 # Public URL if the project is live (website, App Store page...). Live projects are

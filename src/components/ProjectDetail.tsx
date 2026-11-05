@@ -1,10 +1,10 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
 import ProjectCover from "@/components/ProjectCover";
 import {
   type Project,
-  PROJECT_TYPES,
   getProjects,
   hasPage,
   stripEmptySections,
@@ -28,10 +28,7 @@ function splitSections(markdown: string): { title?: string; body: string }[] {
  * lists them (wrapping around at both ends).
  */
 function neighbours(project: Project): { previous?: Project; next?: Project } {
-  const order = PROJECT_TYPES.map((t) => t.type);
-  const listed = getProjects()
-    .filter((p) => p.type !== "client" && hasPage(p))
-    .sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+  const listed = getProjects().filter((p) => p.type !== "client" && hasPage(p));
   if (listed.length < 2) return {};
   const index = listed.findIndex((p) => p.slug === project.slug);
   return {
@@ -58,13 +55,11 @@ interface Props {
 export default function ProjectDetail({ project, linkMode }: Props) {
   const sections = splitSections(stripEmptySections(project.body));
   const { previous, next } = neighbours(project);
-  const typeLabel = PROJECT_TYPES.find((t) => t.type === project.type)?.title;
 
   const facts = [
     { label: "Company", value: project.company },
     { label: "Role", value: project.role },
     { label: "Year", value: project.year },
-    { label: "Type", value: typeLabel },
   ].filter((fact) => fact.value);
 
   return (
@@ -99,7 +94,11 @@ export default function ProjectDetail({ project, linkMode }: Props) {
         />
       </div>
 
-      <dl className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
+      {/* One column per fact on larger screens, so there are no empty cells. */}
+      <dl
+        style={{ "--facts": facts.length } as CSSProperties}
+        className="mt-10 grid grid-cols-2 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1 sm:grid-cols-[repeat(var(--facts),minmax(0,1fr))] gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10"
+      >
         {facts.map((fact) => (
           <div key={fact.label} className="bg-background px-4 py-3">
             <dt className="text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary">

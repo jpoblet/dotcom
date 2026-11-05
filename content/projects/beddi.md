@@ -6,7 +6,7 @@ type: client
 summary: "Brand and website for our own wedding: a bit about us, the details of the day and RSVPs for our guests."
 company: ""
 role: "Branding, design and development"
-year: ""
+year: "2022"
 tags: [Branding, Website]
 # Path under /public, e.g. /images/projects/beddi.jpg
 thumbnail: ""

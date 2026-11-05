@@ -9,7 +9,7 @@ role: "Design and development"
 year: "2026"
 tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
-thumbnail: ""
+thumbnail: "/images/projects/what-the-flag.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#E63946"
 # Public URL if the project is live (website, App Store page...). Live projects are

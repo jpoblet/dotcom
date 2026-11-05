@@ -21,42 +21,8 @@ function SectionTitle({ index, title, count }: { index: string; title: string; c
   );
 }
 
-/** Big card: cover on top, then meta, title, summary and a call to action. */
-function FeatureCard({ project }: { project: Project }) {
-  return (
-    <Link href={`/projects/${project.slug}`} className="group block">
-      <ProjectCover
-        name={project.name}
-        accent={project.accent}
-        thumbnail={project.thumbnail}
-        sizes="(min-width: 848px) 388px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
-        className="aspect-[3/2] rounded-sm"
-      />
-      <div className="mt-4">
-        <p className="text-xs text-foreground-secondary">{projectMeta(project)}</p>
-        <h3 className="mt-1 text-lg font-medium leading-snug">
-          {project.name}
-          {project.draft && <DraftBadge />}
-        </h3>
-        <div>
-          <p className="mt-2 text-sm leading-relaxed text-foreground-secondary line-clamp-3">
-            {project.summary}
-          </p>
-          <p className="mt-3 inline-flex items-center gap-1.5 text-xs">
-            Read the case study
-            <ArrowRight
-              size={14}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-/** Grid card: cover, then title and a short summary. */
-function GridCard({ project }: { project: Project }) {
+/** Case study card: cover, then meta, title, summary and a call to action. */
+function CaseStudyCard({ project }: { project: Project }) {
   return (
     <div className="flex flex-col">
       <Link href={`/projects/${project.slug}`} className="group block">
@@ -64,21 +30,28 @@ function GridCard({ project }: { project: Project }) {
           name={project.name}
           accent={project.accent}
           thumbnail={project.thumbnail}
-          sizes="(min-width: 848px) 251px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
-          className="aspect-[4/3] rounded-sm"
+          sizes="(min-width: 848px) 388px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+          className="aspect-[3/2] rounded-sm"
         />
-        <div className="mt-4 flex items-baseline justify-between gap-4">
-          <h3 className="text-sm font-medium">
+        <div className="mt-4">
+          <p className="text-xs text-foreground-secondary">{projectMeta(project)}</p>
+          <h3 className="mt-1 text-lg font-medium leading-snug">
             {project.name}
             {project.draft && <DraftBadge />}
           </h3>
-          {project.year && (
-            <span className="shrink-0 text-xs text-foreground-secondary">{project.year}</span>
-          )}
+          <div>
+            <p className="mt-2 text-sm leading-relaxed text-foreground-secondary line-clamp-3">
+              {project.summary}
+            </p>
+            <p className="mt-3 inline-flex items-center gap-1.5 text-xs">
+              Read the case study
+              <ArrowRight
+                size={14}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </p>
+          </div>
         </div>
-        <p className="mt-1.5 text-sm leading-relaxed text-foreground-secondary line-clamp-2">
-          {project.summary}
-        </p>
       </Link>
       {project.liveUrl && (
         <a
@@ -95,14 +68,21 @@ function GridCard({ project }: { project: Project }) {
   );
 }
 
-/** Compact row for client websites: they link straight to the live site. */
+/** Compact row for websites: they link straight to the live site. */
 function WebsiteRow({ project }: { project: Project }) {
   const content = (
     <>
+      <ProjectCover
+        name={project.name}
+        accent={project.accent}
+        thumbnail={project.thumbnail}
+        sizes="96px"
+        className="hidden sm:block w-24 aspect-[16/10] rounded-sm"
+      />
       <span className="min-w-0">
         <span className="block text-sm font-medium">{project.name}</span>
         <span className="block text-xs text-foreground-secondary truncate">
-          {project.role}
+          {project.role || project.summary}
         </span>
       </span>
       <span className="hidden sm:block text-xs text-foreground-secondary">
@@ -124,7 +104,7 @@ function WebsiteRow({ project }: { project: Project }) {
     </>
   );
   const className =
-    "group grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_8rem_13rem] items-center gap-4 py-4 border-b border-background-inverse/10";
+    "group grid grid-cols-[1fr_auto] sm:grid-cols-[6rem_1fr_8rem_13rem] items-center gap-4 py-4 border-b border-background-inverse/10";
   return (
     <li>
       {project.liveUrl ? (
@@ -148,10 +128,10 @@ function DraftBadge() {
 
 /** The /projects page body. Same 800px content width as the case studies. */
 export default function ProjectsIndex() {
+  // Most recent first (getProjects sorts them).
   const projects = getProjects();
-  const work = projects.filter((p) => p.type === "work" && hasPage(p));
-  const personal = projects.filter((p) => p.type === "personal" && hasPage(p));
-  // Client websites have no case study; they're listed with their live link.
+  const caseStudies = projects.filter((p) => p.type !== "client" && hasPage(p));
+  // Websites have no case study; they're listed with their live link.
   const websites = projects.filter((p) => p.type === "client");
 
   let section = 0;
@@ -166,27 +146,16 @@ export default function ProjectsIndex() {
           Projects
         </h1>
         <p className="mt-6 max-w-xl text-sm sm:text-base leading-relaxed text-foreground-secondary">
-          Case studies from my jobs, products I&apos;ve designed and built
-          myself, and websites for people I like working with.
+          Case studies from my jobs and from products I&apos;ve designed and
+          built myself, plus websites I&apos;ve made along the way.
         </p>
 
-        {work.length > 0 && (
+        {caseStudies.length > 0 && (
           <section className="mt-16 sm:mt-24">
-            <SectionTitle index={nextIndex()} title="Work" count={work.length} />
+            <SectionTitle index={nextIndex()} title="Case studies" count={caseStudies.length} />
             <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2">
-              {work.map((project) => (
-                <FeatureCard key={project.slug} project={project} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {personal.length > 0 && (
-          <section className="mt-20 sm:mt-28">
-            <SectionTitle index={nextIndex()} title="Built by me" count={personal.length} />
-            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {personal.map((project) => (
-                <GridCard key={project.slug} project={project} />
+              {caseStudies.map((project) => (
+                <CaseStudyCard key={project.slug} project={project} />
               ))}
             </div>
           </section>
@@ -203,7 +172,7 @@ export default function ProjectsIndex() {
           </section>
         )}
 
-        {work.length + personal.length + websites.length === 0 && (
+        {caseStudies.length + websites.length === 0 && (
           <p className="mt-10 text-sm leading-relaxed text-foreground-secondary">
             Case studies are on their way. In the meantime,{" "}
             <Link href="/" className="underline underline-offset-2 text-foreground">

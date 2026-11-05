@@ -36,7 +36,7 @@ export default function ProjectCover({
           fill
           priority={priority}
           sizes={sizes}
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
         />
       ) : (
         <div
