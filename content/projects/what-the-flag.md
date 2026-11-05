@@ -1,24 +1,28 @@
 ---
 name: What The Flag
+# work: a case study from a job. personal: something I made myself. client: a site made for a client.
+type: personal
 # One sentence shown on project cards and given to the AI.
-summary: ""
+summary: "A native iOS game about flags: every flag starts blank and you colour it in, one section at a time, with five lives to get it right."
 company: ""
-role: ""
-year: ""
-tags: []
+role: "Design and development"
+year: "2026"
+tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
 thumbnail: ""
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
-live_url: ""
-# While true, the AI mentions this project by name and summary only, with no link (the page is not built yet).
-draft: true
+live_url: "https://whattheflag.co"
+# While true, the case-study page isn't built and the AI doesn't link to it.
+draft: false
 ---
 
-## Context
+## What it is
 
-## My role
+What The Flag is a game for anyone who thinks they know their flags. Each flag starts blank, with no colours, and you fill it in one section at a time. You have five lives, and lost lives come back gradually over time. Hints colour in a section for you when a flag resists; you earn them by completing flags and by playing every day of the week, or you can buy them.
 
-## Process
+It's also a way to learn: each flag comes with the history and symbols behind it, and a map showing where the country is. Beyond the flags of the world, there are special collections of states, provinces and regions.
 
-## Outcome
+## How it's built
+
+I designed and built it as a native app for iPhone and iPad (iOS 17.6 and later), plus its landing page. Privacy was a principle from the start: progress and settings are stored only on the device, there is no account and no personal data is collected. An Android version is on the way.
