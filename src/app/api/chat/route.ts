@@ -1,7 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { NextRequest } from "next/server";
 import { buildTools, runTool } from "@/lib/chat-tools";
-import { buildKnowledgeBase, getProfile } from "@/lib/content";
+import {
+  buildKnowledgeBase,
+  getProfile,
+  pickConversationStarter,
+  pickLiveProjects,
+} from "@/lib/content";
 import { NOTICES } from "@/lib/notices";
 import { type RateLimitResult, checkRateLimit } from "@/lib/rate-limit";
 import type { Widget } from "@/lib/widgets";
@@ -39,7 +44,7 @@ export type ChatStreamEvent =
   | { type: "text"; text: string }
   | { type: "widget"; widget: Widget }
   | { type: "done" }
-  | { type: "refusal" }
+  | { type: "refusal"; message: string }
   | { type: "error"; message: string };
 
 function buildSystemPrompt(): string {
@@ -138,9 +143,12 @@ function isSpendLimitError(error: unknown): boolean {
 
 function friendlyError(error: unknown): string {
   if (isSpendLimitError(error)) return NOTICES.monthlyBudgetReached();
-  if (error instanceof Anthropic.RateLimitError) return NOTICES.providerBusy();
+  // The visitor has to wait a moment: point them to live projects meanwhile.
+  if (error instanceof Anthropic.RateLimitError) {
+    return NOTICES.providerBusy(pickLiveProjects());
+  }
   if (error instanceof Anthropic.APIError && error.status === 529) {
-    return NOTICES.providerOverloaded();
+    return NOTICES.providerOverloaded(pickLiveProjects());
   }
   return NOTICES.genericError(getProfile().email);
 }
@@ -258,7 +266,11 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        send(lastStop === "refusal" ? { type: "refusal" } : { type: "done" });
+        send(
+          lastStop === "refusal"
+            ? { type: "refusal", message: NOTICES.refusal(pickConversationStarter()) }
+            : { type: "done" },
+        );
       } catch (error) {
         if (request.signal.aborted) return;
         console.error("[chat] Claude request failed:", error);

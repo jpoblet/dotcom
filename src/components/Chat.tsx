@@ -295,7 +295,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
             widgets: [...(m.widgets ?? []), event.widget],
           }));
         } else if (event.type === "refusal") {
-          failReply(NOTICES.refusal());
+          failReply(event.message);
         } else if (event.type === "error") {
           failReply(event.message);
         }

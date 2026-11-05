@@ -8,6 +8,9 @@ year: ""
 tags: []
 # Path under /public, e.g. /images/projects/medal.jpg
 thumbnail: ""
+# Public URL if the project is live (website, App Store page...). Live projects are
+# suggested to visitors while the chat is busy, and the AI can share the link.
+live_url: ""
 # While true, the AI mentions this project by name and summary only, with no link (the page is not built yet).
 draft: true
 ---
