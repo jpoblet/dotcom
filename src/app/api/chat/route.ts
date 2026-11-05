@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { NextRequest } from "next/server";
 import { buildTools, runTool } from "@/lib/chat-tools";
 import { buildKnowledgeBase, getProfile } from "@/lib/content";
+import { NOTICES } from "@/lib/notices";
+import { type RateLimitResult, checkRateLimit } from "@/lib/rate-limit";
 import type { Widget } from "@/lib/widgets";
 
 export const maxDuration = 60;
@@ -120,15 +122,38 @@ function parseMessages(body: unknown): ChatMessage[] | string {
   return recent;
 }
 
+/**
+ * Spend limits reached: the workspace limit set in the Console (HTTP 400,
+ * "You have reached your specified workspace API usage limits") or the
+ * usage tier's cap (HTTP 429, "You have reached your API usage limits").
+ * The API has no dedicated error type for the first, so match the message.
+ */
+function isSpendLimitError(error: unknown): boolean {
+  return (
+    (error instanceof Anthropic.BadRequestError ||
+      error instanceof Anthropic.RateLimitError) &&
+    /usage limits/i.test(error.message)
+  );
+}
+
 function friendlyError(error: unknown): string {
-  const email = getProfile().email;
-  if (error instanceof Anthropic.RateLimitError) {
-    return "Lots of people are asking me things right now. Give it a few seconds and try again.";
-  }
+  if (isSpendLimitError(error)) return NOTICES.monthlyBudgetReached();
+  if (error instanceof Anthropic.RateLimitError) return NOTICES.providerBusy();
   if (error instanceof Anthropic.APIError && error.status === 529) {
-    return "The AI is a bit overloaded right now. Please try again in a moment.";
+    return NOTICES.providerOverloaded();
   }
-  return `Sorry, something went wrong on my side. Try again, or email me at ${email}.`;
+  return NOTICES.genericError(getProfile().email);
+}
+
+function rateLimitNotice(limit: Exclude<RateLimitResult, { allowed: true }>): string {
+  switch (limit.scope) {
+    case "visitor-hour":
+      return NOTICES.visitorHourLimit(Math.ceil(limit.retryAfter / 60));
+    case "visitor-day":
+      return NOTICES.visitorDayLimit();
+    case "site-day":
+      return NOTICES.siteDayLimit();
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -142,6 +167,15 @@ export async function POST(request: NextRequest) {
   const messages = parseMessages(body);
   if (typeof messages === "string") {
     return Response.json({ error: messages }, { status: 400 });
+  }
+
+  // Checked before calling Claude, so limited messages cost nothing.
+  const limit = await checkRateLimit(request);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: rateLimitNotice(limit), code: "rate_limited", scope: limit.scope },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
+    );
   }
 
   const encoder = new TextEncoder();

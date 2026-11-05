@@ -55,3 +55,15 @@ career timeline or a contact card under its reply
 ([`src/components/ChatWidgets.tsx`](src/components/ChatWidgets.tsx)).
 Project pages link back to the chat with `/?ask=...`, which asks the question
 on arrival.
+
+## Rate limiting
+
+[`src/lib/rate-limit.ts`](src/lib/rate-limit.ts) limits the chat with Upstash
+Redis (connected through the Vercel Marketplace, which sets the env vars):
+15 messages per visitor per hour, 50 per visitor per day and 300 per day
+site-wide (resets at 00:00 UTC). Visitors are identified by a salted hash of
+their IP. Without Redis configured (e.g. locally) or if it's unreachable, the
+chat is not limited and the problem is logged.
+
+All notices shown for limits, errors and refusals live in
+[`src/lib/notices.ts`](src/lib/notices.ts).

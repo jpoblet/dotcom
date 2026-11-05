@@ -14,6 +14,7 @@ import {
   streamChat,
   toApiHistory,
 } from "@/lib/chat-client";
+import { NOTICES } from "@/lib/notices";
 
 const OrganicBlob = dynamic(() => import("@/components/OrganicBlob"), {
   ssr: false,
@@ -47,8 +48,6 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 /** Touch devices: don't auto-focus the input, it pops the keyboard open. */
 const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
 
-const REFUSAL_TEXT =
-  "That's not something I can help with here. Ask me about my work, my projects or my life instead!";
 
 export default function Chat({ name, title, email, links }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -296,7 +295,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
             widgets: [...(m.widgets ?? []), event.widget],
           }));
         } else if (event.type === "refusal") {
-          failReply(REFUSAL_TEXT);
+          failReply(NOTICES.refusal());
         } else if (event.type === "error") {
           failReply(event.message);
         }
@@ -304,7 +303,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
     } catch {
       if (!controller.signal.aborted) {
         failReply(
-          `Sorry, I couldn't connect. Please try again, or email me at ${email}.`,
+          NOTICES.connectionError(email),
         );
       }
     } finally {
