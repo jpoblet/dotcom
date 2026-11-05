@@ -69,6 +69,13 @@ export interface Project {
   year: string;
   tags: string[];
   thumbnail: string;
+  /** Phone-sized screenshot of the live site, shown with the desktop one. */
+  mobileImage: string;
+  /** Cover colour (CSS colour) used while there is no thumbnail. */
+  accent: string;
+  /** Brand logo and the background it sits on, for the projects page. */
+  logo: string;
+  brandBackground: string;
   /** Public URL when the project itself is live (website, app). */
   liveUrl: string;
   draft: boolean;
@@ -208,7 +215,29 @@ export function getAboutSections(): AboutSection[] {
   });
 }
 
+/**
+ * How recent a project is, from its `year` ("2026", "2020 - 2021",
+ * "2024 - Present"): [end year, start year]. Ongoing projects count as the
+ * most recent; projects without a year come last.
+ */
+function recency(project: Project): [number, number] {
+  const years = project.year.match(/\d{4}/g)?.map(Number) ?? [];
+  const ongoing = /present/i.test(project.year);
+  const start = years[0] ?? -1;
+  const end = ongoing ? Infinity : (years.at(-1) ?? -1);
+  return [end, start];
+}
+
+/** All projects, most recent first. */
 export function getProjects(): Project[] {
+  return readProjects().sort((a, b) => {
+    const [aEnd, aStart] = recency(a);
+    const [bEnd, bStart] = recency(b);
+    return bEnd - aEnd || bStart - aStart || a.name.localeCompare(b.name);
+  });
+}
+
+function readProjects(): Project[] {
   return listMarkdown("projects").map((file) => {
     const { data, body } = readMarkdown("projects", file);
     return {
@@ -223,6 +252,10 @@ export function getProjects(): Project[] {
       year: str(data.year),
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
+      mobileImage: str(data.mobile_image),
+      accent: str(data.accent) || "#64748B",
+      logo: str(data.logo),
+      brandBackground: str(data.brand_background) || "#FFFFFF",
       liveUrl: str(data.live_url),
       draft: data.draft !== false,
       body,
@@ -260,6 +293,9 @@ export function toProjectCard(project: Project): ProjectCardData {
     summary: project.summary,
     meta: projectMeta(project),
     thumbnail: project.thumbnail,
+    accent: project.accent,
+    logo: project.logo,
+    brandBackground: project.brandBackground,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };
 }
@@ -357,7 +393,7 @@ export function buildKnowledgeBase(): string {
   const intro: Record<ProjectType, string> = {
     work: "Case studies from my jobs.",
     personal: "Products I designed and built myself.",
-    client: "Websites I designed and built for clients and for people close to me.",
+    client: "Websites I designed and built: for clients, for people close to me and for my own ventures. They have no case-study page.",
   };
   for (const { type, title } of PROJECT_TYPES) {
     const group = projects.filter((p) => p.type === type);

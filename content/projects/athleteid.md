@@ -9,7 +9,14 @@ role: "Design and development"
 year: "2026"
 tags: [Product, Web app, Chrome extension, Design system, Sport]
 # Path under /public, e.g. /images/projects/athleteid.jpg
-thumbnail: ""
+thumbnail: "/images/projects/athleteid.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/athleteid-mobile.jpg"
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#2563EB"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/athleteid.png"
+brand_background: "#FFFFFF"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://athleteid.pro"

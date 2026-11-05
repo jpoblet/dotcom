@@ -8,6 +8,10 @@
   --font-sans: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
+  /* Light theme background: a soft warm cream instead of pure white, and a
+     slightly deeper cream for hover states and secondary surfaces. */
+  --cream: oklch(98.2% 0.013 85);
+  --cream-200: oklch(95.4% 0.018 85);
 
   --apricot-50: oklch(97.44% 0.016 70.54);
   --apricot-100: oklch(94.43% 0.036 70.02);
@@ -37,12 +41,12 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
-  --color-background: var(--polar);
-  --color-background-secondary: var(--boulder-100);
+  --color-background: var(--cream);
+  --color-background-secondary: var(--cream-200);
   --color-background-inverse: var(--boulder-950);
   --color-foreground: var(--boulder-950);
   --color-foreground-secondary: var(--boulder-500);
-  --color-foreground-inverse: var(--polar);
+  --color-foreground-inverse: var(--cream);
   --color-accent: var(--boulder-950);
 }
 
@@ -137,6 +141,108 @@ body {
 .animate-slide-up {
   animation: slide-up 0.5s ease-out 0.15s forwards;
   opacity: 0;
+}
+
+/* Generated project cover (used until a project has a thumbnail): a wash
+   of the project's accent colour, a dotted field that echoes the home
+   page's blob, and a giant cropped monogram. Set --accent inline. */
+.project-cover {
+  container-type: inline-size;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: color-mix(in oklch, var(--accent) 14%, var(--color-background));
+}
+.project-cover::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background-image: radial-gradient(
+    oklch(from var(--accent) calc(l * 0.75) c h) 1.1px,
+    transparent 1.6px
+  );
+  background-size: 12px 12px;
+  mask-image: radial-gradient(ellipse 55% 65% at 70% 45%, #000 15%, transparent 72%);
+  opacity: 0.6;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.project-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 78% 30%,
+    color-mix(in oklch, var(--accent) 40%, transparent),
+    transparent 55%
+  );
+}
+.project-cover-monogram {
+  position: absolute;
+  right: 4cqw;
+  bottom: -9cqw;
+  z-index: 1;
+  font-size: 46cqw;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  /* A deeper shade of the accent, keeping its hue. */
+  color: oklch(from var(--accent) calc(l * 0.72) calc(c * 1.05) h);
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .project-cover::before {
+  transform: scale(1.06) translate(-1%, 1%);
+}
+.group:hover .project-cover-monogram {
+  transform: translateY(-3cqw);
+}
+
+/* Project modal: the backdrop fades, the case study fades in while rising
+   slightly, and plays the same in reverse when closing. */
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-content-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-modal-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
+.animate-modal-out {
+  animation: fade-out 0.25s ease-in both;
+}
+
+.animate-modal-content-in {
+  animation: modal-content-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+}
+
+.animate-modal-content-out {
+  animation: modal-content-out 0.25s ease-in both;
 }
 
 /* Suggestion chips: rise into place when they appear. */
@@ -238,7 +344,7 @@ body {
   margin-top: 0.375rem;
 }
 .case-study img {
-  border-radius: 1.5rem;
+  border-radius: 4px;
   border: 1px solid color-mix(in oklab, var(--color-background-inverse) 10%, transparent);
 }
 .case-study blockquote {

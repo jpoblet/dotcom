@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { DM_Mono } from "next/font/google";
 import Script from "next/script";
+import SiteFooter from "@/components/SiteFooter";
 import { getProfile } from "@/lib/content";
 
 const dmMono = DM_Mono({
@@ -57,7 +58,7 @@ export const viewport: Viewport = {
 };
 
 // Applies the saved theme before first paint, so dark-mode visitors don't see
-// a white flash. Must stay in sync with the theme switcher in Chat.tsx.
+// a light flash. Must stay in sync with components/ThemeSwitcher.tsx.
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
 // Umami analytics (cookieless). The website id is public by design. Events
@@ -67,8 +68,11 @@ const UMAMI_WEBSITE_ID = "c9feed1a-4c35-42a6-96df-97d07e0bf709";
 
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  /** Project case studies opened as a modal (see app/@modal). */
+  modal: React.ReactNode;
 }) {
   return (
     <html lang="en" className={dmMono.variable} suppressHydrationWarning>
@@ -77,6 +81,8 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         {children}
+        <SiteFooter email={profile.email} links={profile.links} />
+        {modal}
         <Script
           src="https://cloud.umami.is/script.js"
           data-website-id={UMAMI_WEBSITE_ID}

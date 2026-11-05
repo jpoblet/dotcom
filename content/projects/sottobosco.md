@@ -9,7 +9,14 @@ role: "Naming, branding and art direction"
 year: "2025 - Present"
 tags: [Naming, Logo, Branding, Art direction, Merch]
 # Path under /public, e.g. /images/projects/sottobosco.jpg
-thumbnail: ""
+thumbnail: "/images/projects/sottobosco.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/sottobosco-mobile.jpg"
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#4D7C0F"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/sottobosco.png"
+brand_background: "#212121"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://sottobosco.art"

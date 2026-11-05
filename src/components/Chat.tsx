@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
+import { Send } from "lucide-react";
 import dynamic from "next/dynamic";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
 import RotatingSuggestion from "@/components/RotatingSuggestion";
-import SiteFooter from "@/components/SiteFooter";
 import {
   type Message,
   loadMessages,
@@ -25,13 +24,10 @@ const OrganicBlob = dynamic(() => import("@/components/OrganicBlob"), {
   ssr: false,
 });
 
-type Theme = "light" | "dark" | "system";
-
 interface ChatProps {
   name: string;
   title: string;
   email: string;
-  links: { label: string; href: string }[];
   /** Questions suggested on the empty chat (from profile.yaml). */
   starterQuestions: string[];
 }
@@ -46,12 +42,6 @@ const LONGEST_PHRASE = PLACEHOLDER_PHRASES.reduce((a, b) =>
   b.length > a.length ? b : a,
 );
 
-const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
-];
-
 /** Touch devices: don't auto-focus the input, it pops the keyboard open. */
 const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
 
@@ -60,7 +50,6 @@ export default function Chat({
   name,
   title,
   email,
-  links,
   starterQuestions,
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -72,8 +61,6 @@ export default function Chat({
   const [isTyping, setIsTyping] = useState(true);
   const [placeholderHeight, setPlaceholderHeight] = useState<number>();
   const [isBoxExpanded, setIsBoxExpanded] = useState(false);
-  const [theme, setTheme] = useState<Theme | null>(null);
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [showLeftShadow, setShowLeftShadow] = useState(false);
   const [showRightShadow, setShowRightShadow] = useState(false);
 
@@ -81,7 +68,6 @@ export default function Chat({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const placeholderMeasureRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
-  const themeMenuRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   /** Follow new text only while the visitor is at the bottom of the chat. */
   const stickToBottomRef = useRef(true);
@@ -104,16 +90,11 @@ export default function Chat({
     if (textareaRef.current) textareaRef.current.style.height = "";
   };
 
-  // Restore chat history and theme from localStorage after hydration.
+  // Restore chat history from localStorage after hydration.
   // (Reading them during render would mismatch the server-rendered HTML.)
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setMessages(loadMessages());
-
-    const savedTheme = localStorage.getItem("theme");
-    setTheme(
-      savedTheme === "light" || savedTheme === "dark" ? savedTheme : "system",
-    );
 
     if (!isTouchDevice()) textareaRef.current?.focus();
   }, []);
@@ -142,23 +123,20 @@ export default function Chat({
   // Stop any in-flight reply if the page unmounts
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // Collapse the floating box and theme menu on outside taps/clicks
+  // Collapse the floating box on outside taps/clicks
   useEffect(() => {
-    if (!isBoxExpanded && !isThemeMenuOpen) return;
+    if (!isBoxExpanded) return;
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
       if (boxRef.current && !boxRef.current.contains(target)) {
         setIsBoxExpanded(false);
       }
-      if (themeMenuRef.current && !themeMenuRef.current.contains(target)) {
-        setIsThemeMenuOpen(false);
-      }
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [isBoxExpanded, isThemeMenuOpen]);
+  }, [isBoxExpanded]);
 
   // Desktop: typing anywhere on the page goes into the input, without
   // trapping focus (Tab, text selection and links keep working).
@@ -166,6 +144,8 @@ export default function Chat({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.key.length !== 1) return;
+      // A project modal is open on top of the chat.
+      if (document.body.dataset.modal === "open") return;
       const active = document.activeElement;
       if (
         active instanceof HTMLInputElement ||
@@ -180,42 +160,6 @@ export default function Chat({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // Apply and persist the theme (the inline script in layout.tsx applies the
-  // saved theme before first paint; this keeps it in sync afterwards).
-  useEffect(() => {
-    if (!theme) return;
-
-    const applyTheme = () => {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      document.documentElement.classList.toggle(
-        "dark",
-        theme === "dark" || (theme === "system" && prefersDark),
-      );
-    };
-
-    applyTheme();
-    localStorage.setItem("theme", theme);
-
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      mediaQuery.addEventListener("change", applyTheme);
-      return () => mediaQuery.removeEventListener("change", applyTheme);
-    }
-  }, [theme]);
-
-  const getThemeIcon = () => {
-    if (theme === "light") return <Sun size={16} />;
-    if (theme === "dark") return <Moon size={16} />;
-    return <Monitor size={16} />;
-  };
-
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
-    setIsThemeMenuOpen(false);
-  };
 
   // Typing animation effect for placeholder - only when no messages exist
   useEffect(() => {
@@ -428,52 +372,12 @@ export default function Chat({
             <Logo className="h-9 fill-current" />
           </button>
 
-          <div className="flex items-center gap-5">
-            <Link
-              href="/projects"
-              className="text-xs underline underline-offset-2 hover:opacity-70 transition-opacity duration-200"
-            >
-              Projects
-            </Link>
-
-            {/* Theme Switcher */}
-            <div className="relative" ref={themeMenuRef}>
-              <button
-                onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-                aria-label="Change theme"
-                aria-haspopup="menu"
-                aria-expanded={isThemeMenuOpen}
-                className={`flex items-center gap-2 px-4 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${isThemeMenuOpen ? "border-background-inverse" : "border-background-inverse/10"}`}
-              >
-                {getThemeIcon()}
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-200 ${isThemeMenuOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              {isThemeMenuOpen && (
-                <div
-                  role="menu"
-                  className="absolute top-full right-0 mt-2 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
-                >
-                  {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
-                    <button
-                      key={value}
-                      role="menuitemradio"
-                      aria-checked={theme === value}
-                      disabled={theme === value}
-                      onClick={() => handleThemeChange(value)}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-xs text-foreground hover:bg-background-secondary transition-colors disabled:text-foreground-secondary disabled:cursor-not-allowed"
-                    >
-                      <Icon size={16} />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <Link
+            href="/projects"
+            className="text-xs underline underline-offset-2 hover:opacity-70 transition-opacity duration-200"
+          >
+            Projects
+          </Link>
         </div>
       </header>
 
@@ -568,13 +472,6 @@ export default function Chat({
       {/* Gradient Overlay */}
       <div className="fixed bottom-0 left-0 right-0 h-[400px] bg-gradient-to-t from-background from-40% to-transparent to-100% z-40 pointer-events-none"></div>
 
-      {/* Static Footer */}
-      <SiteFooter
-        email={email}
-        links={links}
-        className="fixed bottom-0 left-0 right-0 z-50 pt-5 sm:pt-10 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(2.5rem+env(safe-area-inset-bottom))]"
-      />
-
       {/* Floating Input Section */}
       <div className="fixed bottom-0 left-0 right-0 z-40">
         <div className="p-0 sm:p-6">
@@ -582,10 +479,10 @@ export default function Chat({
             ref={boxRef}
             data-floating-box
             onClick={() => setIsBoxExpanded(true)}
-            className={`p-6 border mx-auto min-h-fit transition-all duration-200 sm:rounded-3xl sm:mb-[calc(7rem+env(safe-area-inset-bottom))] ${
+            className={`p-6 border mx-auto min-h-fit transition-all duration-200 sm:rounded-3xl sm:mb-[calc(3.25rem+env(safe-area-inset-bottom))] ${
               isBoxExpanded
-                ? "max-w-4xl mb-[calc(3.75rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background sm:shadow-xl"
-                : "max-w-3xl mb-[calc(3rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/10 bg-background hover:bg-background-secondary sm:shadow-lg"
+                ? "max-w-4xl mb-[calc(4.25rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background"
+                : "max-w-3xl mb-[calc(3.5rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/15 bg-background hover:bg-background-secondary"
             } ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
             <div className="flex flex-col space-y-4 min-h-fit">

@@ -10,6 +10,11 @@ year: "2020 - 2021"
 tags: [Mobile app, User research, UX, UI, iOS and Android]
 # Path under /public, e.g. /images/projects/glovo-delivery-flow.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#FFC244"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/glovo-delivery-flow.png"
+brand_background: "#FFC042"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: ""

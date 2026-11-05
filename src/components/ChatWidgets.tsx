@@ -1,36 +1,34 @@
-import Image from "next/image";
 import Link from "next/link";
+import ProjectLogoTile from "@/components/ProjectLogoTile";
 import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
+/** Horizontal card: brand tile on the left, details on the right. */
 function ProjectCard({ project }: { project: ProjectCardData }) {
   const body = (
     <>
-      {project.thumbnail && (
-        <div className="relative aspect-[16/9] bg-background-secondary">
-          <Image
-            src={project.thumbnail}
-            alt=""
-            fill
-            sizes="(min-width: 640px) 18rem, 100vw"
-            className="object-cover"
-          />
-        </div>
-      )}
-      <div className="p-4 space-y-1.5">
+      <ProjectLogoTile
+        project={project}
+        sizes="8rem"
+        compact
+        className="w-24 sm:w-32 shrink-0 self-stretch min-h-24 border-0 border-r"
+      />
+      <div className="min-w-0 flex-1 p-4 space-y-1">
         {project.meta && (
-          <p className="text-[0.6875rem] text-foreground-secondary">
+          <p className="text-[0.6875rem] text-foreground-secondary truncate">
             {project.meta}
           </p>
         )}
         <p className="text-sm font-medium">{project.name}</p>
         {project.summary && (
-          <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-3">
+          <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-2">
             {project.summary}
           </p>
         )}
         <p className="pt-1 text-xs">
           {project.href ? (
-            <span className="underline underline-offset-2">View project</span>
+            <span className="inline-flex items-center gap-1 underline underline-offset-2">
+              View project
+            </span>
           ) : (
             <span className="text-foreground-secondary">
               Case study coming soon
@@ -42,7 +40,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
   );
 
   const className =
-    "block w-full sm:w-72 overflow-hidden rounded-2xl border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
+    "group flex w-full sm:w-[28rem] overflow-hidden rounded-sm border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
 
   return project.href ? (
     <Link
@@ -59,7 +57,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
 
 function Timeline({ roles }: { roles: TimelineEntry[] }) {
   return (
-    <ol className="w-full sm:max-w-md rounded-2xl border border-background-inverse/10 p-5">
+    <ol className="w-full sm:max-w-md rounded-sm border border-background-inverse/10 p-5">
       {roles.map((role, index) => {
         const current = role.end === "Present";
         return (
@@ -93,7 +91,7 @@ function ContactCard({
   links: { label: string; href: string }[];
 }) {
   return (
-    <div className="w-full sm:max-w-md rounded-2xl border border-background-inverse/10 p-5 space-y-4">
+    <div className="w-full sm:max-w-md rounded-sm border border-background-inverse/10 p-5 space-y-4">
       <a
         href={`mailto:${email}`}
         className="inline-flex items-center rounded-full bg-background-inverse px-5 py-3 text-xs text-background hover:opacity-70 transition-opacity duration-200"

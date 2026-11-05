@@ -9,7 +9,14 @@ role: "Branding, design and development"
 year: "2026"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/wgic26.jpg
-thumbnail: ""
+thumbnail: "/images/projects/wgic26.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/wgic26-mobile.jpg"
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#65A30D"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/wgic26.svg"
+brand_background: "#2B4739"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://wgic26.vercel.app"

@@ -11,6 +11,11 @@ export interface ProjectCardData {
   /** "Company · Role · Year", whichever parts exist. */
   meta: string;
   thumbnail: string;
+  /** Cover colour used while there is no thumbnail. */
+  accent: string;
+  /** Brand logo and its background (empty logo: use the cover). */
+  logo: string;
+  brandBackground: string;
   /** Set only when the case-study page is published. */
   href?: string;
 }
