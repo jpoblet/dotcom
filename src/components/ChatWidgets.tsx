@@ -68,7 +68,7 @@ function Timeline({ roles }: { roles: TimelineEntry[] }) {
               <span className="absolute left-[0.2rem] top-3 bottom-0 w-px bg-background-inverse/15" />
             )}
             <span
-              className={`absolute left-0 top-1.5 size-2 rounded-full border border-foreground ${current ? "bg-foreground" : "bg-background"}`}
+              className={`absolute left-0 top-1.5 size-2 rounded-sm border border-foreground ${current ? "bg-foreground" : "bg-background"}`}
             />
             <p className="text-sm font-medium">{role.role}</p>
             <p className="text-xs text-foreground-secondary">
@@ -92,7 +92,7 @@ function ContactCard({
     <div className="w-full sm:max-w-md rounded-2xl border border-background-inverse/10 p-5 space-y-4">
       <a
         href={`mailto:${email}`}
-        className="inline-flex items-center rounded-full bg-background-inverse px-5 py-3 text-xs text-background hover:opacity-70 transition-opacity duration-200"
+        className="inline-flex items-center rounded-sm bg-background-inverse px-5 py-3 text-xs text-background hover:opacity-70 transition-opacity duration-200"
       >
         {email}
       </a>
@@ -103,7 +103,7 @@ function ContactCard({
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-background-inverse/8 px-4 py-2 text-xs text-foreground hover:bg-background-inverse/15 transition-colors duration-200"
+            className="rounded-sm bg-background-inverse/8 px-4 py-2 text-xs text-foreground hover:bg-background-inverse/15 transition-colors duration-200"
           >
             {link.label}
           </a>

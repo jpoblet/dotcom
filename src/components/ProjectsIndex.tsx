@@ -29,19 +29,17 @@ function FeatureCard({ project }: { project: Project }) {
         name={project.name}
         accent={project.accent}
         thumbnail={project.thumbnail}
-        sizes="(min-width: 1008px) 960px, calc(100vw - 3rem)"
-        className="aspect-[16/10] sm:aspect-[2/1] rounded-3xl"
+        sizes="(min-width: 1008px) 468px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+        className="aspect-[3/2] rounded-3xl"
       />
-      <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_1.4fr] sm:gap-10">
+      <div className="mt-4">
+        <p className="text-xs text-foreground-secondary">{projectMeta(project)}</p>
+        <h3 className="mt-1 text-lg font-medium leading-snug">
+          {project.name}
+          {project.draft && <DraftBadge />}
+        </h3>
         <div>
-          <p className="text-xs text-foreground-secondary">{projectMeta(project)}</p>
-          <h3 className="mt-1.5 text-xl sm:text-2xl font-medium leading-snug">
-            {project.name}
-            {project.draft && <DraftBadge />}
-          </h3>
-        </div>
-        <div>
-          <p className="text-sm leading-relaxed text-foreground-secondary">
+          <p className="mt-2 text-sm leading-relaxed text-foreground-secondary line-clamp-3">
             {project.summary}
           </p>
           <p className="mt-3 inline-flex items-center gap-1.5 text-xs">
@@ -66,11 +64,11 @@ function GridCard({ project }: { project: Project }) {
           name={project.name}
           accent={project.accent}
           thumbnail={project.thumbnail}
-          sizes="(min-width: 1008px) 468px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+          sizes="(min-width: 1008px) 304px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
           className="aspect-[4/3] rounded-3xl"
         />
         <div className="mt-4 flex items-baseline justify-between gap-4">
-          <h3 className="text-base font-medium">
+          <h3 className="text-sm font-medium">
             {project.name}
             {project.draft && <DraftBadge />}
           </h3>
@@ -102,7 +100,7 @@ function WebsiteRow({ project }: { project: Project }) {
   const content = (
     <>
       <span
-        className="size-2.5 shrink-0 rounded-full"
+        className="size-2.5 shrink-0 rounded-sm"
         style={{ backgroundColor: project.accent }}
         aria-hidden="true"
       />
@@ -147,7 +145,7 @@ function WebsiteRow({ project }: { project: Project }) {
 
 function DraftBadge() {
   return (
-    <span className="ml-2 align-middle rounded-full bg-background-inverse/8 px-2 py-0.5 text-[0.6875rem] font-normal text-foreground-secondary">
+    <span className="ml-2 align-middle rounded-sm bg-background-inverse/8 px-2 py-0.5 text-[0.6875rem] font-normal text-foreground-secondary">
       Draft
     </span>
   );
@@ -180,7 +178,7 @@ export default function ProjectsIndex() {
         {work.length > 0 && (
           <section className="mt-16 sm:mt-24">
             <SectionTitle index={nextIndex()} title="Work" count={work.length} />
-            <div className="mt-8 space-y-16 sm:space-y-20">
+            <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2">
               {work.map((project) => (
                 <FeatureCard key={project.slug} project={project} />
               ))}
@@ -191,7 +189,7 @@ export default function ProjectsIndex() {
         {personal.length > 0 && (
           <section className="mt-20 sm:mt-28">
             <SectionTitle index={nextIndex()} title="Built by me" count={personal.length} />
-            <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2">
+            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {personal.map((project) => (
                 <GridCard key={project.slug} project={project} />
               ))}

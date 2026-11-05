@@ -451,13 +451,13 @@ export default function Chat({
                 <div className="flex justify-start" aria-label="Thinking">
                   <div className="text-foreground p-4">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-foreground-secondary rounded-sm animate-bounce"></div>
                       <div
-                        className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
+                        className="w-2 h-2 bg-foreground-secondary rounded-sm animate-bounce"
                         style={{ animationDelay: "0.1s" }}
                       ></div>
                       <div
-                        className="w-2 h-2 bg-foreground-secondary rounded-full animate-bounce"
+                        className="w-2 h-2 bg-foreground-secondary rounded-sm animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
@@ -481,8 +481,8 @@ export default function Chat({
             onClick={() => setIsBoxExpanded(true)}
             className={`p-6 border mx-auto min-h-fit transition-all duration-200 sm:rounded-3xl sm:mb-[calc(3.25rem+env(safe-area-inset-bottom))] ${
               isBoxExpanded
-                ? "max-w-4xl mb-[calc(4.25rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background sm:shadow-xl"
-                : "max-w-3xl mb-[calc(3.5rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/10 bg-background hover:bg-background-secondary sm:shadow-lg"
+                ? "max-w-4xl mb-[calc(4.25rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background"
+                : "max-w-3xl mb-[calc(3.5rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/15 bg-background hover:bg-background-secondary"
             } ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
             <div className="flex flex-col space-y-4 min-h-fit">
@@ -529,7 +529,7 @@ export default function Chat({
                 <button
                   onClick={() => sendMessage()}
                   disabled={!inputMessage.trim() || isLoading}
-                  className="bg-background-inverse text-background px-5 py-3 rounded-full hover:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
+                  className="bg-background-inverse text-background px-5 py-3 rounded-sm hover:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center"
                   title="Send"
                   aria-label="Send"
                 >
@@ -554,7 +554,7 @@ export default function Chat({
                           onClick={() => sendMessage(question, "follow_up")}
                           disabled={isLoading}
                           style={{ animationDelay: `${index * 80}ms` }}
-                          className="animate-suggestion-in px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 whitespace-nowrap flex-shrink-0"
+                          className="animate-suggestion-in px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-sm cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 whitespace-nowrap flex-shrink-0"
                         >
                           {question}
                         </button>

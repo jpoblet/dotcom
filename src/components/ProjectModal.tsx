@@ -108,7 +108,7 @@ export default function ProjectModal({ children, closeTo }: Props) {
       <button
         onClick={close}
         aria-label="Close"
-        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-full border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-sm border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
       >
         <X size={18} />
       </button>

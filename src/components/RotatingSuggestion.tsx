@@ -64,7 +64,7 @@ export default function RotatingSuggestion({ questions, onPick, disabled }: Prop
       onPointerLeave={() => (paused.current = false)}
       onFocus={() => (paused.current = true)}
       onBlur={() => (paused.current = false)}
-      className={`px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-[opacity,translate,background-color] duration-300 whitespace-nowrap ${
+      className={`px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-sm cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-[opacity,translate,background-color] duration-300 whitespace-nowrap ${
         // The rise-in animation is dropped while leaving, or its end state
         // would override the fade-out.
         leaving ? "opacity-0 -translate-y-2" : "animate-suggestion-in"
