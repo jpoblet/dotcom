@@ -72,7 +72,7 @@ export default function ThemeSwitcher() {
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className={`-my-2 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-background hover:bg-background-inverse/10 rounded-sm border transition-all duration-200 ${
+        className={`-my-2 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${
           isOpen ? "border-background-inverse" : "border-background-inverse/10"
         }`}
       >

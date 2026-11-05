@@ -30,7 +30,7 @@ function FeatureCard({ project }: { project: Project }) {
         accent={project.accent}
         thumbnail={project.thumbnail}
         sizes="(min-width: 1008px) 468px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
-        className="aspect-[3/2] rounded-3xl"
+        className="aspect-[3/2] rounded-sm"
       />
       <div className="mt-4">
         <p className="text-xs text-foreground-secondary">{projectMeta(project)}</p>
@@ -65,7 +65,7 @@ function GridCard({ project }: { project: Project }) {
           accent={project.accent}
           thumbnail={project.thumbnail}
           sizes="(min-width: 1008px) 304px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
-          className="aspect-[4/3] rounded-3xl"
+          className="aspect-[4/3] rounded-sm"
         />
         <div className="mt-4 flex items-baseline justify-between gap-4">
           <h3 className="text-sm font-medium">
@@ -99,11 +99,6 @@ function GridCard({ project }: { project: Project }) {
 function WebsiteRow({ project }: { project: Project }) {
   const content = (
     <>
-      <span
-        className="size-2.5 shrink-0 rounded-sm"
-        style={{ backgroundColor: project.accent }}
-        aria-hidden="true"
-      />
       <span className="min-w-0">
         <span className="block text-sm font-medium">{project.name}</span>
         <span className="block text-xs text-foreground-secondary truncate">
@@ -129,7 +124,7 @@ function WebsiteRow({ project }: { project: Project }) {
     </>
   );
   const className =
-    "group grid grid-cols-[auto_1fr_auto] sm:grid-cols-[auto_1fr_8rem_13rem] items-center gap-4 py-4 border-b border-background-inverse/10";
+    "group grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_8rem_13rem] items-center gap-4 py-4 border-b border-background-inverse/10";
   return (
     <li>
       {project.liveUrl ? (
@@ -145,7 +140,7 @@ function WebsiteRow({ project }: { project: Project }) {
 
 function DraftBadge() {
   return (
-    <span className="ml-2 align-middle rounded-sm bg-background-inverse/8 px-2 py-0.5 text-[0.6875rem] font-normal text-foreground-secondary">
+    <span className="ml-2 align-middle rounded-full bg-background-inverse/8 px-2 py-0.5 text-[0.6875rem] font-normal text-foreground-secondary">
       Draft
     </span>
   );

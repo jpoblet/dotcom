@@ -58,7 +58,7 @@ function StatList({ title, rows }: { title: string; rows: [string, number][] }) 
 
 function StatsBlock({ title, stats }: { title: string; stats: Stats }) {
   return (
-    <section className="rounded-3xl border border-background-inverse/10 p-6">
+    <section className="rounded-sm border border-background-inverse/10 p-6">
       <div className="flex items-baseline justify-between">
         <h2 className="text-base font-medium">{title}</h2>
         <p className="text-2xl tabular-nums">{stats.questions ?? 0}</p>
@@ -131,7 +131,7 @@ export default async function AdminPage({ searchParams }: Props) {
           return (
             <section
               key={`${conversation.id}-${first.at}`}
-              className="rounded-3xl border border-background-inverse/10 p-6"
+              className="rounded-sm border border-background-inverse/10 p-6"
             >
               <p className="text-xs text-foreground-secondary">
                 {formatTime(first.at)}

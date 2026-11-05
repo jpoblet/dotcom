@@ -70,7 +70,7 @@ export default function ProjectModal({ children, closeTo }: Props) {
     <div role="dialog" aria-modal="true" aria-labelledby="project-title" className="fixed inset-0 z-[60]">
       <div
         aria-hidden="true"
-        className={`absolute inset-0 bg-background/60 backdrop-blur-md ${
+        className={`absolute inset-0 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 ${
           closing ? "animate-modal-out" : "animate-modal-in"
         }`}
       />
@@ -108,7 +108,7 @@ export default function ProjectModal({ children, closeTo }: Props) {
       <button
         onClick={close}
         aria-label="Close"
-        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-sm border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-full border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
       >
         <X size={18} />
       </button>

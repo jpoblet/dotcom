@@ -70,7 +70,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
   return (
     <article>
       {project.draft && (
-        <p className="mb-6 inline-block rounded-sm bg-background-inverse/8 px-3 py-1 text-xs text-foreground-secondary">
+        <p className="mb-6 inline-block rounded-full bg-background-inverse/8 px-3 py-1 text-xs text-foreground-secondary">
           Draft: only visible in development
         </p>
       )}
@@ -95,11 +95,11 @@ export default function ProjectDetail({ project, linkMode }: Props) {
           thumbnail={project.thumbnail}
           priority
           sizes="(min-width: 1248px) 1200px, calc(100vw - 3rem)"
-          className="aspect-[16/10] sm:aspect-[2/1] rounded-3xl"
+          className="aspect-[16/10] sm:aspect-[2/1] rounded-sm"
         />
       </div>
 
-      <dl className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-background-inverse/10 bg-background-inverse/10">
+      <dl className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
         {facts.map((fact) => (
           <div key={fact.label} className="bg-background px-4 py-3">
             <dt className="text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary">
@@ -113,7 +113,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
       {(project.tags.length > 0 || project.liveUrl) && (
         <div className="mt-6 flex flex-wrap items-center gap-2">
           {project.tags.map((tag) => (
-            <span key={tag} className="rounded-sm bg-background-inverse/8 px-4 py-2 text-xs">
+            <span key={tag} className="rounded-full bg-background-inverse/8 px-4 py-2 text-xs">
               {tag}
             </span>
           ))}
@@ -122,7 +122,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-sm bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-70 transition-opacity"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-70 transition-opacity"
             >
               Visit the live site
               <ArrowUpRight size={14} />
@@ -171,7 +171,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
           href="/projects"
           aria-label="All projects"
           title="All projects"
-          className="flex size-10 items-center justify-center rounded-sm border border-background-inverse/10 hover:bg-background-secondary transition-colors duration-200"
+          className="flex size-10 items-center justify-center rounded-full border border-background-inverse/10 hover:bg-background-secondary transition-colors duration-200"
         >
           <LayoutGrid size={16} />
         </Link>
