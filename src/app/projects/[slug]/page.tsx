@@ -50,7 +50,7 @@ export default async function ProjectPage({ params }: Props) {
     <>
       <ProjectsIndex />
       <ProjectModal closeTo="/projects">
-        <ProjectDetail project={project} />
+        <ProjectDetail project={project} linkMode="hard" />
       </ProjectModal>
     </>
   );

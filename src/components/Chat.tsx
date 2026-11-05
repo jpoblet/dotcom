@@ -479,10 +479,10 @@ export default function Chat({
             ref={boxRef}
             data-floating-box
             onClick={() => setIsBoxExpanded(true)}
-            className={`p-6 border mx-auto min-h-fit transition-all duration-200 sm:rounded-3xl sm:mb-[calc(4rem+env(safe-area-inset-bottom))] ${
+            className={`p-6 border mx-auto min-h-fit transition-all duration-200 sm:rounded-3xl sm:mb-[calc(3.25rem+env(safe-area-inset-bottom))] ${
               isBoxExpanded
-                ? "max-w-4xl mb-[calc(3.5rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background sm:shadow-xl"
-                : "max-w-3xl mb-[calc(2.75rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/10 bg-background hover:bg-background-secondary sm:shadow-lg"
+                ? "max-w-4xl mb-[calc(4.25rem+env(safe-area-inset-bottom))] rounded-4xl border-background-inverse bg-background sm:shadow-xl"
+                : "max-w-3xl mb-[calc(3.5rem+env(safe-area-inset-bottom))] rounded-t-4xl border-b-0 sm:border-b border-background-inverse/10 bg-background hover:bg-background-secondary sm:shadow-lg"
             } ${isLoading ? "opacity-80" : "opacity-100"}`}
           >
             <div className="flex flex-col space-y-4 min-h-fit">

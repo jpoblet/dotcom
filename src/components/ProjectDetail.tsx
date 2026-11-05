@@ -1,16 +1,71 @@
-import Image from "next/image";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { type Project, projectMeta, stripEmptySections } from "@/lib/content";
+import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
+import ProjectCover from "@/components/ProjectCover";
+import {
+  type Project,
+  PROJECT_TYPES,
+  getProjects,
+  hasPage,
+  stripEmptySections,
+} from "@/lib/content";
+
+/** Splits a case study into its "## " sections (plus any intro before them). */
+function splitSections(markdown: string): { title?: string; body: string }[] {
+  return markdown
+    .split(/\n(?=## )/)
+    .map((chunk) => {
+      const match = chunk.match(/^## (.*)\n?([\s\S]*)$/);
+      return match
+        ? { title: match[1].trim(), body: match[2].trim() }
+        : { body: chunk.trim() };
+    })
+    .filter((section) => section.body);
+}
 
 /**
- * A project's case study, shown inside ProjectModal. The content is up to
- * 960px wide; the hero image breaks out wider, up to 1200px. Projects
- * without a thumbnail get a plain placeholder.
+ * The projects before and after this one, in the order the projects page
+ * lists them (wrapping around at both ends).
  */
-export default function ProjectDetail({ project }: { project: Project }) {
-  const meta = projectMeta(project);
-  const body = stripEmptySections(project.body);
-  const ask = `/?ask=${encodeURIComponent(`Tell me more about ${project.name}`)}`;
+function neighbours(project: Project): { previous?: Project; next?: Project } {
+  const order = PROJECT_TYPES.map((t) => t.type);
+  const listed = getProjects()
+    .filter((p) => p.type !== "client" && hasPage(p))
+    .sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+  if (listed.length < 2) return {};
+  const index = listed.findIndex((p) => p.slug === project.slug);
+  return {
+    previous: listed[(index - 1 + listed.length) % listed.length],
+    next: listed[(index + 1) % listed.length],
+  };
+}
+
+interface Props {
+  project: Project;
+  /**
+   * How to open the next project: "soft" inside a modal opened from another
+   * page (swaps the modal in place), "hard" when the project URL was opened
+   * directly (a normal page load).
+   */
+  linkMode: "soft" | "hard";
+}
+
+/**
+ * A project's case study, shown inside ProjectModal: facts, title and
+ * summary up to 960px, a cover up to 1200px, then each section on two
+ * columns (heading left, text right) on larger screens.
+ */
+export default function ProjectDetail({ project, linkMode }: Props) {
+  const sections = splitSections(stripEmptySections(project.body));
+  const { previous, next } = neighbours(project);
+  const typeLabel = PROJECT_TYPES.find((t) => t.type === project.type)?.title;
+
+  const facts = [
+    { label: "Company", value: project.company },
+    { label: "Role", value: project.role },
+    { label: "Year", value: project.year },
+    { label: "Type", value: typeLabel },
+  ].filter((fact) => fact.value);
 
   return (
     <article>
@@ -20,68 +75,151 @@ export default function ProjectDetail({ project }: { project: Project }) {
         </p>
       )}
 
-      {meta && <p className="text-xs text-foreground-secondary">{meta}</p>}
-      <h1 id="project-title" className="mt-2 text-2xl sm:text-3xl leading-snug font-medium">
+      <h1
+        id="project-title"
+        className="text-4xl sm:text-6xl font-medium leading-[1.05] tracking-tight"
+      >
         {project.name}
       </h1>
       {project.summary && (
-        <p className="mt-4 text-sm sm:text-base leading-relaxed text-foreground-secondary">
+        <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-foreground-secondary">
           {project.summary}
         </p>
       )}
 
       {/* Wider than the content: centred on the screen, up to 1200px. */}
-      <div className="relative left-1/2 -translate-x-1/2 mt-10 w-[min(calc(100vw-3rem),75rem)] aspect-[16/9] sm:aspect-[2/1] overflow-hidden rounded-3xl border border-background-inverse/10 bg-background-secondary">
-        {project.thumbnail ? (
-          <Image
-            src={project.thumbnail}
-            alt={project.name}
-            fill
-            priority
-            sizes="(min-width: 1248px) 1200px, calc(100vw - 3rem)"
-            className="object-cover"
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 flex items-center justify-center p-8 text-center text-xl sm:text-4xl font-medium text-foreground-secondary/40"
-          >
-            {project.name}
-          </div>
-        )}
+      <div className="relative left-1/2 -translate-x-1/2 mt-10 sm:mt-14 w-[min(calc(100vw-3rem),75rem)]">
+        <ProjectCover
+          name={project.name}
+          accent={project.accent}
+          thumbnail={project.thumbnail}
+          priority
+          sizes="(min-width: 1248px) 1200px, calc(100vw - 3rem)"
+          className="aspect-[16/10] sm:aspect-[2/1] rounded-3xl"
+        />
       </div>
 
-      {project.tags.length > 0 && (
-        <ul className="mt-10 flex flex-wrap gap-2">
+      <dl className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-background-inverse/10 bg-background-inverse/10">
+        {facts.map((fact) => (
+          <div key={fact.label} className="bg-background px-4 py-3">
+            <dt className="text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary">
+              {fact.label}
+            </dt>
+            <dd className="mt-1 text-sm">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {(project.tags.length > 0 || project.liveUrl) && (
+        <div className="mt-6 flex flex-wrap items-center gap-2">
           {project.tags.map((tag) => (
-            <li key={tag} className="rounded-full bg-background-inverse/8 px-4 py-2 text-xs">
+            <span key={tag} className="rounded-full bg-background-inverse/8 px-4 py-2 text-xs">
               {tag}
-            </li>
+            </span>
           ))}
-        </ul>
+          {project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-70 transition-opacity"
+            >
+              Visit the live site
+              <ArrowUpRight size={14} />
+            </a>
+          )}
+        </div>
       )}
 
-      {body ? (
-        <div className="case-study mt-12">
-          <ReactMarkdown>{body}</ReactMarkdown>
+      {sections.length > 0 ? (
+        <div className="mt-16 sm:mt-20 space-y-12 sm:space-y-16">
+          {sections.map((section, index) => (
+            <section
+              key={section.title ?? index}
+              className="grid gap-3 sm:grid-cols-[14rem_1fr] sm:gap-10 border-t border-background-inverse/10 pt-6"
+            >
+              {section.title ? (
+                <h2 className="text-xs uppercase tracking-[0.12em] text-foreground-secondary">
+                  <span className="tabular-nums mr-3">{String(index + 1).padStart(2, "0")}</span>
+                  {section.title}
+                </h2>
+              ) : (
+                <span />
+              )}
+              <div className="case-study">
+                <ReactMarkdown>{section.body}</ReactMarkdown>
+              </div>
+            </section>
+          ))}
         </div>
       ) : (
-        <p className="mt-12 text-sm text-foreground-secondary">
+        <p className="mt-16 text-sm text-foreground-secondary">
           The full write-up is on its way.
         </p>
       )}
 
-      <div className="mt-16 rounded-3xl border border-background-inverse/10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <p className="text-sm">Curious about the details? Ask me anything about it.</p>
-        {/* A full page load, so the chat reads ?ask= even when it was
-            already open underneath the modal. */}
-        <a
-          href={ask}
-          className="self-start sm:self-auto shrink-0 rounded-full bg-background-inverse px-5 py-3 text-xs text-background hover:opacity-70 transition-opacity duration-200"
+      <nav
+        aria-label="More projects"
+        className="mt-20 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-t border-background-inverse/10 pt-6"
+      >
+        {previous ? (
+          <ProjectLink project={previous} linkMode={linkMode} direction="previous" />
+        ) : (
+          <span />
+        )}
+        <Link
+          href="/projects"
+          aria-label="All projects"
+          title="All projects"
+          className="flex size-10 items-center justify-center rounded-full border border-background-inverse/10 hover:bg-background-secondary transition-colors duration-200"
         >
-          Ask me about this project
-        </a>
-      </div>
+          <LayoutGrid size={16} />
+        </Link>
+        {next ? (
+          <ProjectLink project={next} linkMode={linkMode} direction="next" />
+        ) : (
+          <span />
+        )}
+      </nav>
     </article>
+  );
+}
+
+function ProjectLink({
+  project,
+  linkMode,
+  direction,
+}: {
+  project: Project;
+  linkMode: "soft" | "hard";
+  direction: "previous" | "next";
+}) {
+  const isNext = direction === "next";
+  const Arrow = isNext ? ArrowRight : ArrowLeft;
+  const content = (
+    <>
+      <span className="flex items-center gap-1.5 text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary">
+        {!isNext && (
+          <Arrow size={12} className="transition-transform duration-300 group-hover:-translate-x-1" />
+        )}
+        {isNext ? "Next" : "Previous"}
+        {isNext && (
+          <Arrow size={12} className="transition-transform duration-300 group-hover:translate-x-1" />
+        )}
+      </span>
+      <span className="mt-1 block truncate text-sm font-medium">{project.name}</span>
+    </>
+  );
+  const className = `group min-w-0 ${isNext ? "justify-self-end text-right" : "justify-self-start"}`;
+  const href = `/projects/${project.slug}`;
+  return linkMode === "soft" ? (
+    // replace: closing the modal still returns to the page underneath.
+    <Link href={href} replace scroll={false} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <a href={href} className={className}>
+      {content}
+    </a>
   );
 }

@@ -21,7 +21,7 @@ export default async function ProjectModalPage({ params }: Props) {
 
   return (
     <ProjectModal closeTo="back">
-      <ProjectDetail project={project} />
+      <ProjectDetail project={project} linkMode="soft" />
     </ProjectModal>
   );
 }

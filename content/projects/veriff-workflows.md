@@ -10,6 +10,8 @@ year: "2024 - Present"
 tags: [B2B SaaS, Admin platform, Complex logic, Redesign]
 # Path under /public, e.g. /images/projects/veriff-workflows.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#0F766E"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: ""

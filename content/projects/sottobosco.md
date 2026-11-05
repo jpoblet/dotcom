@@ -10,6 +10,8 @@ year: "2025 - Present"
 tags: [Naming, Logo, Branding, Art direction, Merch]
 # Path under /public, e.g. /images/projects/sottobosco.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#4D7C0F"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://sottobosco.art"

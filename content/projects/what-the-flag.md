@@ -10,6 +10,8 @@ year: "2026"
 tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#E63946"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://whattheflag.co"

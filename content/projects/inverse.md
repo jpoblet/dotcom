@@ -10,6 +10,8 @@ year: "2025"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/inverse.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#7C3AED"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://inverse-dotcom.vercel.app"

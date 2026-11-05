@@ -14,10 +14,10 @@ export default function PageHeader() {
           <Logo className="h-9 fill-current" />
         </Link>
         <Link
-          href="/projects"
+          href="/"
           className="text-xs underline underline-offset-2 hover:opacity-70 transition-opacity duration-200"
         >
-          All projects
+          Ask me anything
         </Link>
       </div>
     </header>

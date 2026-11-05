@@ -69,6 +69,8 @@ export interface Project {
   year: string;
   tags: string[];
   thumbnail: string;
+  /** Cover colour (CSS colour) used while there is no thumbnail. */
+  accent: string;
   /** Public URL when the project itself is live (website, app). */
   liveUrl: string;
   draft: boolean;
@@ -223,6 +225,7 @@ export function getProjects(): Project[] {
       year: str(data.year),
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
+      accent: str(data.accent) || "#64748B",
       liveUrl: str(data.live_url),
       draft: data.draft !== false,
       body,
@@ -260,6 +263,7 @@ export function toProjectCard(project: Project): ProjectCardData {
     summary: project.summary,
     meta: projectMeta(project),
     thumbnail: project.thumbnail,
+    accent: project.accent,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };
 }

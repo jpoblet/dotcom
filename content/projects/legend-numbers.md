@@ -10,6 +10,8 @@ year: "2026"
 tags: [Chrome extension, Sport, Data curation, Privacy first]
 # Path under /public, e.g. /images/projects/legend-numbers.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#16A34A"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://legendnumbers.com"

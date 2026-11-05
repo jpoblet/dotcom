@@ -10,6 +10,8 @@ year: "2024"
 tags: [Social network, Sport]
 # Path under /public, e.g. /images/projects/medal.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#D4A017"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://medal.io"

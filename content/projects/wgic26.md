@@ -10,6 +10,8 @@ year: "2026"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/wgic26.jpg
 thumbnail: ""
+# Colour of the generated cover shown while there is no thumbnail.
+accent: "#65A30D"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://wgic26.vercel.app"

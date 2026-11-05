@@ -1,21 +1,17 @@
-import Image from "next/image";
 import Link from "next/link";
+import ProjectCover from "@/components/ProjectCover";
 import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
 function ProjectCard({ project }: { project: ProjectCardData }) {
   const body = (
     <>
-      {project.thumbnail && (
-        <div className="relative aspect-[16/9] bg-background-secondary">
-          <Image
-            src={project.thumbnail}
-            alt=""
-            fill
-            sizes="(min-width: 640px) 18rem, 100vw"
-            className="object-cover"
-          />
-        </div>
-      )}
+      <ProjectCover
+        name={project.name}
+        accent={project.accent}
+        thumbnail={project.thumbnail}
+        sizes="(min-width: 640px) 18rem, 100vw"
+        className="aspect-[16/9] border-0"
+      />
       <div className="p-4 space-y-1.5">
         {project.meta && (
           <p className="text-[0.6875rem] text-foreground-secondary">
@@ -42,7 +38,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
   );
 
   const className =
-    "block w-full sm:w-72 overflow-hidden rounded-2xl border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
+    "group block w-full sm:w-72 overflow-hidden rounded-2xl border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
 
   return project.href ? (
     <Link
