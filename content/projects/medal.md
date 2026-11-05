@@ -1,24 +1,22 @@
 ---
 name: Medal
+# work: a case study from a job. personal: something I made myself. client: a site made for a client.
+type: personal
 # One sentence shown on project cards and given to the AI.
-summary: ""
+summary: "A social network for the world of sports."
 company: ""
 role: ""
 year: ""
-tags: []
+tags: [Social network, Sport]
 # Path under /public, e.g. /images/projects/medal.jpg
 thumbnail: ""
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
-live_url: ""
-# While true, the AI mentions this project by name and summary only, with no link (the page is not built yet).
-draft: true
+live_url: "https://medal.io"
+# While true, the case-study page isn't built and the AI doesn't link to it.
+draft: false
 ---
 
-## Context
+## Status
 
-## My role
-
-## Process
-
-## Outcome
+Medal is live but parked for now. In the future it may merge with AthleteID and evolve together with it.
