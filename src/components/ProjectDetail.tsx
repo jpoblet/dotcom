@@ -198,7 +198,11 @@ function ProjectLink({
   const Arrow = isNext ? ArrowRight : ArrowLeft;
   const content = (
     <>
-      <span className="flex items-center gap-1.5 text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary">
+      <span
+        className={`flex items-center gap-1.5 text-[0.6875rem] uppercase tracking-[0.12em] text-foreground-secondary ${
+          isNext ? "justify-end" : ""
+        }`}
+      >
         {!isNext && (
           <Arrow size={12} className="transition-transform duration-300 group-hover:-translate-x-1" />
         )}
