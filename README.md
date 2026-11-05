@@ -32,11 +32,18 @@ Everything the site and the AI know about me lives in [`content/`](content):
 | `experience.yaml` | Work history, newest first (`end: Present` marks the current role) |
 | `education.yaml` | Education, newest first |
 | `about/*.md` | Longer writing (summary, background, personal, travels...). Files are read in filename order; the `title` front matter becomes the section heading |
-| `projects/<slug>.md` | One file per project. Front matter feeds cards and the AI; the body is the case study (empty `##` sections are hidden). Thumbnails go in `/public`, e.g. `/images/projects/medal.jpg` |
+| `projects/<slug>.md` | One file per project. Front matter feeds cards and the AI; the body is the case study (empty `##` sections are hidden). `type` groups it under Work (`work`), Personal projects (`personal`) or Other websites (`client`). Thumbnails go in `/public`, e.g. `/images/projects/medal.jpg` |
+
+**Years that update themselves:** in any Markdown body, `{{years_since:2016-11}}`
+(or `{{years_since:2011}}`) becomes the number of whole years since that date.
+`{{duration:2011-11/2019-04}}` becomes the time between two dates in words
+("about seven and a half years"); use `now` as the end for something ongoing.
+Work history durations are worked out from `start` and `end` automatically.
 
 **Publishing a project:** set `draft: false`. That builds `/projects/<slug>`,
 lists it on `/projects`, and lets the AI link to it. Drafts are previewable
-with `npm run dev` (marked "Draft") but return 404 in production.
+with `npm run dev` (marked "Draft") but return 404 in production. The AI still
+reads a draft's summary and body; it just never links to a page for it.
 
 [`src/lib/content.ts`](src/lib/content.ts) loads these files and builds the AI's
 knowledge base. No code changes are needed to add or edit content.

@@ -47,9 +47,20 @@ export interface AboutSection {
   body: string;
 }
 
+export type ProjectType = "work" | "personal" | "client";
+
+/** Section titles, in the order projects are listed. */
+export const PROJECT_TYPES: { type: ProjectType; title: string }[] = [
+  { type: "work", title: "Work" },
+  { type: "personal", title: "Personal projects" },
+  { type: "client", title: "Other websites" },
+];
+
 export interface Project {
   slug: string;
   name: string;
+  /** work: a case study from a job; personal: something Jordi made; client: a site made for someone else. */
+  type: ProjectType;
   summary: string;
   company: string;
   role: string;
@@ -70,6 +81,87 @@ function readYaml<T>(file: string): T {
   return parseYaml(readFile(file)) as T;
 }
 
+// Dates and durations. Everything that depends on today is computed here so
+// figures like "10 years of experience" stay current on their own.
+
+const MONTHS = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+
+/** Months since year 0 for "2016-11", "2011" (January), "October 2024", "now" or "Present". */
+function toMonthIndex(value: string): number | undefined {
+  const text = value.trim().toLowerCase();
+  if (text === "now" || text === "present") {
+    const now = new Date();
+    return now.getFullYear() * 12 + now.getMonth();
+  }
+  const numeric = text.match(/^(\d{4})(?:-(\d{1,2}))?$/);
+  if (numeric) return Number(numeric[1]) * 12 + (Number(numeric[2] ?? 1) - 1);
+  const named = text.match(/^([a-z]+)\s+(\d{4})$/);
+  if (named && MONTHS.includes(named[1])) {
+    return Number(named[2]) * 12 + MONTHS.indexOf(named[1]);
+  }
+  return undefined;
+}
+
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve",
+];
+const say = (n: number) => NUMBER_WORDS[n] ?? String(n);
+const plural = (n: number, unit: string) =>
+  n === 1 ? `a ${unit}` : `${say(n)} ${unit}s`;
+
+/**
+ * A length of time the way a person would say it: "two years", "just over
+ * a year", "about seven and a half years", "close to two years".
+ */
+export function describeDuration(months: number): string {
+  if (months < 1) return "less than a month";
+  if (months < 12) return plural(months, "month");
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (rest === 0) return plural(years, "year");
+  if (rest <= 2) return `just over ${plural(years, "year")}`;
+  if (rest >= 10) return `close to ${plural(years + 1, "year")}`;
+  if (rest >= 5 && rest <= 7) {
+    return years === 1 ? "about a year and a half" : `about ${say(years)} and a half years`;
+  }
+  return `${plural(years, "year")} and ${plural(rest, "month")}`;
+}
+
+/** Duration between two dates in any format toMonthIndex accepts. */
+export function durationBetween(start: string, end: string): string | undefined {
+  const from = toMonthIndex(start);
+  const to = toMonthIndex(end);
+  if (from === undefined || to === undefined || to < from) return undefined;
+  // Inclusive of both months: April 2020 - November 2021 is 20 months.
+  return describeDuration(to - from + 1);
+}
+
+/**
+ * Fills placeholders in Markdown bodies:
+ * - {{years_since:2016-11}} (or {{years_since:2011}}): whole years since
+ *   then, as a number ("10").
+ * - {{duration:2011-11/2019-04}}: the time between two dates in words
+ *   ("about seven and a half years"); use "now" as the end for something
+ *   still going on.
+ */
+function fillPlaceholders(text: string): string {
+  return text
+    .replace(/\{\{\s*years_since:([\d-]+)\s*\}\}/g, (match, start: string) => {
+      const from = toMonthIndex(start);
+      const now = toMonthIndex("now");
+      if (from === undefined || now === undefined) return match;
+      return String(Math.floor((now - from) / 12));
+    })
+    .replace(
+      /\{\{\s*duration:([^/}]+)\/([^}]+?)\s*\}\}/g,
+      (match, start: string, end: string) => durationBetween(start, end) ?? match,
+    );
+}
+
 /** Splits a Markdown file into YAML front matter and body. */
 function readMarkdown(...segments: string[]): {
   data: Record<string, unknown>;
@@ -77,10 +169,10 @@ function readMarkdown(...segments: string[]): {
 } {
   const raw = readFile(...segments);
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) return { data: {}, body: raw.trim() };
+  if (!match) return { data: {}, body: fillPlaceholders(raw.trim()) };
   return {
     data: (parseYaml(match[1]) as Record<string, unknown>) ?? {},
-    body: match[2].trim(),
+    body: fillPlaceholders(match[2].trim()),
   };
 }
 
@@ -120,6 +212,9 @@ export function getProjects(): Project[] {
     return {
       slug: file.replace(/\.md$/, ""),
       name: str(data.name),
+      type: (PROJECT_TYPES.some((t) => t.type === data.type)
+        ? data.type
+        : "work") as ProjectType,
       summary: str(data.summary),
       company: str(data.company),
       role: str(data.role),
@@ -203,7 +298,8 @@ export function stripEmptySections(markdown: string): string {
 
 /**
  * All content as one Markdown document, used as the AI's knowledge base.
- * Deterministic output (no dates or random ordering) so it can be
+ * Deterministic output (no random ordering; the only date-dependent parts
+ * are {{years_since}} figures, which change once a year) so it can be
  * prompt-cached.
  */
 export function buildKnowledgeBase(): string {
@@ -219,14 +315,22 @@ export function buildKnowledgeBase(): string {
   );
 
   for (const section of getAboutSections()) {
-    parts.push(`\n## ${section.title}\n\n${section.body}`);
+    // Subheadings sit one level below the section's own heading.
+    const body = section.body.replace(/^(#{2,5}) /gm, "#$1 ");
+    parts.push(`\n## ${section.title}\n\n${body}`);
   }
 
   parts.push("\n## Work experience (newest first)");
   for (const role of getExperience()) {
     parts.push(
       `\n### ${role.role}, ${role.company}`,
-      `${role.start} - ${role.end} · ${role.location}`,
+      [
+        `${role.start} - ${role.end}`,
+        durationBetween(role.start, role.end),
+        role.location,
+      ]
+        .filter(Boolean)
+        .join(" · "),
     );
     if (role.summary) parts.push(role.summary);
   }
@@ -247,20 +351,29 @@ export function buildKnowledgeBase(): string {
     ...profile.skills.map((skill) => `- ${skill}`),
   );
 
-  parts.push("\n## Projects");
-  for (const project of getProjects()) {
-    const meta = projectMeta(project);
-    parts.push(`\n### ${project.name}`);
-    if (meta) parts.push(meta);
-    parts.push(
-      project.draft
-        ? "Page: none yet (case study not published, do not link to it)"
-        : `Page: /projects/${project.slug}`,
-    );
-    if (project.liveUrl) parts.push(`Live at: ${project.liveUrl}`);
-    if (project.summary) parts.push(project.summary);
-    if (!project.draft) {
-      const body = stripEmptySections(project.body);
+  const projects = getProjects();
+  const intro: Record<ProjectType, string> = {
+    work: "Case studies from my jobs.",
+    personal: "Products I designed and built myself.",
+    client: "Websites I designed and built for clients and for people close to me.",
+  };
+  for (const { type, title } of PROJECT_TYPES) {
+    const group = projects.filter((p) => p.type === type);
+    if (group.length === 0) continue;
+    parts.push(`\n## Projects: ${title}\n\n${intro[type]}`);
+    for (const project of group) {
+      const meta = projectMeta(project);
+      parts.push(`\n### ${project.name}`);
+      if (meta) parts.push(meta);
+      parts.push(
+        project.draft
+          ? "Page: none (no case-study page, do not link to one)"
+          : `Page: /projects/${project.slug}`,
+      );
+      if (project.liveUrl) parts.push(`Live at: ${project.liveUrl}`);
+      if (project.summary) parts.push(project.summary);
+      // Drafts only lack a page; their write-up is still useful to the AI.
+      const body = stripEmptySections(project.body).replace(/^## /gm, "#### ");
       if (body) parts.push(body);
     }
   }
