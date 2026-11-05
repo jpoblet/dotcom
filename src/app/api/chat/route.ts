@@ -148,7 +148,7 @@ function friendlyError(error: unknown): string {
 function rateLimitNotice(limit: Exclude<RateLimitResult, { allowed: true }>): string {
   switch (limit.scope) {
     case "visitor-hour":
-      return NOTICES.visitorHourLimit(Math.ceil(limit.retryAfter / 60));
+      return NOTICES.visitorHourLimit(limit.retryAfter);
     case "visitor-day":
       return NOTICES.visitorDayLimit();
     case "site-day":

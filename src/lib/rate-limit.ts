@@ -14,12 +14,9 @@
 import { createHash } from "node:crypto";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { LIMITS } from "./limits";
 
-export const LIMITS = {
-  visitorPerHour: 15,
-  visitorPerDay: 50,
-  sitePerDay: 300,
-} as const;
+export { LIMITS };
 
 export type RateLimitResult =
   | { allowed: true }
