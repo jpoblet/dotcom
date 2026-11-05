@@ -1,7 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { NextRequest } from "next/server";
 import { buildTools, runTool } from "@/lib/chat-tools";
-import { buildKnowledgeBase, getProfile } from "@/lib/content";
+import {
+  buildKnowledgeBase,
+  getProfile,
+  pickConversationStarter,
+  pickLiveProjects,
+} from "@/lib/content";
+import { NOTICES } from "@/lib/notices";
+import { type RateLimitResult, checkRateLimit } from "@/lib/rate-limit";
 import type { Widget } from "@/lib/widgets";
 
 export const maxDuration = 60;
@@ -19,12 +26,25 @@ interface ChatMessage {
   content: string;
 }
 
+// Emoji (including flags, skin tones, keycaps and ZWJ sequences) plus one
+// preceding space. Built with new RegExp so the TS target doesn't limit the
+// flags. Keeps the text symbols (c), (r) and TM.
+const EMOJI = new RegExp(
+  "[ \\t]?(?:(?![\\u00A9\\u00AE\\u2122])\\p{Extended_Pictographic}|\\p{Regional_Indicator})(?:\\p{Extended_Pictographic}|\\p{Emoji_Modifier}|[\\uFE0F\\u200D\\u20E3])*|[\\uFE0F\\u20E3]",
+  "gu",
+);
+
+/** Safety net for the "no emojis" rule in the system prompt. */
+function stripEmoji(text: string): string {
+  return text.replace(EMOJI, "");
+}
+
 /** Newline-delimited JSON events streamed to the browser. */
 export type ChatStreamEvent =
   | { type: "text"; text: string }
   | { type: "widget"; widget: Widget }
   | { type: "done" }
-  | { type: "refusal" }
+  | { type: "refusal"; message: string }
   | { type: "error"; message: string };
 
 function buildSystemPrompt(): string {
@@ -35,7 +55,9 @@ function buildSystemPrompt(): string {
 How to answer:
 - Speak as ${first}: warm, direct and a little playful, like a relaxed conversation over coffee. No corporate speak.
 - Keep replies short, usually one to three sentences, leading with the most relevant specifics (companies, roles, dates, places). Go longer only when the visitor asks for detail.
-- Only state what the knowledge base below supports. If something isn't covered, say you haven't written about it here yet and suggest emailing ${profile.email}. Never invent projects, employers, metrics or opinions.
+- Only state what the knowledge base below supports. If something isn't covered, say plainly that it's not something you've written about here. Never invent projects, employers, metrics or opinions.
+- Never use emojis or emoticons, in any reply.
+- Stop when the answer is complete. Don't close with offers or sign-offs such as "feel free to ask" or "email me if you have more questions". Mention the email address only when the visitor asks how to get in touch.
 - Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
 - You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
 - Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
@@ -105,15 +127,41 @@ function parseMessages(body: unknown): ChatMessage[] | string {
   return recent;
 }
 
+/**
+ * Spend limits reached: the workspace limit set in the Console (HTTP 400,
+ * "You have reached your specified workspace API usage limits") or the
+ * usage tier's cap (HTTP 429, "You have reached your API usage limits").
+ * The API has no dedicated error type for the first, so match the message.
+ */
+function isSpendLimitError(error: unknown): boolean {
+  return (
+    (error instanceof Anthropic.BadRequestError ||
+      error instanceof Anthropic.RateLimitError) &&
+    /usage limits/i.test(error.message)
+  );
+}
+
 function friendlyError(error: unknown): string {
-  const email = getProfile().email;
+  if (isSpendLimitError(error)) return NOTICES.monthlyBudgetReached();
+  // The visitor has to wait a moment: point them to live projects meanwhile.
   if (error instanceof Anthropic.RateLimitError) {
-    return "Lots of people are asking me things right now. Give it a few seconds and try again.";
+    return NOTICES.providerBusy(pickLiveProjects());
   }
   if (error instanceof Anthropic.APIError && error.status === 529) {
-    return "The AI is a bit overloaded right now. Please try again in a moment.";
+    return NOTICES.providerOverloaded(pickLiveProjects());
   }
-  return `Sorry, something went wrong on my side. Try again, or email me at ${email}.`;
+  return NOTICES.genericError(getProfile().email);
+}
+
+function rateLimitNotice(limit: Exclude<RateLimitResult, { allowed: true }>): string {
+  switch (limit.scope) {
+    case "visitor-hour":
+      return NOTICES.visitorHourLimit(limit.retryAfter);
+    case "visitor-day":
+      return NOTICES.visitorDayLimit();
+    case "site-day":
+      return NOTICES.siteDayLimit();
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -127,6 +175,15 @@ export async function POST(request: NextRequest) {
   const messages = parseMessages(body);
   if (typeof messages === "string") {
     return Response.json({ error: messages }, { status: 400 });
+  }
+
+  // Checked before calling Claude, so limited messages cost nothing.
+  const limit = await checkRateLimit(request);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: rateLimitNotice(limit), code: "rate_limited", scope: limit.scope },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
+    );
   }
 
   const encoder = new TextEncoder();
@@ -170,7 +227,9 @@ export async function POST(request: NextRequest) {
           abortStream = () => stream.abort();
 
           let stepHasText = false;
-          stream.on("text", (text) => {
+          stream.on("text", (delta) => {
+            const text = stripEmoji(delta);
+            if (!text) return;
             // Separate text written in different steps into paragraphs.
             if (!stepHasText && sentText) send({ type: "text", text: "\n\n" });
             stepHasText = sentText = true;
@@ -207,7 +266,11 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        send(lastStop === "refusal" ? { type: "refusal" } : { type: "done" });
+        send(
+          lastStop === "refusal"
+            ? { type: "refusal", message: NOTICES.refusal(pickConversationStarter()) }
+            : { type: "done" },
+        );
       } catch (error) {
         if (request.signal.aborted) return;
         console.error("[chat] Claude request failed:", error);

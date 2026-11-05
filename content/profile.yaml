@@ -37,3 +37,14 @@ skills:
   - Cooking a delicious tortilla
   - Great wildlife spotter
   - Running at 5 min/km for 21 km
+
+# Personal stories suggested when the chat can't answer something, shown as
+# "Ask me about my work, my projects or my life instead, like <story>."
+# Write each one as a short phrase that reads naturally after "like".
+conversation_starters:
+  - the time I ran a prioritisation workshop with a Maasai community near the Masai Mara
+  - herding cattle by day and designing a ranch's website by night in Namibia
+  - travelling from Ethiopia to Cape Town entirely overland
+  - representing Australia at four Roller Hockey World Championships
+  - volunteering as a wildlife rescuer in Melbourne
+  - why my favourite animal is the dung beetle

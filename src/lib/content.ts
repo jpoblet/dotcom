@@ -19,6 +19,8 @@ export interface Profile {
   links: { label: string; href: string }[];
   languages: { language: string; level: string }[];
   skills: string[];
+  /** Personal stories the chat can suggest asking about. */
+  conversation_starters?: string[];
 }
 
 export interface Role {
@@ -54,6 +56,8 @@ export interface Project {
   year: string;
   tags: string[];
   thumbnail: string;
+  /** Public URL when the project itself is live (website, app). */
+  liveUrl: string;
   draft: boolean;
   body: string;
 }
@@ -122,6 +126,7 @@ export function getProjects(): Project[] {
       year: str(data.year),
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
+      liveUrl: str(data.live_url),
       draft: data.draft !== false,
       body,
     };
@@ -160,6 +165,27 @@ export function toProjectCard(project: Project): ProjectCardData {
     thumbnail: project.thumbnail,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };
+}
+
+/** Uniform random pick of up to `count` items (Fisher-Yates shuffle). */
+function sample<T>(items: T[], count: number): T[] {
+  const pool = [...items];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
+
+/** Up to `count` random projects that are live, as Markdown-ready links. */
+export function pickLiveProjects(count = 2): { name: string; url: string }[] {
+  const live = getProjects().filter((p) => p.liveUrl);
+  return sample(live, count).map((p) => ({ name: p.name, url: p.liveUrl }));
+}
+
+/** A random personal story to suggest asking about, if any are listed. */
+export function pickConversationStarter(): string | undefined {
+  return sample(getProfile().conversation_starters ?? [], 1)[0];
 }
 
 export function getCurrentRole(): Role | undefined {
@@ -231,6 +257,7 @@ export function buildKnowledgeBase(): string {
         ? "Page: none yet (case study not published, do not link to it)"
         : `Page: /projects/${project.slug}`,
     );
+    if (project.liveUrl) parts.push(`Live at: ${project.liveUrl}`);
     if (project.summary) parts.push(project.summary);
     if (!project.draft) {
       const body = stripEmptySections(project.body);
