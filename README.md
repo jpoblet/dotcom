@@ -74,3 +74,21 @@ chat is not limited and the problem is logged.
 
 All notices shown for limits, errors and refusals live in
 [`src/lib/notices.ts`](src/lib/notices.ts).
+
+## Chat log and analytics
+
+**Chat log.** Every question is stored in Upstash Redis with its reply, the
+cards and follow-ups shown, how it was asked (typed, starter chip, follow-up
+chip, project page), the visitor's country and city, and a random id per
+conversation. No IP addresses. Entries never expire. Rate-limited questions
+only count in the totals. See [`src/lib/chat-log.ts`](src/lib/chat-log.ts).
+
+**Reading it.** Open `/admin` and log in with any username and the
+`ADMIN_PASSWORD` environment variable. Without that variable, `/admin`
+returns 404. It shows monthly and all-time totals and every conversation,
+newest first.
+
+**Analytics.** [Umami](https://cloud.umami.is) (cookieless) records visits on
+the live domains only, plus these events: `Chat question` (with its
+`source`) and `Project card shown` (with the `project`). The website id is in
+[`src/app/layout.tsx`](src/app/layout.tsx).

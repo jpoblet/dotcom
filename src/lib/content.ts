@@ -21,6 +21,8 @@ export interface Profile {
   skills: string[];
   /** Personal stories the chat can suggest asking about. */
   conversation_starters?: string[];
+  /** Questions suggested on the empty chat. */
+  starter_questions?: string[];
 }
 
 export interface Role {

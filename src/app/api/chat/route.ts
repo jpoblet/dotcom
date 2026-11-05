@@ -1,12 +1,26 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { NextRequest } from "next/server";
-import { buildTools, runTool } from "@/lib/chat-tools";
+import { type NextRequest, after } from "next/server";
+import {
+  SUGGEST_FOLLOW_UPS,
+  buildTools,
+  parseFollowUps,
+  runTool,
+} from "@/lib/chat-tools";
 import {
   buildKnowledgeBase,
   getProfile,
   pickConversationStarter,
   pickLiveProjects,
 } from "@/lib/content";
+import {
+  type ChatLogEntry,
+  type ChatOutcome,
+  QUESTION_SOURCES,
+  type QuestionSource,
+  countRateLimited,
+  logChatTurn,
+  requestLocation,
+} from "@/lib/chat-log";
 import { NOTICES } from "@/lib/notices";
 import { type RateLimitResult, checkRateLimit } from "@/lib/rate-limit";
 import type { Widget } from "@/lib/widgets";
@@ -43,6 +57,7 @@ function stripEmoji(text: string): string {
 export type ChatStreamEvent =
   | { type: "text"; text: string }
   | { type: "widget"; widget: Widget }
+  | { type: "suggestions"; questions: string[] }
   | { type: "done" }
   | { type: "refusal"; message: string }
   | { type: "error"; message: string };
@@ -55,14 +70,17 @@ function buildSystemPrompt(): string {
 How to answer:
 - Speak as ${first}: warm, direct and a little playful, like a relaxed conversation over coffee. No corporate speak.
 - Keep replies short, usually one to three sentences, leading with the most relevant specifics (companies, roles, dates, places). Go longer only when the visitor asks for detail.
-- Only state what the knowledge base below supports. If something isn't covered, say plainly that it's not something you've written about here. Never invent projects, employers, metrics or opinions.
+- Sound like ${first} remembering and talking, not like a document being read out. Never copy or closely paraphrase sentences from the knowledge base: retell things in fresh words each time, the way you'd tell the same story differently to a different person. Pick the details that fit this particular question, vary how you open and structure replies, and don't reuse phrasing from your earlier replies in the conversation.
+- Never mention where your answers come from: no "notes", "knowledge base", "documents", "what I've written" or "here on this site".
+- Only state facts the knowledge base supports; never invent projects, employers, metrics, dates or opinions. When something isn't covered, answer the way a person would when they don't recall or haven't thought about it ("I don't remember exactly", "honestly, I'm not sure", "that's not something I've given much thought"), varying the wording, and move on to something related you can talk about when it fits naturally.
 - Never use emojis or emoticons, in any reply.
 - Health: share only what the knowledge base says about the cancer diagnosis and treatment, calmly and without drama. Never guess at medical details, prognosis or anything left out.
 - Stop when the answer is complete. Don't close with offers or sign-offs such as "feel free to ask" or "email me if you have more questions". Mention the email address only when the visitor asks how to get in touch.
 - Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
 - You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
+- After your written reply, call suggest_follow_ups with two or three questions the visitor might want to ask next. It's always the last call of a reply.
 - Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
-- If asked, be upfront that you are an AI answering from ${first}'s own notes, not ${first} typing live.
+- If a visitor asks whether they're talking to the real ${first}, be upfront: you're an AI that answers as ${first}, not ${first} typing live.
 - Stay on topic: ${first}, his work, design, and the things he would happily chat about. Politely steer unrelated requests (coding help, homework, general assistant tasks) back to ${first}.
 - Reply in the visitor's language.
 
@@ -154,6 +172,27 @@ function friendlyError(error: unknown): string {
   return NOTICES.genericError(getProfile().email);
 }
 
+/** Where the question came from and which chat it belongs to (for the log). */
+function parseLogContext(body: unknown): {
+  conversationId: string;
+  source: QuestionSource;
+} {
+  const { conversationId, source } = (body ?? {}) as Record<string, unknown>;
+  return {
+    conversationId:
+      typeof conversationId === "string" && /^[\w-]{1,64}$/.test(conversationId)
+        ? conversationId
+        : "unknown",
+    source: QUESTION_SOURCES.includes(source as QuestionSource)
+      ? (source as QuestionSource)
+      : "typed",
+  };
+}
+
+function cardId(widget: Widget): string {
+  return widget.kind === "project" ? `project:${widget.project.slug}` : widget.kind;
+}
+
 function rateLimitNotice(limit: Exclude<RateLimitResult, { allowed: true }>): string {
   switch (limit.scope) {
     case "visitor-hour":
@@ -178,9 +217,13 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: messages }, { status: 400 });
   }
 
+  const logContext = parseLogContext(body);
+  const location = requestLocation(request);
+
   // Checked before calling Claude, so limited messages cost nothing.
   const limit = await checkRateLimit(request);
   if (!limit.allowed) {
+    after(() => countRateLimited(logContext.source, location));
     return Response.json(
       { error: rateLimitNotice(limit), code: "rate_limited", scope: limit.scope },
       { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
@@ -190,10 +233,41 @@ export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
   let abortStream: (() => void) | undefined;
 
+  // What happened in this turn, stored once the response has finished.
+  const turn: ChatLogEntry = {
+    at: new Date().toISOString(),
+    ...logContext,
+    ...location,
+    question: messages.at(-1)!.content,
+    reply: "",
+    cards: [],
+    followUps: [],
+    outcome: "answered",
+  };
+  let finishTurn: (outcome: ChatOutcome) => void = () => {};
+  const turnFinished = new Promise<void>((resolve) => {
+    let finished = false;
+    finishTurn = (outcome) => {
+      if (finished) return;
+      finished = true;
+      turn.outcome = outcome;
+      resolve();
+    };
+  });
+  after(async () => {
+    await turnFinished;
+    await logChatTurn(turn);
+  });
+
   const responseBody = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: ChatStreamEvent) =>
+      const send = (event: ChatStreamEvent) => {
+        if (event.type === "text") turn.reply += event.text;
+        if (event.type === "widget") turn.cards.push(cardId(event.widget));
+        if (event.type === "suggestions") turn.followUps = event.questions;
         controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      };
+      let outcome: ChatOutcome = "answered";
 
       try {
         // Reads ANTHROPIC_API_KEY (or another configured credential).
@@ -249,9 +323,28 @@ export async function POST(request: NextRequest) {
 
           if (final.stop_reason !== "tool_use") break;
 
+          const toolCalls = final.content.filter((b) => b.type === "tool_use");
+          const followUpCall = toolCalls.find((b) => b.name === SUGGEST_FOLLOW_UPS);
+          if (followUpCall) {
+            const questions = parseFollowUps(followUpCall.input);
+            if (questions.length) send({ type: "suggestions", questions });
+          }
+          // Follow-ups come last: once they're in and the reply is written,
+          // the turn is over, with no extra model call.
+          if (sentText && toolCalls.every((b) => b.name === SUGGEST_FOLLOW_UPS)) {
+            break;
+          }
+
           const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
-          for (const block of final.content) {
-            if (block.type !== "tool_use") continue;
+          for (const block of toolCalls) {
+            if (block.name === SUGGEST_FOLLOW_UPS) {
+              results.push({
+                type: "tool_result",
+                tool_use_id: block.id,
+                content: "Suggestions noted. Now write your reply to the visitor; don't suggest follow-ups again.",
+              });
+              continue;
+            }
             const outcome = runTool(block.name, block.input);
             if (outcome.widget) send({ type: "widget", widget: outcome.widget });
             results.push({
@@ -267,16 +360,22 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        if (lastStop === "refusal") outcome = "refusal";
         send(
           lastStop === "refusal"
             ? { type: "refusal", message: NOTICES.refusal(pickConversationStarter()) }
             : { type: "done" },
         );
       } catch (error) {
-        if (request.signal.aborted) return;
+        if (request.signal.aborted) {
+          outcome = "aborted";
+          return;
+        }
+        outcome = "error";
         console.error("[chat] Claude request failed:", error);
         send({ type: "error", message: friendlyError(error) });
       } finally {
+        finishTurn(outcome);
         try {
           controller.close();
         } catch {
@@ -285,6 +384,7 @@ export async function POST(request: NextRequest) {
       }
     },
     cancel() {
+      finishTurn("aborted");
       abortStream?.();
     },
   });

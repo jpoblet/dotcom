@@ -3,6 +3,7 @@
  * reading the streamed /api/chat response.
  */
 import type { ChatStreamEvent } from "@/app/api/chat/route";
+import type { QuestionSource } from "@/lib/chat-log";
 import type { Widget } from "@/lib/widgets";
 
 export interface Message {
@@ -13,11 +14,31 @@ export interface Message {
   timestamp: Date;
   /** Error/refusal notices are shown but never sent back to the model. */
   isError?: boolean;
+  /** Follow-up questions the AI suggested after this reply. */
+  suggestions?: string[];
   /** Cards the AI showed under this reply (project, timeline, contact). */
   widgets?: Widget[];
 }
 
 export const STORAGE_KEY = "chat-history";
+const CONVERSATION_KEY = "chat-conversation-id";
+
+/**
+ * Random id for the current chat, so the log can group its questions.
+ * Says nothing about the visitor; a new one starts when the chat is reset.
+ */
+export function getConversationId(): string {
+  let id = localStorage.getItem(CONVERSATION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(CONVERSATION_KEY, id);
+  }
+  return id;
+}
+
+export function startNewConversation() {
+  localStorage.setItem(CONVERSATION_KEY, crypto.randomUUID());
+}
 
 /**
  * Replies saved by the previous (OpenAI) version were HTML with inline
@@ -92,11 +113,16 @@ export function toApiHistory(messages: Message[]) {
 export async function* streamChat(
   history: ReturnType<typeof toApiHistory>,
   signal: AbortSignal,
+  source: QuestionSource = "typed",
 ): AsyncGenerator<ChatStreamEvent> {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: history }),
+    body: JSON.stringify({
+      messages: history,
+      conversationId: getConversationId(),
+      source,
+    }),
     signal,
   });
 
