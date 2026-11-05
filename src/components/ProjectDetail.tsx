@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
+import DeviceShowcase from "@/components/DeviceShowcase";
 import ProjectCover from "@/components/ProjectCover";
 import {
   type Project,
@@ -84,14 +85,23 @@ export default function ProjectDetail({ project, linkMode }: Props) {
 
       {/* Wider than the content: centred on the screen, up to 960px. */}
       <div className="relative left-1/2 -translate-x-1/2 mt-10 sm:mt-14 w-[min(calc(100vw-3rem),60rem)]">
-        <ProjectCover
-          name={project.name}
-          accent={project.accent}
-          thumbnail={project.thumbnail}
-          priority
-          sizes="(min-width: 1008px) 960px, calc(100vw - 3rem)"
-          className="aspect-[16/10] sm:aspect-[2/1] rounded-sm"
-        />
+        {project.liveUrl && project.thumbnail ? (
+          <DeviceShowcase
+            name={project.name}
+            url={project.liveUrl}
+            desktopImage={project.thumbnail}
+            mobileImage={project.mobileImage || undefined}
+          />
+        ) : (
+          <ProjectCover
+            name={project.name}
+            accent={project.accent}
+            thumbnail={project.thumbnail}
+            priority
+            sizes="(min-width: 1008px) 960px, calc(100vw - 3rem)"
+            className="aspect-[16/10] sm:aspect-[2/1] rounded-sm"
+          />
+        )}
       </div>
 
       {/* One column per fact on larger screens, so there are no empty cells. */}

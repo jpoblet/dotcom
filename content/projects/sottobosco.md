@@ -10,6 +10,8 @@ year: "2025 - Present"
 tags: [Naming, Logo, Branding, Art direction, Merch]
 # Path under /public, e.g. /images/projects/sottobosco.jpg
 thumbnail: "/images/projects/sottobosco.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/sottobosco-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#4D7C0F"
 # Logo and background colour for the tile on the projects page.

@@ -10,6 +10,8 @@ year: "2026"
 tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
 thumbnail: "/images/projects/what-the-flag.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/what-the-flag-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#E63946"
 # Logo and background colour for the tile on the projects page.

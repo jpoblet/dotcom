@@ -10,6 +10,8 @@ year: "2026"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/wgic26.jpg
 thumbnail: "/images/projects/wgic26.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/wgic26-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#65A30D"
 # Logo and background colour for the tile on the projects page.

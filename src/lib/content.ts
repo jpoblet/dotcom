@@ -69,6 +69,8 @@ export interface Project {
   year: string;
   tags: string[];
   thumbnail: string;
+  /** Phone-sized screenshot of the live site, shown with the desktop one. */
+  mobileImage: string;
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
@@ -250,6 +252,7 @@ function readProjects(): Project[] {
       year: str(data.year),
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
+      mobileImage: str(data.mobile_image),
       accent: str(data.accent) || "#64748B",
       logo: str(data.logo),
       brandBackground: str(data.brand_background) || "#FFFFFF",

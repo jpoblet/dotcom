@@ -10,6 +10,8 @@ year: "2024"
 tags: [Social network, Sport]
 # Path under /public, e.g. /images/projects/medal.jpg
 thumbnail: "/images/projects/medal.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/medal-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#D4A017"
 # Logo and background colour for the tile on the projects page.

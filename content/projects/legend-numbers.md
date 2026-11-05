@@ -10,6 +10,8 @@ year: "2026"
 tags: [Chrome extension, Sport, Data curation, Privacy first]
 # Path under /public, e.g. /images/projects/legend-numbers.jpg
 thumbnail: "/images/projects/legend-numbers.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/legend-numbers-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#16A34A"
 # Public URL if the project is live (website, App Store page...). Live projects are

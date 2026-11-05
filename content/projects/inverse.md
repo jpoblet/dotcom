@@ -10,6 +10,8 @@ year: "2025"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/inverse.jpg
 thumbnail: "/images/projects/inverse.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/inverse-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#7C3AED"
 # Logo and background colour for the tile on the projects page.

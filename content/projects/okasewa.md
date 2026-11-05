@@ -10,6 +10,8 @@ year: "2020"
 tags: [Website]
 # Path under /public, e.g. /images/projects/okasewa.jpg
 thumbnail: "/images/projects/okasewa.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/okasewa-mobile.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#B45309"
 # Logo and background colour for the tile on the projects page.
