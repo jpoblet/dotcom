@@ -13,9 +13,12 @@ import {
   type Message,
   loadMessages,
   saveMessages,
+  startNewConversation,
   streamChat,
   toApiHistory,
 } from "@/lib/chat-client";
+import { track } from "@/lib/analytics";
+import type { QuestionSource } from "@/lib/chat-log";
 import { NOTICES } from "@/lib/notices";
 
 const OrganicBlob = dynamic(() => import("@/components/OrganicBlob"), {
@@ -261,9 +264,13 @@ export default function Chat({
     return () => observer.disconnect();
   }, [messages.length]);
 
-  const sendMessage = async (messageText?: string) => {
+  const sendMessage = async (
+    messageText?: string,
+    source: QuestionSource = "typed",
+  ) => {
     const textToSend = (messageText ?? inputMessage).trim();
     if (!textToSend || isLoading) return;
+    track("Chat question", { source });
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -296,12 +303,15 @@ export default function Chat({
     abortRef.current = controller;
 
     try {
-      for await (const event of streamChat(history, controller.signal)) {
+      for await (const event of streamChat(history, controller.signal, source)) {
         if (event.type === "text") {
           updateReply((m) => ({ ...m, text: m.text + event.text }));
         } else if (event.type === "suggestions") {
           updateReply((m) => ({ ...m, suggestions: event.questions }));
         } else if (event.type === "widget") {
+          if (event.widget.kind === "project") {
+            track("Project card shown", { project: event.widget.project.slug });
+          }
           updateReply((m) => ({
             ...m,
             widgets: [...(m.widgets ?? []), event.widget],
@@ -338,7 +348,7 @@ export default function Chat({
     // Next tick, after the saved history has been restored.
     const timeout = setTimeout(() => {
       window.history.replaceState(null, "", window.location.pathname);
-      void sendMessage(ask.slice(0, 500));
+      void sendMessage(ask.slice(0, 500), "project_page");
     }, 0);
     return () => clearTimeout(timeout);
     // Runs once on arrival; sendMessage is intentionally not a dependency.
@@ -396,6 +406,7 @@ export default function Chat({
     setInputMessage("");
     setIsBoxExpanded(false);
     saveMessages([]);
+    startNewConversation();
     textareaRef.current?.blur();
     resetInputHeight();
   };
@@ -643,7 +654,7 @@ export default function Chat({
                       followUps.map((question, index) => (
                         <button
                           key={`${lastMessage?.id}-${index}`}
-                          onClick={() => sendMessage(question)}
+                          onClick={() => sendMessage(question, "follow_up")}
                           disabled={isLoading}
                           style={{ animationDelay: `${index * 80}ms` }}
                           className="animate-suggestion-in px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 whitespace-nowrap flex-shrink-0"
@@ -654,12 +665,15 @@ export default function Chat({
                     ) : !isLoading ? (
                       <RotatingSuggestion
                         questions={unaskedStarters}
-                        onPick={(question) => sendMessage(question)}
+                        onPick={(question) => sendMessage(question, "starter")}
                         disabled={isLoading}
                       />
                     ) : null}
                   </div>
                 </div>
+                <p className="px-1 text-[0.6875rem] leading-none text-foreground-secondary">
+                  Questions are stored anonymously.
+                </p>
               </div>
             </div>
           </div>

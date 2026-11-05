@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { DM_Mono } from "next/font/google";
+import Script from "next/script";
 import { getProfile } from "@/lib/content";
 
 const dmMono = DM_Mono({
@@ -59,6 +60,11 @@ export const viewport: Viewport = {
 // a white flash. Must stay in sync with the theme switcher in Chat.tsx.
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
+// Umami analytics (cookieless). The website id is public by design. Events
+// are only recorded on the live domains, so local runs and previews don't
+// count.
+const UMAMI_WEBSITE_ID = "c9feed1a-4c35-42a6-96df-97d07e0bf709";
+
 export default function RootLayout({
   children,
 }: {
@@ -69,7 +75,15 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id={UMAMI_WEBSITE_ID}
+          data-domains="www.jordipoblet.com,jordipoblet.com"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   );
 }

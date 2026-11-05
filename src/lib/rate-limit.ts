@@ -13,8 +13,8 @@
  */
 import { createHash } from "node:crypto";
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { LIMITS } from "./limits";
+import { REDIS_ENV as env, redis } from "./redis";
 
 export { LIMITS };
 
@@ -27,17 +27,8 @@ export type RateLimitResult =
       retryAfter: number;
     };
 
-// The Vercel Marketplace integration may use either naming scheme.
-const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-const token =
-  process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
-
-// Separate counters for production, preview deployments and local runs.
-const env = process.env.VERCEL_ENV ?? "local";
-
 function createLimiters() {
-  if (!url || !token) return null;
-  const redis = new Redis({ url, token });
+  if (!redis) return null;
   const common = { redis, analytics: false, timeout: 1000 } as const;
   return {
     hour: new Ratelimit({

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { NextRequest } from "next/server";
+import { type NextRequest, after } from "next/server";
 import {
   SUGGEST_FOLLOW_UPS,
   buildTools,
@@ -12,6 +12,15 @@ import {
   pickConversationStarter,
   pickLiveProjects,
 } from "@/lib/content";
+import {
+  type ChatLogEntry,
+  type ChatOutcome,
+  QUESTION_SOURCES,
+  type QuestionSource,
+  countRateLimited,
+  logChatTurn,
+  requestLocation,
+} from "@/lib/chat-log";
 import { NOTICES } from "@/lib/notices";
 import { type RateLimitResult, checkRateLimit } from "@/lib/rate-limit";
 import type { Widget } from "@/lib/widgets";
@@ -161,6 +170,27 @@ function friendlyError(error: unknown): string {
   return NOTICES.genericError(getProfile().email);
 }
 
+/** Where the question came from and which chat it belongs to (for the log). */
+function parseLogContext(body: unknown): {
+  conversationId: string;
+  source: QuestionSource;
+} {
+  const { conversationId, source } = (body ?? {}) as Record<string, unknown>;
+  return {
+    conversationId:
+      typeof conversationId === "string" && /^[\w-]{1,64}$/.test(conversationId)
+        ? conversationId
+        : "unknown",
+    source: QUESTION_SOURCES.includes(source as QuestionSource)
+      ? (source as QuestionSource)
+      : "typed",
+  };
+}
+
+function cardId(widget: Widget): string {
+  return widget.kind === "project" ? `project:${widget.project.slug}` : widget.kind;
+}
+
 function rateLimitNotice(limit: Exclude<RateLimitResult, { allowed: true }>): string {
   switch (limit.scope) {
     case "visitor-hour":
@@ -185,9 +215,13 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: messages }, { status: 400 });
   }
 
+  const logContext = parseLogContext(body);
+  const location = requestLocation(request);
+
   // Checked before calling Claude, so limited messages cost nothing.
   const limit = await checkRateLimit(request);
   if (!limit.allowed) {
+    after(() => countRateLimited(logContext.source, location));
     return Response.json(
       { error: rateLimitNotice(limit), code: "rate_limited", scope: limit.scope },
       { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
@@ -197,10 +231,41 @@ export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
   let abortStream: (() => void) | undefined;
 
+  // What happened in this turn, stored once the response has finished.
+  const turn: ChatLogEntry = {
+    at: new Date().toISOString(),
+    ...logContext,
+    ...location,
+    question: messages.at(-1)!.content,
+    reply: "",
+    cards: [],
+    followUps: [],
+    outcome: "answered",
+  };
+  let finishTurn: (outcome: ChatOutcome) => void = () => {};
+  const turnFinished = new Promise<void>((resolve) => {
+    let finished = false;
+    finishTurn = (outcome) => {
+      if (finished) return;
+      finished = true;
+      turn.outcome = outcome;
+      resolve();
+    };
+  });
+  after(async () => {
+    await turnFinished;
+    await logChatTurn(turn);
+  });
+
   const responseBody = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: ChatStreamEvent) =>
+      const send = (event: ChatStreamEvent) => {
+        if (event.type === "text") turn.reply += event.text;
+        if (event.type === "widget") turn.cards.push(cardId(event.widget));
+        if (event.type === "suggestions") turn.followUps = event.questions;
         controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      };
+      let outcome: ChatOutcome = "answered";
 
       try {
         // Reads ANTHROPIC_API_KEY (or another configured credential).
@@ -293,16 +358,22 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        if (lastStop === "refusal") outcome = "refusal";
         send(
           lastStop === "refusal"
             ? { type: "refusal", message: NOTICES.refusal(pickConversationStarter()) }
             : { type: "done" },
         );
       } catch (error) {
-        if (request.signal.aborted) return;
+        if (request.signal.aborted) {
+          outcome = "aborted";
+          return;
+        }
+        outcome = "error";
         console.error("[chat] Claude request failed:", error);
         send({ type: "error", message: friendlyError(error) });
       } finally {
+        finishTurn(outcome);
         try {
           controller.close();
         } catch {
@@ -311,6 +382,7 @@ export async function POST(request: NextRequest) {
       }
     },
     cancel() {
+      finishTurn("aborted");
       abortStream?.();
     },
   });
