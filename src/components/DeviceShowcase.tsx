@@ -13,18 +13,18 @@ const displayUrl = (url: string) =>
   url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 /**
- * A live website, shown as a product shot: the desktop screenshot in a
+ * A live website, shown as a product shot (no panel behind it): the desktop screenshot in a
  * minimal browser window and, overlapping it, a phone showing another part
  * of the site, to show it's responsive. Sizes are relative to the panel, so
  * the composition scales down on phones.
  */
 export default function DeviceShowcase({ name, url, desktopImage, mobileImage }: Props) {
   return (
-    <div className="relative aspect-[16/11] overflow-hidden rounded-sm border border-background-inverse/10 bg-background-secondary">
+    <div className="relative aspect-[25/14]">
       {/* Browser window */}
       <div
-        className={`absolute top-[7%] left-[5%] overflow-hidden rounded-[0.6rem] border border-background-inverse/15 bg-background shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)] ${
-          mobileImage ? "w-[78%]" : "w-[90%]"
+        className={`absolute top-0 left-0 overflow-hidden rounded-[0.6rem] border border-background-inverse/15 bg-background shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)] ${
+          mobileImage ? "w-[80%]" : "w-full"
         }`}
       >
         <div className="flex h-[clamp(1.25rem,3.2vw,2rem)] items-center gap-[0.35em] border-b border-background-inverse/10 px-[0.8em] text-[clamp(0.45rem,1vw,0.6875rem)]">
@@ -49,7 +49,7 @@ export default function DeviceShowcase({ name, url, desktopImage, mobileImage }:
 
       {/* Phone */}
       {mobileImage && (
-        <div className="absolute bottom-[7%] right-[5%] w-[21%] aspect-[9/19.5] overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground shadow-[0_24px_60px_-16px_rgb(0_0_0/0.45)]">
+        <div className="absolute bottom-0 right-0 w-[21%] aspect-[9/19.5] overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground shadow-[0_24px_60px_-16px_rgb(0_0_0/0.45)]">
           <div className="relative h-full w-full overflow-hidden rounded-[clamp(0.6rem,2vw,1.35rem)]">
             <Image
               src={mobileImage}
