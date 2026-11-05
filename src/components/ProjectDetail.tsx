@@ -52,7 +52,7 @@ interface Props {
 
 /**
  * A project's case study, shown inside ProjectModal: facts, title and
- * summary up to 960px, a cover up to 1200px, then each section on two
+ * summary up to 800px, a cover up to 960px, then each section on two
  * columns (heading left, text right) on larger screens.
  */
 export default function ProjectDetail({ project, linkMode }: Props) {
@@ -87,14 +87,14 @@ export default function ProjectDetail({ project, linkMode }: Props) {
         </p>
       )}
 
-      {/* Wider than the content: centred on the screen, up to 1200px. */}
-      <div className="relative left-1/2 -translate-x-1/2 mt-10 sm:mt-14 w-[min(calc(100vw-3rem),75rem)]">
+      {/* Wider than the content: centred on the screen, up to 960px. */}
+      <div className="relative left-1/2 -translate-x-1/2 mt-10 sm:mt-14 w-[min(calc(100vw-3rem),60rem)]">
         <ProjectCover
           name={project.name}
           accent={project.accent}
           thumbnail={project.thumbnail}
           priority
-          sizes="(min-width: 1248px) 1200px, calc(100vw - 3rem)"
+          sizes="(min-width: 1008px) 960px, calc(100vw - 3rem)"
           className="aspect-[16/10] sm:aspect-[2/1] rounded-sm"
         />
       </div>
@@ -136,7 +136,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
           {sections.map((section, index) => (
             <section
               key={section.title ?? index}
-              className="grid gap-3 sm:grid-cols-[14rem_1fr] sm:gap-10 border-t border-background-inverse/10 pt-6"
+              className="grid gap-3 sm:grid-cols-[10rem_1fr] sm:gap-8 border-t border-background-inverse/10 pt-6"
             >
               {section.title ? (
                 <h2 className="text-xs uppercase tracking-[0.12em] text-foreground-secondary">

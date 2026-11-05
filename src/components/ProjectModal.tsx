@@ -81,7 +81,7 @@ export default function ProjectModal({ children, closeTo }: Props) {
         className="absolute inset-0 overflow-y-auto overflow-x-hidden overscroll-contain focus:outline-none"
       >
         <div
-          className={`w-full max-w-[calc(60rem+3rem)] mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
+          className={`w-full max-w-[calc(50rem+3rem)] mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
             closing ? "animate-modal-content-out" : "animate-modal-content-in"
           }`}
         >

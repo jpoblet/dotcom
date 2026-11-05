@@ -29,7 +29,7 @@ function FeatureCard({ project }: { project: Project }) {
         name={project.name}
         accent={project.accent}
         thumbnail={project.thumbnail}
-        sizes="(min-width: 1008px) 468px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+        sizes="(min-width: 848px) 388px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
         className="aspect-[3/2] rounded-sm"
       />
       <div className="mt-4">
@@ -64,7 +64,7 @@ function GridCard({ project }: { project: Project }) {
           name={project.name}
           accent={project.accent}
           thumbnail={project.thumbnail}
-          sizes="(min-width: 1008px) 304px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+          sizes="(min-width: 848px) 251px, (min-width: 640px) 50vw, calc(100vw - 3rem)"
           className="aspect-[4/3] rounded-sm"
         />
         <div className="mt-4 flex items-baseline justify-between gap-4">
@@ -146,7 +146,7 @@ function DraftBadge() {
   );
 }
 
-/** The /projects page body. Same 960px content width as the case studies. */
+/** The /projects page body. Same 800px content width as the case studies. */
 export default function ProjectsIndex() {
   const projects = getProjects();
   const work = projects.filter((p) => p.type === "work" && hasPage(p));
@@ -161,7 +161,7 @@ export default function ProjectsIndex() {
     <div className="min-h-dvh flex flex-col">
       <PageHeader />
 
-      <main className="flex-1 w-full max-w-[calc(60rem+3rem)] mx-auto px-6 pt-12 sm:pt-20 pb-40 sm:pb-48">
+      <main className="flex-1 w-full max-w-[calc(50rem+3rem)] mx-auto px-6 pt-12 sm:pt-20 pb-40 sm:pb-48">
         <h1 className="text-4xl sm:text-6xl font-medium leading-[1.05] tracking-tight">
           Projects
         </h1>
