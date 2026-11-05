@@ -61,39 +61,57 @@ export default function ProjectModal({ children, closeTo }: Props) {
     };
   }, [close]);
 
+  // Three layers: the frosted backdrop, the scrolling case study, and the
+  // logo and close button on top. The blur lives on its own layer because
+  // backdrop-filter would otherwise make the "fixed" controls scroll with
+  // the text. The controls don't animate: they stay put while the case
+  // study fades and moves.
   return (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="project-title"
-      tabIndex={-1}
-      className={`fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-background/60 backdrop-blur-md focus:outline-none ${
-        closing ? "animate-modal-out" : "animate-modal-in"
-      }`}
-    >
+    <div role="dialog" aria-modal="true" aria-labelledby="project-title" className="fixed inset-0 z-[60]">
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 bg-background/60 backdrop-blur-md ${
+          closing ? "animate-modal-out" : "animate-modal-in"
+        }`}
+      />
+
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden overscroll-contain focus:outline-none"
+      >
+        <div
+          className={`w-full max-w-[75rem] mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
+            closing ? "animate-modal-content-out" : "animate-modal-content-in"
+          }`}
+        >
+          {children}
+        </div>
+      </div>
+
+      {/* Keeps the controls legible over text scrolling underneath. */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 top-0 h-[calc(5rem+env(safe-area-inset-top))] bg-gradient-to-b from-background via-background/80 to-transparent ${
+          closing ? "animate-modal-out" : "animate-modal-in"
+        }`}
+      />
+
       {/* Same place as the site header's logo, so it never jumps. */}
       <Link
         href="/"
         aria-label="Home"
-        className="fixed z-10 top-[calc(1rem+env(safe-area-inset-top))] left-6 text-foreground hover:opacity-70 transition-opacity duration-200"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-6 text-foreground hover:opacity-70 transition-opacity duration-200"
       >
         <Logo className="h-9 fill-current" />
       </Link>
       <button
         onClick={close}
         aria-label="Close"
-        className="fixed z-10 top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-full border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 flex items-center justify-center w-10 h-10 rounded-full border border-background-inverse/10 bg-background hover:bg-background-secondary transition-colors duration-200"
       >
         <X size={18} />
       </button>
-      <div
-        className={`w-full max-w-3xl mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
-          closing ? "animate-modal-content-out" : "animate-modal-content-in"
-        }`}
-      >
-        {children}
-      </div>
     </div>
   );
 }
