@@ -143,6 +143,55 @@ body {
   opacity: 0;
 }
 
+/* Project modal: the backdrop fades, the case study fades in while rising
+   slightly, and plays the same in reverse when closing. */
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-content-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-modal-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
+.animate-modal-out {
+  animation: fade-out 0.25s ease-in both;
+}
+
+.animate-modal-content-in {
+  animation: modal-content-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+}
+
+.animate-modal-content-out {
+  animation: modal-content-out 0.25s ease-in both;
+}
+
 /* Suggestion chips: rise into place when they appear. */
 @keyframes suggestion-in {
   from {

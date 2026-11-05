@@ -1,8 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import Logo from "@/components/Logo";
+
+/** Matches .animate-modal-out / .animate-modal-content-out in globals.css. */
+const CLOSE_MS = 250;
 
 interface Props {
   children: ReactNode;
@@ -15,16 +20,25 @@ interface Props {
 }
 
 /**
- * Full-screen modal over a frosted view of the page underneath. Closes with
- * the X button or Escape. Locks the page's own scrolling while open.
+ * Full-screen modal over a frosted view of the page underneath. The case
+ * study fades in while rising slightly, and does the reverse when closing
+ * (X button or Escape). Locks the page's own scrolling while open.
  */
 export default function ProjectModal({ children, closeTo }: Props) {
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
 
+  // Play the closing animation, then leave.
   const close = useCallback(() => {
-    if (closeTo === "back") router.back();
-    else router.push(closeTo, { scroll: false });
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    setTimeout(() => {
+      if (closeTo === "back") router.back();
+      else router.push(closeTo, { scroll: false });
+    }, CLOSE_MS);
   }, [closeTo, router]);
 
   useEffect(() => {
@@ -54,8 +68,18 @@ export default function ProjectModal({ children, closeTo }: Props) {
       aria-modal="true"
       aria-labelledby="project-title"
       tabIndex={-1}
-      className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-background/60 backdrop-blur-md animate-fade-in focus:outline-none"
+      className={`fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-background/60 backdrop-blur-md focus:outline-none ${
+        closing ? "animate-modal-out" : "animate-modal-in"
+      }`}
     >
+      {/* Same place as the site header's logo, so it never jumps. */}
+      <Link
+        href="/"
+        aria-label="Home"
+        className="fixed z-10 top-[calc(1rem+env(safe-area-inset-top))] left-6 text-foreground hover:opacity-70 transition-opacity duration-200"
+      >
+        <Logo className="h-9 fill-current" />
+      </Link>
       <button
         onClick={close}
         aria-label="Close"
@@ -63,7 +87,11 @@ export default function ProjectModal({ children, closeTo }: Props) {
       >
         <X size={18} />
       </button>
-      <div className="w-full max-w-3xl mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      <div
+        className={`w-full max-w-3xl mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
+          closing ? "animate-modal-content-out" : "animate-modal-content-in"
+        }`}
+      >
         {children}
       </div>
     </div>
