@@ -13,6 +13,8 @@ export interface Message {
   timestamp: Date;
   /** Error/refusal notices are shown but never sent back to the model. */
   isError?: boolean;
+  /** Follow-up questions the AI suggested after this reply. */
+  suggestions?: string[];
   /** Cards the AI showed under this reply (project, timeline, contact). */
   widgets?: Widget[];
 }

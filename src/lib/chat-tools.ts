@@ -69,7 +69,39 @@ export function buildTools(): Tool[] {
     },
   );
 
+  tools.push({
+    name: SUGGEST_FOLLOW_UPS,
+    description: `Offer the visitor two or three follow-up questions as tappable chips under your reply. Call it once per reply, as the very last thing, after your written answer. Write each question as the visitor would ask it, short (under 60 characters), in the visitor's language, about something the knowledge base can actually answer and that hasn't been covered yet. Skip it when you are declining an off-topic request.`,
+    input_schema: {
+      type: "object",
+      properties: {
+        questions: {
+          type: "array",
+          items: { type: "string" },
+          description: "Two or three short follow-up questions.",
+        },
+      },
+      required: ["questions"],
+      additionalProperties: false,
+    },
+    strict: true,
+    eager_input_streaming: true,
+  });
+
   return tools;
+}
+
+export const SUGGEST_FOLLOW_UPS = "suggest_follow_ups";
+
+/** Cleans the follow-up questions Claude suggested (never trusted as-is). */
+export function parseFollowUps(input: unknown): string[] {
+  const raw = (input as { questions?: unknown } | null)?.questions;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((q): q is string => typeof q === "string")
+    .map((q) => q.replace(/\s+/g, " ").trim())
+    .filter((q) => q.length > 0 && q.length <= 100)
+    .slice(0, 3);
 }
 
 export interface ToolOutcome {

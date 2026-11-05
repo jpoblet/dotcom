@@ -6,7 +6,7 @@ type: client
 summary: "My wife Chiara's personal art project: I created the name, logo and brand, and helped direct the design of the website and the merch."
 company: "Sottobosco"
 role: "Naming, branding and art direction"
-year: ""
+year: "2025 - Present"
 tags: [Naming, Logo, Branding, Art direction, Merch]
 # Path under /public, e.g. /images/projects/sottobosco.jpg
 thumbnail: ""

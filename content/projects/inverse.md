@@ -6,7 +6,7 @@ type: client
 summary: "Logo, branding and landing page for Inverse, an on-chain and cryptocurrency start-up."
 company: "Inverse"
 role: "Branding, design and development"
-year: ""
+year: "2025"
 tags: [Branding, Logo, Landing page]
 # Path under /public, e.g. /images/projects/inverse.jpg
 thumbnail: ""

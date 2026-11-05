@@ -6,7 +6,7 @@ type: personal
 summary: "A social network for the world of sports."
 company: ""
 role: ""
-year: ""
+year: "2024"
 tags: [Social network, Sport]
 # Path under /public, e.g. /images/projects/medal.jpg
 thumbnail: ""
@@ -19,4 +19,4 @@ draft: false
 
 ## Status
 
-Medal is live but parked for now. In the future it may merge with AthleteID and evolve together with it.
+I started Medal in January 2024 and parked it in December 2024. It's still live. In the future it may merge with AthleteID and evolve together with it.

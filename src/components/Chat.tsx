@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
+import RotatingSuggestion from "@/components/RotatingSuggestion";
 import SiteFooter from "@/components/SiteFooter";
 import {
   type Message,
@@ -28,6 +29,8 @@ interface ChatProps {
   title: string;
   email: string;
   links: { label: string; href: string }[];
+  /** Questions suggested on the empty chat (from profile.yaml). */
+  starterQuestions: string[];
 }
 
 const PLACEHOLDER_PHRASES = [
@@ -50,7 +53,13 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
 
 
-export default function Chat({ name, title, email, links }: ChatProps) {
+export default function Chat({
+  name,
+  title,
+  email,
+  links,
+  starterQuestions,
+}: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -290,6 +299,8 @@ export default function Chat({ name, title, email, links }: ChatProps) {
       for await (const event of streamChat(history, controller.signal)) {
         if (event.type === "text") {
           updateReply((m) => ({ ...m, text: m.text + event.text }));
+        } else if (event.type === "suggestions") {
+          updateReply((m) => ({ ...m, suggestions: event.questions }));
         } else if (event.type === "widget") {
           updateReply((m) => ({
             ...m,
@@ -342,74 +353,21 @@ export default function Chat({ name, title, email, links }: ChatProps) {
     }
   };
 
-  const getContextualQuestions = () => {
-    const lastMessages = messages.slice(-3).map((m) => m.text.toLowerCase());
-    const allText = lastMessages.join(" ");
+  // Starter questions the visitor hasn't asked yet.
+  const unaskedStarters = useMemo(() => {
+    const asked = new Set(
+      messages.filter((m) => m.isUser).map((m) => m.text.trim().toLowerCase()),
+    );
+    const fresh = starterQuestions.filter((q) => !asked.has(q.toLowerCase()));
+    return fresh.length > 0 ? fresh : starterQuestions;
+  }, [messages, starterQuestions]);
 
-    let questions: string[] = [];
-
-    if (messages.length === 0) {
-      questions = [
-        "Where have you worked?",
-        "What tools do you use?",
-        "How many languages do you speak?",
-        "What's your design philosophy?",
-      ];
-    } else if (
-      allText.includes("work") ||
-      allText.includes("job") ||
-      allText.includes("company")
-    ) {
-      questions = [
-        "What was your favorite project?",
-        "Tell me about your leadership experience",
-        "What challenges did you face?",
-        "How do you collaborate with teams?",
-      ];
-    } else if (
-      allText.includes("design") ||
-      allText.includes("ui") ||
-      allText.includes("ux")
-    ) {
-      questions = [
-        "What's your design process?",
-        "How do you approach user research?",
-        "What design tools do you prefer?",
-        "Tell me about your design philosophy",
-      ];
-    } else if (
-      allText.includes("skill") ||
-      allText.includes("tool") ||
-      allText.includes("technology")
-    ) {
-      questions = [
-        "What's your strongest skill?",
-        "How do you stay updated with trends?",
-        "What would you like to learn next?",
-        "Tell me about your technical background",
-      ];
-    } else if (
-      allText.includes("language") ||
-      allText.includes("speak") ||
-      allText.includes("communication")
-    ) {
-      questions = [
-        "How do you handle international projects?",
-        "Tell me about cross-cultural experiences",
-        "What's your communication style?",
-        "How do you present to stakeholders?",
-      ];
-    } else {
-      questions = [
-        "Can you elaborate on that?",
-        "What's your proudest achievement?",
-        "How do you handle challenges?",
-        "What motivates you?",
-      ];
-    }
-
-    return questions.slice(0, 4);
-  };
+  // The AI's follow-ups for its latest reply, once it has finished.
+  const lastMessage = messages.at(-1);
+  const followUps =
+    !isLoading && lastMessage && !lastMessage.isUser && !lastMessage.isError
+      ? (lastMessage.suggestions ?? [])
+      : [];
 
   const updateSuggestionShadows = useCallback(() => {
     const el = suggestionsRef.current;
@@ -428,7 +386,7 @@ export default function Chat({ name, title, email, links }: ChatProps) {
     const observer = new ResizeObserver(updateSuggestionShadows);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [messages.length, updateSuggestionShadows]);
+  }, [messages.length, followUps.length, updateSuggestionShadows]);
 
   const resetChat = () => {
     abortRef.current?.abort();
@@ -678,19 +636,28 @@ export default function Chat({ name, title, email, links }: ChatProps) {
                 >
                   <div
                     ref={suggestionsRef}
-                    className="flex gap-2 overflow-x-auto scrollbar-hide"
+                    className="flex gap-2 min-h-[2.125rem] overflow-x-auto overflow-y-hidden scrollbar-hide"
                     onScroll={updateSuggestionShadows}
                   >
-                    {getContextualQuestions().map((question, index) => (
-                      <button
-                        key={`${messages.length}-${index}`}
-                        onClick={() => sendMessage(question)}
+                    {followUps.length > 0 ? (
+                      followUps.map((question, index) => (
+                        <button
+                          key={`${lastMessage?.id}-${index}`}
+                          onClick={() => sendMessage(question)}
+                          disabled={isLoading}
+                          style={{ animationDelay: `${index * 80}ms` }}
+                          className="animate-suggestion-in px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 whitespace-nowrap flex-shrink-0"
+                        >
+                          {question}
+                        </button>
+                      ))
+                    ) : !isLoading ? (
+                      <RotatingSuggestion
+                        questions={unaskedStarters}
+                        onPick={(question) => sendMessage(question)}
                         disabled={isLoading}
-                        className="px-4 py-2 text-xs bg-background-inverse/8 text-foreground rounded-full cursor-pointer hover:bg-background-inverse/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-background-inverse/0 whitespace-nowrap flex-shrink-0"
-                      >
-                        {question}
-                      </button>
-                    ))}
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>
