@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, Sun, Moon, Monitor, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -458,42 +459,51 @@ export default function Chat({ name, title, email, links }: ChatProps) {
             <Logo className="h-9 fill-current" />
           </button>
 
-          {/* Theme Switcher */}
-          <div className="relative" ref={themeMenuRef}>
-            <button
-              onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-              aria-label="Change theme"
-              aria-haspopup="menu"
-              aria-expanded={isThemeMenuOpen}
-              className={`flex items-center gap-2 px-4 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${isThemeMenuOpen ? "border-background-inverse" : "border-background-inverse/10"}`}
+          <div className="flex items-center gap-5">
+            <Link
+              href="/projects"
+              className="text-xs underline underline-offset-2 hover:opacity-70 transition-opacity duration-200"
             >
-              {getThemeIcon()}
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-200 ${isThemeMenuOpen ? "rotate-180" : ""}`}
-              />
-            </button>
+              Projects
+            </Link>
 
-            {isThemeMenuOpen && (
-              <div
-                role="menu"
-                className="absolute top-full right-0 mt-2 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
+            {/* Theme Switcher */}
+            <div className="relative" ref={themeMenuRef}>
+              <button
+                onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                aria-label="Change theme"
+                aria-haspopup="menu"
+                aria-expanded={isThemeMenuOpen}
+                className={`flex items-center gap-2 px-4 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${isThemeMenuOpen ? "border-background-inverse" : "border-background-inverse/10"}`}
               >
-                {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
-                  <button
-                    key={value}
-                    role="menuitemradio"
-                    aria-checked={theme === value}
-                    disabled={theme === value}
-                    onClick={() => handleThemeChange(value)}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-xs text-foreground hover:bg-background-secondary transition-colors disabled:text-foreground-secondary disabled:cursor-not-allowed"
-                  >
-                    <Icon size={16} />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
+                {getThemeIcon()}
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${isThemeMenuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isThemeMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute top-full right-0 mt-2 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
+                >
+                  {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      role="menuitemradio"
+                      aria-checked={theme === value}
+                      disabled={theme === value}
+                      onClick={() => handleThemeChange(value)}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-xs text-foreground hover:bg-background-secondary transition-colors disabled:text-foreground-secondary disabled:cursor-not-allowed"
+                    >
+                      <Icon size={16} />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
