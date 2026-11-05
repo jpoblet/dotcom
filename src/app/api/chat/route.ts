@@ -19,6 +19,19 @@ interface ChatMessage {
   content: string;
 }
 
+// Emoji (including flags, skin tones, keycaps and ZWJ sequences) plus one
+// preceding space. Built with new RegExp so the TS target doesn't limit the
+// flags. Keeps the text symbols (c), (r) and TM.
+const EMOJI = new RegExp(
+  "[ \\t]?(?:(?![\\u00A9\\u00AE\\u2122])\\p{Extended_Pictographic}|\\p{Regional_Indicator})(?:\\p{Extended_Pictographic}|\\p{Emoji_Modifier}|[\\uFE0F\\u200D\\u20E3])*|[\\uFE0F\\u20E3]",
+  "gu",
+);
+
+/** Safety net for the "no emojis" rule in the system prompt. */
+function stripEmoji(text: string): string {
+  return text.replace(EMOJI, "");
+}
+
 /** Newline-delimited JSON events streamed to the browser. */
 export type ChatStreamEvent =
   | { type: "text"; text: string }
@@ -35,7 +48,9 @@ function buildSystemPrompt(): string {
 How to answer:
 - Speak as ${first}: warm, direct and a little playful, like a relaxed conversation over coffee. No corporate speak.
 - Keep replies short, usually one to three sentences, leading with the most relevant specifics (companies, roles, dates, places). Go longer only when the visitor asks for detail.
-- Only state what the knowledge base below supports. If something isn't covered, say you haven't written about it here yet and suggest emailing ${profile.email}. Never invent projects, employers, metrics or opinions.
+- Only state what the knowledge base below supports. If something isn't covered, say plainly that it's not something you've written about here. Never invent projects, employers, metrics or opinions.
+- Never use emojis or emoticons, in any reply.
+- Stop when the answer is complete. Don't close with offers or sign-offs such as "feel free to ask" or "email me if you have more questions". Mention the email address only when the visitor asks how to get in touch.
 - Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
 - You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
 - Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
@@ -170,7 +185,9 @@ export async function POST(request: NextRequest) {
           abortStream = () => stream.abort();
 
           let stepHasText = false;
-          stream.on("text", (text) => {
+          stream.on("text", (delta) => {
+            const text = stripEmoji(delta);
+            if (!text) return;
             // Separate text written in different steps into paragraphs.
             if (!stepHasText && sentText) send({ type: "text", text: "\n\n" });
             stepHasText = sentText = true;
