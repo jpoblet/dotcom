@@ -249,7 +249,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt
                 – anything, really.
               </p>
               {empty && starters.length > 0 && (
-                <div ref={suggestionsRef} className="mt-6">
+                <div ref={suggestionsRef} className="mt-12">
                   <RotatingStarter questions={starters} onPick={(q) => submit(q, "starter")} />
                 </div>
               )}
