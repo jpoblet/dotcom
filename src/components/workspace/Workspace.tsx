@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, RotateCcw, X } from "lucide-react";
 import { track } from "@/lib/analytics";
 import type { Project } from "@/lib/content";
 import { useChatSession } from "@/lib/use-chat-session";
 import Logo from "@/components/Logo";
 import ChatPane from "./ChatPane";
+import ConfirmDialog from "./ConfirmDialog";
 import NotesPanel from "./NotesPanel";
 import ProfileCard from "./ProfileCard";
 import { ProjectView, WorkOverview } from "./WorkPanel";
@@ -100,28 +101,7 @@ export default function Workspace({
 
   const actions = useMemo(() => ({ openProject }), [openProject]);
 
-  // Desktop: the tabs float over both headers and glide between them. With
-  // the panel closed they sit at the chat header's right (left of the "start
-  // over" button); open, they cross to the left column's header, beside the
-  // logo, above the panel they control.
-  const navRef = useRef<HTMLDivElement>(null);
-  const [navLeft, setNavLeft] = useState<number | null>(null);
-  useEffect(() => {
-    const place = () => {
-      const width = window.innerWidth;
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      const navWidth = navRef.current?.offsetWidth ?? 0;
-      setNavLeft(panelOpen ? 4 * rem : width - 1 * rem - 2 * rem - 0.75 * rem - navWidth);
-    };
-    place();
-    const observer = new ResizeObserver(place);
-    if (navRef.current) observer.observe(navRef.current);
-    window.addEventListener("resize", place);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", place);
-    };
-  }, [panelOpen]);
+  const [confirmReset, setConfirmReset] = useState(false);
   const topicCount = session.topics.length;
 
   // The header buttons open the panel on a tab, or close it if that tab
@@ -177,15 +157,6 @@ export default function Workspace({
   return (
     <WorkspaceContext.Provider value={actions}>
       <div data-workspace className="h-dvh w-full overflow-hidden lg:flex">
-        <div
-          ref={navRef}
-          style={{ left: navLeft ?? undefined }}
-          className={`fixed top-0 z-[55] hidden lg:block transition-[left,opacity] duration-[520ms] ${EASE} ${
-            navLeft === null ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          {tabs}
-        </div>
         {/* The left column: who's answering, by default; Work or AI Notes
             in the same place when asked for. The chat on the right never
             moves. Phones: the column is only the panel's sheet. */}
@@ -194,15 +165,28 @@ export default function Workspace({
             panelOpen ? "lg:w-1/2 lg:border-r" : "lg:w-[clamp(20rem,38%,34rem)] lg:border-r-0"
           }`}
         >
-          <div className="hidden h-12 shrink-0 items-center justify-between border-b border-background-inverse/10 px-4 lg:flex">
+          {/* The controls stay put here, open or closed: the logo, the two
+              tabs and "start over", with "close" at the far end when open. */}
+          <div className="hidden h-12 shrink-0 items-center gap-6 px-4 lg:flex">
             <Logo className="h-6 fill-current shrink-0" />
+            {tabs}
+            <button
+              type="button"
+              onClick={() => setConfirmReset(true)}
+              disabled={session.messages.length === 0}
+              title="Start over"
+              aria-label="Start over"
+              className="-ml-2 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
+            >
+              <RotateCcw size={14} />
+            </button>
             <button
               type="button"
               onClick={closePanel}
               aria-label="Close panel"
               title="Close"
               tabIndex={panelOpen ? 0 : -1}
-              className={`-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
+              className={`-mr-1 ml-auto flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
                 panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
               }`}
             >
@@ -240,7 +224,7 @@ export default function Workspace({
           >
           {/* Keeps the content from squeezing while the panel closes. */}
           <div className="flex h-full min-h-0 flex-col lg:min-w-[24rem]">
-          <div className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-background-inverse/10 px-6 lg:hidden">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-4 px-6 lg:hidden">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -332,10 +316,7 @@ export default function Workspace({
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}
-            reset={() => {
-              session.reset();
-              closeProject();
-            }}
+            onStartOver={() => setConfirmReset(true)}
             panelButtons={
               <div className="flex items-center gap-1 lg:hidden">
                 {(["work", "notes"] as const).map((value) => {
@@ -365,6 +346,20 @@ export default function Workspace({
         </div>
 
       </div>
+      <ConfirmDialog
+        open={confirmReset}
+        title="Start over?"
+        confirmLabel="Start over"
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          setConfirmReset(false);
+          session.reset();
+          closeProject();
+        }}
+      >
+        This clears our whole conversation and your AI Notes, and there&apos;s no way to get
+        them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
+      </ConfirmDialog>
     </WorkspaceContext.Provider>
   );
 }

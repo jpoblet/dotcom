@@ -50,9 +50,9 @@ interface Props {
 }
 
 /**
- * Who's answering: status, the name set large, what I do, now, and the
- * time in Barcelona, with the links at the foot. Sits on the same ground
- * as the chat, with no fill or rule of its own.
+ * Who's answering: status, the name set large, what I do and the job
+ * right now in one line, and the time in Barcelona, with the links at the
+ * foot. Sits on the same ground as the chat, with no fill or rule of its own.
  */
 export default function ProfileCard({ name, title, now, timeZone, city, email, links }: Props) {
   const localTime = useLocalTime(timeZone);
@@ -73,8 +73,10 @@ export default function ProfileCard({ name, title, now, timeZone, city, email, l
         )}
       </h1>
       <dl className="space-y-4">
-        <Fact label="What I do">{title}</Fact>
-        {now && <Fact label="Now">{now}</Fact>}
+        {/* One line: the kind of work, then the job right now. */}
+        <Fact label="What I do">
+          {now ? `${title}, currently ${now}.` : title}
+        </Fact>
         <Fact label="Local time">
           <span className="tabular-nums">{localTime || "--:--"}</span> in {city}
         </Fact>

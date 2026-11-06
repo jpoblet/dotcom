@@ -8,7 +8,6 @@ import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
-import ConfirmDialog from "./ConfirmDialog";
 import { Online } from "./ProfileCard";
 
 interface Props {
@@ -20,7 +19,8 @@ interface Props {
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
-  reset: () => void;
+  /** Asks to start over (the confirmation lives in the workspace). */
+  onStartOver: () => void;
   /** Whether the Work / AI Notes panel is open (the name moves up here). */
   panelOpen: boolean;
   /** Buttons that open the Work and AI Notes panel (phones). */
@@ -62,12 +62,11 @@ export default function ChatPane({
   messages,
   isLoading,
   send,
-  reset,
+  onStartOver,
   panelOpen,
   panelButtons,
 }: Props) {
   const [input, setInput] = useState("");
-  const [confirmReset, setConfirmReset] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastTurnRef = useRef<HTMLElement>(null);
@@ -140,8 +139,9 @@ export default function ChatPane({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      {/* Header. On phones it stands in for the card: name and status. */}
-      <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
+      {/* Header, on the page's own ground. On phones it stands in for the
+          card: name and status. */}
+      <div className="flex h-12 shrink-0 items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Logo className="h-6 fill-current shrink-0 lg:hidden" />
           {/* Phones: always here, standing in for the card. Desktop: arrives
@@ -160,11 +160,12 @@ export default function ChatPane({
             <Online />
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        {/* Phones only: on desktop these live in the left column's header. */}
+        <div className="flex items-center gap-1 lg:hidden">
           {panelButtons}
           <button
             type="button"
-            onClick={() => setConfirmReset(true)}
+            onClick={onStartOver}
             disabled={empty}
             title="Start over"
             aria-label="Start over"
@@ -323,21 +324,6 @@ export default function ChatPane({
           </div>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={confirmReset}
-        title="Start over?"
-        confirmLabel="Start over"
-        onCancel={() => setConfirmReset(false)}
-        onConfirm={() => {
-          setConfirmReset(false);
-          reset();
-          inputRef.current?.focus();
-        }}
-      >
-        This clears our whole conversation and your AI Notes, and there&apos;s no way to get
-        them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
-      </ConfirmDialog>
     </div>
   );
 }
