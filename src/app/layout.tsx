@@ -70,10 +70,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className="font-sans">
+        {/* Next puts beforeInteractive scripts in the head, ahead of
+            hydration, so React never renders a raw <script> itself. */}
+        <Script id="theme" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
         {children}
         <SiteFooter email={profile.email} links={profile.links} />
         {modal}
