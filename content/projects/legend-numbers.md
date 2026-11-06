@@ -12,8 +12,20 @@ tags: [Chrome extension, Sport, Data curation, Privacy first]
 thumbnail: "/images/projects/legend-numbers.jpg"
 # Phone-sized screenshot shown next to the desktop one on the project page.
 mobile_image: "/images/projects/legend-numbers-mobile.jpg"
+# More screenshots of the live site, shown between the sections of the case study.
+gallery:
+  - "/images/projects/gallery/legend-numbers-d1.jpg"
+  - "/images/projects/gallery/legend-numbers-d2.jpg"
+  - "/images/projects/gallery/legend-numbers-d3.jpg"
+mobile_gallery:
+  - "/images/projects/gallery/legend-numbers-m2.jpg"
+  - "/images/projects/gallery/legend-numbers-m3.jpg"
+  - "/images/projects/gallery/legend-numbers-m4.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#16A34A"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/legend-numbers.png"
+brand_background: "#13161D"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://legendnumbers.com"

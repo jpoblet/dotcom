@@ -12,11 +12,20 @@ tags: [Product, Web app, Chrome extension, Design system, Sport]
 thumbnail: "/images/projects/athleteid.jpg"
 # Phone-sized screenshot shown next to the desktop one on the project page.
 mobile_image: "/images/projects/athleteid-mobile.jpg"
+# More screenshots of the live site, shown between the sections of the case study.
+gallery:
+  - "/images/projects/gallery/athleteid-d1.jpg"
+  - "/images/projects/gallery/athleteid-d2.jpg"
+  - "/images/projects/gallery/athleteid-d5.jpg"
+mobile_gallery:
+  - "/images/projects/gallery/athleteid-m1.jpg"
+  - "/images/projects/gallery/athleteid-m2.jpg"
+  - "/images/projects/gallery/athleteid-m3.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#2563EB"
 # Logo and background colour for the tile on the projects page.
-logo: "/images/logos/athleteid.png"
-brand_background: "#FFFFFF"
+logo: "/images/logos/athleteid-white.png"
+brand_background: "#151515"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://athleteid.pro"

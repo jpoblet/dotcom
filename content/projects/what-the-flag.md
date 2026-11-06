@@ -12,6 +12,15 @@ tags: [iOS app, SwiftUI, Game design, Privacy first]
 thumbnail: "/images/projects/what-the-flag.jpg"
 # Phone-sized screenshot shown next to the desktop one on the project page.
 mobile_image: "/images/projects/what-the-flag-mobile.jpg"
+# More screenshots of the live site, shown between the sections of the case study.
+gallery:
+  - "/images/projects/gallery/what-the-flag-d1.jpg"
+  - "/images/projects/gallery/what-the-flag-d2.jpg"
+  - "/images/projects/gallery/what-the-flag-d3.jpg"
+mobile_gallery:
+  - "/images/projects/gallery/what-the-flag-m1.jpg"
+  - "/images/projects/gallery/what-the-flag-m2.jpg"
+  - "/images/projects/gallery/what-the-flag-m4.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#E63946"
 # Logo and background colour for the tile on the projects page.

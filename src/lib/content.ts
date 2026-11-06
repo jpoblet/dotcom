@@ -71,6 +71,9 @@ export interface Project {
   thumbnail: string;
   /** Phone-sized screenshot of the live site, shown with the desktop one. */
   mobileImage: string;
+  /** More screenshots of the live site, for the case study. */
+  gallery: string[];
+  mobileGallery: string[];
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
@@ -253,6 +256,8 @@ function readProjects(): Project[] {
       tags: Array.isArray(data.tags) ? data.tags.map(str) : [],
       thumbnail: str(data.thumbnail),
       mobileImage: str(data.mobile_image),
+      gallery: Array.isArray(data.gallery) ? data.gallery.map(str) : [],
+      mobileGallery: Array.isArray(data.mobile_gallery) ? data.mobile_gallery.map(str) : [],
       accent: str(data.accent) || "#64748B",
       logo: str(data.logo),
       brandBackground: str(data.brand_background) || "#FFFFFF",

@@ -2,7 +2,9 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
+import { BrowserFrame, PhoneFrame } from "@/components/DeviceFrames";
 import DeviceShowcase from "@/components/DeviceShowcase";
+import ProjectLogoTile from "@/components/ProjectLogoTile";
 import SectionNav from "@/components/SectionNav";
 import { readableOn } from "@/lib/color";
 import { type Project, getProjects, hasPage, stripEmptySections } from "@/lib/content";
@@ -32,6 +34,50 @@ function caseStudies(): Project[] {
 const displayUrl = (url: string) =>
   url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
+/**
+ * Screenshot blocks for the case study, from the project's gallery: a wide
+ * desktop shot, a row of phones, then the remaining desktop shots side by
+ * side.
+ */
+function mediaBlocks(project: Project): ReactNode[] {
+  const url = project.liveUrl;
+  if (!url) return [];
+  const [first, ...rest] = project.gallery;
+  const blocks: ReactNode[] = [];
+  const caption = (text: string) => (
+    <p className="mt-4 text-xs text-foreground-secondary">{text}</p>
+  );
+  if (first) {
+    blocks.push(
+      <figure>
+        <BrowserFrame src={first} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 960px, 100vw" />
+      </figure>,
+    );
+  }
+  if (project.mobileGallery.length) {
+    blocks.push(
+      <figure>
+        <div className="grid grid-cols-3 gap-[4%] px-[6%]">
+          {project.mobileGallery.slice(0, 3).map((src) => (
+            <PhoneFrame key={src} src={src} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
+          ))}
+        </div>
+        {caption("The same site on a phone.")}
+      </figure>,
+    );
+  }
+  if (rest.length) {
+    blocks.push(
+      <figure className="grid gap-6 sm:grid-cols-2">
+        {rest.map((src) => (
+          <BrowserFrame key={src} src={src} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 470px, 100vw" />
+        ))}
+      </figure>,
+    );
+  }
+  return blocks;
+}
+
 interface Props {
   project: Project;
   /**
@@ -44,21 +90,21 @@ interface Props {
 
 /**
  * A case study, shown inside ProjectModal:
- * - a full-bleed hero in the brand's colour with the name set huge;
- * - the live site in a browser and a phone, overlapping the hero's edge
- *   (the brand logo sits in the hero's top row);
- * - the write-up with a sticky table of contents;
+ * - a hero with the name set huge and the brand tile in its top row;
+ * - the live site in a browser and a phone;
+ * - the write-up with a sticky table of contents, with more screenshots of
+ *   the site between its sections;
  * - a full-bleed "next case study" band in the next brand's colour.
  */
 export default function ProjectDetail({ project, linkMode }: Props) {
   const sections = splitSections(stripEmptySections(project.body));
+  const media = mediaBlocks(project);
   const list = caseStudies();
   const position = list.findIndex((p) => p.slug === project.slug);
   const previous =
     list.length > 1 ? list[(position - 1 + list.length) % list.length] : undefined;
   const next = list.length > 1 ? list[(position + 1) % list.length] : undefined;
 
-  const ink = readableOn(project.brandBackground);
   const showcase = Boolean(project.liveUrl && project.thumbnail);
   const facts = [
     { label: "Company", value: project.company },
@@ -69,12 +115,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
   return (
     <article>
       {/* Hero */}
-      <header
-        style={{ background: project.brandBackground, color: ink }}
-        className={`relative overflow-hidden px-6 sm:px-10 pt-[calc(6.5rem+env(safe-area-inset-top))] ${
-          showcase ? "pb-[clamp(9rem,26vw,20rem)]" : "pb-16 sm:pb-24"
-        }`}
-      >
+      <header className="relative px-6 sm:px-10 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:pb-16">
         <div className="relative mx-auto max-w-[90rem]">
           <div className="flex items-center justify-between gap-6">
             <p className="text-xs uppercase tracking-[0.14em] opacity-70">
@@ -87,11 +128,11 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               {project.draft && " · Draft (development only)"}
             </p>
             {project.logo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={project.logo}
-                alt={`${project.name} logo`}
-                className="h-[clamp(1.5rem,3vw,2.5rem)] w-auto max-w-[40%] object-contain"
+              <ProjectLogoTile
+                project={project}
+                sizes="8rem"
+                compact
+                className="w-24 sm:w-32 aspect-[16/10] rounded-sm"
               />
             )}
           </div>
@@ -121,9 +162,9 @@ export default function ProjectDetail({ project, linkMode }: Props) {
         </div>
       </header>
 
-      {/* The live site, overlapping the hero's lower edge. */}
+      {/* The live site, on desktop and on a phone. */}
       {showcase && (
-        <div className="relative -mt-[clamp(7rem,21vw,16rem)] px-6 sm:px-10">
+        <div className="relative px-6 sm:px-10">
           <div className="mx-auto max-w-[60rem]">
             <DeviceShowcase
               name={project.name}
@@ -165,15 +206,26 @@ export default function ProjectDetail({ project, linkMode }: Props) {
             </div>
             <div className="space-y-16 sm:space-y-24">
               {sections.map((section, index) => (
-                <section key={section.id} id={section.id} className="scroll-mt-24">
-                  <h2 className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
-                    <span className="tabular-nums mr-3">{String(index + 1).padStart(2, "0")}</span>
-                    {section.title}
-                  </h2>
-                  <div className="case-study case-study-lead mt-5">
-                    <ReactMarkdown>{section.body}</ReactMarkdown>
-                  </div>
-                </section>
+                <div key={section.id} className="space-y-16 sm:space-y-24">
+                  <section id={section.id} className="scroll-mt-24">
+                    <h2 className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
+                      <span className="tabular-nums mr-3">{String(index + 1).padStart(2, "0")}</span>
+                      {section.title}
+                    </h2>
+                    <div className="case-study case-study-lead mt-5">
+                      <ReactMarkdown>{section.body}</ReactMarkdown>
+                    </div>
+                  </section>
+                  {/* One block of screenshots after each section; any left
+                      over follow the last one. */}
+                  {(index < sections.length - 1 ? media.slice(index, index + 1) : media.slice(index)).map(
+                    (block, i) => (
+                      <div key={i} className="relative z-10 sm:-ml-[13.5rem]">
+                        {block}
+                      </div>
+                    ),
+                  )}
+                </div>
               ))}
             </div>
           </div>
