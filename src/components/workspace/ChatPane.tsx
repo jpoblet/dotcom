@@ -27,6 +27,9 @@ interface Props {
  * The intro ends with two of these, picked at random on each visit. All true,
  * all things the agent can talk about.
  */
+/** Where a new question lands: just below the header. */
+const QUESTION_TOP = 96;
+
 const ASIDES = [
   "the music I listen to",
   "the time I herded cattle in Namibia",
@@ -100,7 +103,6 @@ export default function ChatPane({
   // Whether the big name has scrolled up behind the header: the small one
   // then takes its place in the corner under the logo.
   const heroRef = useRef<HTMLDivElement>(null);
-  const pinnedRef = useRef<HTMLDivElement>(null);
   const [heroHidden, setHeroHidden] = useState(false);
   useEffect(() => {
     const hero = heroRef.current;
@@ -135,10 +137,8 @@ export default function ChatPane({
     // Restored history jumps there; a question just sent glides.
     const behavior = scrolledFor.current === undefined ? "instant" : "smooth";
     scrolledFor.current = lastQuestionId;
-    // Just under the pinned name, whatever size it is at this width.
-    const pinned = pinnedRef.current;
-    const clear = pinned ? pinned.offsetTop + pinned.offsetHeight + 20 : 112;
-    container.scrollTo({ top: turn.offsetTop - clear, behavior });
+    // Just clear of the header.
+    container.scrollTo({ top: turn.offsetTop - QUESTION_TOP, behavior });
   }, [lastQuestionId, viewportHeight]);
 
   // Empty page: lift the input to just under the suggestions. Measured
@@ -238,38 +238,21 @@ export default function ChatPane({
         <div className="flex items-center gap-1">{headerControls}</div>
       </div>
 
-      {/* Where the chat is narrow, its text would run under the pinned name:
-          a soft band of page colour sits behind the header while the name
-          is pinned. Wide, the two never meet, so there is none. */}
+      {/* The name, small, once the big one has scrolled away: two lines
+          (name, then title) turned a quarter anticlockwise, reading up the
+          left edge under the logo, centred on the screen's height. It fades
+          in, and back out the same way. Not on narrow screens, where there's
+          no margin beside the conversation for it. */}
       <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-36 bg-gradient-to-b from-background from-80% to-transparent transition-opacity duration-[900ms] @[72rem]:hidden ${
-          heroHidden ? "opacity-100" : "opacity-0"
-        }`}
-      />
-
-      {/* The name, small, in the corner under the logo, once the big one
-          has scrolled away. It fades up in, and back out the same way. */}
-      <div
-        ref={pinnedRef}
         aria-hidden={!heroHidden}
-        className={`vt-pin pointer-events-none absolute top-12 left-4 z-20 @[72rem]:top-16 @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          heroHidden ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        className={`vt-pin pointer-events-none absolute top-1/2 left-4 z-20 hidden -translate-y-1/2 rotate-180 [writing-mode:vertical-rl] @[40rem]:block @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          heroHidden ? "translate-x-0 opacity-100" : "translate-x-1.5 opacity-0"
         }`}
       >
         {/* Two sizes, keeping the same ratio: 24/16 with room, 18/14 without. */}
-        <p className="w-fit font-mono text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
-        {/* Two lines, broken after the "&". */}
-        <p className="mt-0.5 w-fit font-mono text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-base">
-          {title.includes("& ") ? (
-            <>
-              {title.slice(0, title.indexOf("& ") + 1)}
-              <br />
-              {title.slice(title.indexOf("& ") + 2)}
-            </>
-          ) : (
-            title
-          )}
+        <p className="whitespace-nowrap font-mono text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
+        <p className="whitespace-nowrap font-mono text-xs leading-snug text-foreground-secondary @[72rem]:text-base">
+          {title}
         </p>
       </div>
 
