@@ -51,23 +51,18 @@ conversation_starters:
   - surfing almost every day while working remotely from Lanzarote
   - playing guitar at my own wedding in the middle of a forest
 
-# Questions suggested on the empty chat. Work and career first: most
-# visitors come for that. The agent suggests personal topics later, in its
-# follow-ups. Keep them short, written as a visitor would ask, and
-# answerable from /content.
+# Questions suggested on the empty chat: work and career only, and no
+# project named (the agent brings projects up in its answers). Personal
+# topics come later, in its follow-ups. Keep them short, written as a
+# visitor would ask, and answerable from /content.
 starter_questions:
-  - Where have you worked?
-  - What are you building right now?
+  - What's your work experience?
   - How did you get into product design?
-  - What is AthleteID?
-  - Tell me about the Glovo courier app
-  - What do you mean by product builder?
-  - What tools do you use?
-  - How do you think about design constraints?
-  - What was it like being the first designer at Rillet?
-  - What does a Lead Product Designer do at Veriff?
-  - What is Legend Numbers?
-  - Tell me about What The Flag
+  - What's your design process like?
   - How do you work with engineers?
   - Do you code as well as design?
-  - What's your design process like?
+  - How has AI changed the way you work?
+  - What does a Lead Product Designer do?
+  - What do you mean by product builder?
+  - Have you worked in startups or agencies?
+  - How do you think about design constraints?
