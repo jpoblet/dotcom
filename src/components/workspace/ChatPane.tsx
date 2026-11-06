@@ -18,9 +18,6 @@ interface Props {
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
-  /** Whether the Work / AI Notes panel is open (desktop: the name and the
-      logo have moved into it). */
-  panelOpen: boolean;
   /** Work, AI Notes and "start over", at the header's right. */
   headerControls: React.ReactNode;
 }
@@ -62,7 +59,6 @@ export default function ChatPane({
   isLoading,
   send,
   title,
-  panelOpen,
   headerControls,
 }: Props) {
   const [input, setInput] = useState("");
@@ -161,16 +157,17 @@ export default function ChatPane({
         <div className="flex items-center gap-1">{headerControls}</div>
       </div>
 
-      {/* The name, shrunk into the corner under the logo: once the big one
-          has scrolled away, or (desktop) while the panel is open. */}
+      {/* The name, small, in the corner under the logo, once the big one
+          has scrolled away. It fades up in, and back out the same way. */}
       <div
-        className={`pointer-events-none absolute top-12 left-4 z-20 origin-top-left ${
-          heroHidden ? "block" : panelOpen ? "hidden lg:block" : "hidden"
-        } ${heroHidden && !panelOpen ? "animate-name-pin" : ""}`}
+        aria-hidden={!heroHidden}
+        className={`pointer-events-none absolute top-12 left-4 z-20 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          heroHidden ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
       >
-        <p className="vt-name w-fit font-heading text-base font-bold leading-tight">{name}</p>
+        <p className="w-fit font-heading text-base font-bold leading-tight">{name}</p>
         {/* Two lines, broken after the "&". */}
-        <p className="vt-title mt-0.5 w-fit text-xs leading-snug text-foreground-secondary">
+        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary">
           {title.includes("& ") ? (
             <>
               {title.slice(0, title.indexOf("& ") + 1)}
@@ -191,16 +188,14 @@ export default function ChatPane({
 className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
           >
             <div className="mx-auto max-w-[42rem]">
-              {/* The name opens the page. While the panel is open it has shrunk
-                  into the corner under the logo; its space stays, so nothing
-                  here jumps as it goes. */}
-              <div ref={heroRef} className={`mb-10 ${panelOpen ? "lg:invisible" : ""}`}>
+              {/* The name opens the page. */}
+              <div ref={heroRef} className="mb-10">
                 <h1
-                  className={`w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em] ${heroHidden || panelOpen ? "" : "vt-name"}`}
+                  className="w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em]"
                 >
                   {name}
                 </h1>
-                <p className={`mt-3 w-fit text-base text-foreground-secondary ${heroHidden || panelOpen ? "" : "vt-title"}`}>
+                <p className="mt-3 w-fit text-base text-foreground-secondary">
                   {title}
                 </p>
               </div>
@@ -220,12 +215,12 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
 
               {!empty && (
                 <>
-                  {/* Where the conversation begins: a title and a gentle wavy rule. */}
-                  <div className="mt-14" aria-hidden="true">
-                    <p className="animate-suggestion-in font-label text-xs text-foreground-secondary">
+                  {/* Where the conversation begins: a small title, the wave running on from it. */}
+                  <div className="mt-14 flex items-center gap-3" aria-hidden="true">
+                    <p className="animate-suggestion-in shrink-0 font-label text-[0.6875rem] font-medium text-foreground-secondary">
                       Conversation started here
                     </p>
-                    <div className="wiggle-rule mt-3 h-1 text-background-inverse/20" />
+                    <div className="wiggle-rule h-[6px] min-w-0 flex-1 text-background-inverse/25" />
                   </div>
                   <div className="mt-12 space-y-16">
                     {turns.map((turn, index) => {
@@ -334,10 +329,11 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-background-inverse px-4 text-sm font-bold text-background transition-opacity hover:opacity-90 cursor-pointer disabled:cursor-default disabled:opacity-30"
+                aria-label="Send"
+                title="Send"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background-inverse text-background transition-opacity hover:opacity-90 cursor-pointer disabled:cursor-default disabled:opacity-30"
               >
-                Send
-                <ArrowUp size={15} strokeWidth={2.25} />
+                <ArrowUp size={17} strokeWidth={2.25} />
               </button>
             </form>
           </div>

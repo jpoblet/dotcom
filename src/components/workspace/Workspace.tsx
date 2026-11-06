@@ -31,10 +31,9 @@ interface Props {
 
 /**
  * The home page: the chat in the middle, opening with the name. "Work" and
- * "AI Notes" open a panel from the right; as it arrives the chat moves
- * over, the tabs cross into the panel's header and the name shrinks into
- * the corner under the logo (a view transition morphs each one; browsers
- * without them just switch). On phones the panel is a sheet.
+ * "AI Notes" open a panel from the right; as it arrives the chat glides
+ * over and the tabs cross into the panel's header (a view transition;
+ * browsers without them just switch). On phones the panel is a sheet.
  */
 export default function Workspace({
   name,
@@ -50,6 +49,7 @@ export default function Workspace({
   // Whether the side panel is showing (a sheet over the chat on phones).
   const [panelOpen, setPanelOpenState] = useState(false);
   const panelOpenRef = useRef(false);
+
   // The project on screen, and whether its panel is slid in. The slug
   // outlives the panel by one transition, so it can slide out with content.
   const [slug, setSlug] = useState<string | null>(null);
@@ -60,8 +60,8 @@ export default function Workspace({
 
   /**
    * Opens or closes the panel. On desktop the change runs as a view
-   * transition: the panel slides in, the chat glides over, and the name,
-   * logo and tabs morph to their places in the new layout.
+   * transition: the panel slides in, the chat glides over, and the tabs
+   * move to their place in the new layout.
    */
   const setPanelOpen = useCallback((open: boolean, alongside?: () => void) => {
     const apply = () => {
@@ -222,7 +222,6 @@ export default function Workspace({
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}
-            panelOpen={panelOpen}
             headerControls={
               <>
                 {!panelOpen && desktopControls}

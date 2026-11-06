@@ -97,8 +97,9 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
         {projects.map((project, index) => {
           const row = (
             <>
-              <span className="flex h-11 w-14 shrink-0 items-center text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
-                <LogoMark logo={project.logoMark} name={project.name} className="h-6 w-full" />
+              {/* The mark, centred both ways in its slot beside the text. */}
+              <span className="flex w-14 shrink-0 items-center justify-center self-stretch text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+                <LogoMark logo={project.logoMark} name={project.name} align="center" className="h-6 w-full" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
