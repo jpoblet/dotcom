@@ -50,7 +50,7 @@ function mediaBlocks(project: Project): ReactNode[] {
   if (first) {
     blocks.push(
       <figure>
-        <BrowserFrame src={first} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 960px, 100vw" />
+        <BrowserFrame src={first} tint={project.screenColors[first]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 960px, 100vw" />
       </figure>,
     );
   }
@@ -59,7 +59,7 @@ function mediaBlocks(project: Project): ReactNode[] {
       <figure>
         <div className="grid grid-cols-3 gap-[4%] px-[6%]">
           {project.mobileGallery.slice(0, 3).map((src) => (
-            <PhoneFrame key={src} src={src} url={url} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
+            <PhoneFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
           ))}
         </div>
         {caption("The same site on a phone.")}
@@ -70,7 +70,7 @@ function mediaBlocks(project: Project): ReactNode[] {
     blocks.push(
       <figure className="grid gap-6 sm:grid-cols-2">
         {rest.map((src) => (
-          <BrowserFrame key={src} src={src} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 470px, 100vw" />
+          <BrowserFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 470px, 100vw" />
         ))}
       </figure>,
     );
@@ -171,6 +171,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               url={project.liveUrl}
               desktopImage={project.thumbnail}
               mobileImage={project.mobileImage || undefined}
+              colors={project.screenColors}
             />
           </div>
         </div>

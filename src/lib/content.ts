@@ -74,6 +74,8 @@ export interface Project {
   /** More screenshots of the live site, for the case study. */
   gallery: string[];
   mobileGallery: string[];
+  /** Background colour of each screenshot (see npm run screen-colors). */
+  screenColors: Record<string, string>;
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
@@ -242,10 +244,29 @@ export function getProjects(): Project[] {
   });
 }
 
+/** content/screen-colors.json, written by scripts/screen-colors.mjs. */
+function readScreenColors(): Record<string, string> {
+  try {
+    return JSON.parse(readFile("screen-colors.json")) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
 function readProjects(): Project[] {
+  const allColors = readScreenColors();
   return listMarkdown("projects").map((file) => {
     const { data, body } = readMarkdown("projects", file);
+    const images = [
+      str(data.thumbnail),
+      str(data.mobile_image),
+      ...(Array.isArray(data.gallery) ? data.gallery.map(str) : []),
+      ...(Array.isArray(data.mobile_gallery) ? data.mobile_gallery.map(str) : []),
+    ].filter(Boolean);
     return {
+      screenColors: Object.fromEntries(
+        images.filter((src) => allColors[src]).map((src) => [src, allColors[src]]),
+      ),
       slug: file.replace(/\.md$/, ""),
       name: str(data.name),
       type: (PROJECT_TYPES.some((t) => t.type === data.type)

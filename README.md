@@ -92,3 +92,14 @@ newest first.
 the live domains only, plus these events: `Chat question` (with its
 `source`) and `Project card shown` (with the `project`). The website id is in
 [`src/app/layout.tsx`](src/app/layout.tsx).
+
+## Screenshots and device frames
+
+Project screenshots live in `public/images/projects/` (and `gallery/`). The
+browser and phone frames around them take a tint of each screenshot's
+background colour, read from `content/screen-colors.json`. After adding or
+replacing screenshots, regenerate it:
+
+```sh
+npm run screen-colors
+```

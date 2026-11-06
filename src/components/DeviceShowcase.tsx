@@ -6,6 +6,8 @@ interface Props {
   desktopImage: string;
   /** Optional phone screenshot, overlapping the browser window. */
   mobileImage?: string;
+  /** Background colour of each screenshot, for tinted frames. */
+  colors?: Record<string, string>;
 }
 
 /**
@@ -14,11 +16,12 @@ interface Props {
  * of the site, to show it's responsive. Sizes are relative, so the
  * composition scales down on phones.
  */
-export default function DeviceShowcase({ name, url, desktopImage, mobileImage }: Props) {
+export default function DeviceShowcase({ name, url, desktopImage, mobileImage, colors = {} }: Props) {
   return (
     <div className="relative aspect-[25/14]">
       <BrowserFrame
         src={desktopImage}
+        tint={colors[desktopImage]}
         url={url}
         alt={`${name} website on a desktop browser`}
         priority
@@ -28,6 +31,7 @@ export default function DeviceShowcase({ name, url, desktopImage, mobileImage }:
       {mobileImage && (
         <PhoneFrame
           src={mobileImage}
+          tint={colors[mobileImage]}
           url={url}
           alt={`${name} website on a phone`}
           sizes="(min-width: 1008px) 200px, 21vw"

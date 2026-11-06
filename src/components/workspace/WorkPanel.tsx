@@ -163,14 +163,14 @@ export function ProjectView({
   const media: React.ReactNode[] = [];
   if (url && firstShot) {
     media.push(
-      <BrowserFrame src={firstShot} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1024px) 760px, 100vw" />,
+      <BrowserFrame src={firstShot} tint={project.screenColors[firstShot]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1024px) 760px, 100vw" />,
     );
   }
   if (url && project.mobileGallery.length) {
     media.push(
       <div className="grid grid-cols-3 gap-[5%] px-[8%]">
         {project.mobileGallery.slice(0, 3).map((src) => (
-          <PhoneFrame key={src} src={src} url={url} alt={`${project.name} on a phone`} sizes="200px" />
+          <PhoneFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name} on a phone`} sizes="200px" />
         ))}
       </div>,
     );
@@ -179,7 +179,7 @@ export function ProjectView({
     media.push(
       <div className="grid gap-4 sm:grid-cols-2">
         {otherShots.map((src) => (
-          <BrowserFrame key={src} src={src} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1024px) 380px, 100vw" />
+          <BrowserFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1024px) 380px, 100vw" />
         ))}
       </div>,
     );
@@ -217,6 +217,7 @@ export function ProjectView({
               url={url}
               desktopImage={project.thumbnail}
               mobileImage={project.mobileImage || undefined}
+              colors={project.screenColors}
             />
           ) : (
             <div className="flex aspect-[2/1] items-center justify-center rounded-sm bg-background-inverse/[0.03]">
