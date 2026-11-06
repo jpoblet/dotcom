@@ -70,7 +70,7 @@ export default function ProjectModal({ children, closeTo }: Props) {
     <div role="dialog" aria-modal="true" aria-labelledby="project-title" className="fixed inset-0 z-[60]">
       <div
         aria-hidden="true"
-        className={`absolute inset-0 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 ${
+        className={`absolute inset-0 bg-background/88 backdrop-blur-3xl backdrop-saturate-150 ${
           closing ? "animate-modal-out" : "animate-modal-in"
         }`}
       />
@@ -81,7 +81,8 @@ export default function ProjectModal({ children, closeTo }: Props) {
         className="absolute inset-0 overflow-y-auto overflow-x-hidden overscroll-contain focus:outline-none"
       >
         <div
-          className={`w-full max-w-[calc(50rem+3rem)] mx-auto px-6 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] ${
+          // The case study lays out its own full-bleed hero and columns.
+          className={`w-full pb-[env(safe-area-inset-bottom)] ${
             closing ? "animate-modal-content-out" : "animate-modal-content-in"
           }`}
         >
@@ -89,13 +90,6 @@ export default function ProjectModal({ children, closeTo }: Props) {
         </div>
       </div>
 
-      {/* Keeps the controls legible over text scrolling underneath. */}
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-x-0 top-0 h-[calc(5rem+env(safe-area-inset-top))] bg-gradient-to-b from-background via-background/80 to-transparent ${
-          closing ? "animate-modal-out" : "animate-modal-in"
-        }`}
-      />
 
       {/* Same place as the site header's logo, so it never jumps. */}
       <Link
