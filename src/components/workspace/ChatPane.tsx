@@ -65,15 +65,33 @@ export default function ChatPane({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const stickToBottom = useRef(true);
   const starters = useRandomPick(starterQuestions, 4);
+  const lastTurnRef = useRef<HTMLElement>(null);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
-  // Follow new text while the visitor is at the bottom.
+  // The latest exchange is at least a screen tall, so its question can sit
+  // at the top of the view even while the reply is still short.
   useEffect(() => {
-    if (!stickToBottom.current) return;
     const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, isLoading]);
+    if (!el) return;
+    const observer = new ResizeObserver(() => setViewportHeight(el.clientHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // A new question glides to the top of the view; the reply then writes in
+  // below it without moving the page (the visitor scrolls if it runs long).
+  const lastQuestionId = messages.findLast((m) => m.isUser)?.id;
+  const scrolledFor = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const container = scrollRef.current;
+    const turn = lastTurnRef.current;
+    if (!lastQuestionId || !container || !turn || scrolledFor.current === lastQuestionId) return;
+    // Restored history jumps there; a question just sent glides.
+    const behavior = scrolledFor.current === undefined ? "instant" : "smooth";
+    scrolledFor.current = lastQuestionId;
+    container.scrollTo({ top: turn.offsetTop - 24, behavior });
+  }, [lastQuestionId, viewportHeight]);
 
   // Watch the intro within the conversation's own scroll area.
   useEffect(() => {
@@ -91,7 +109,7 @@ export default function ChatPane({
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
       if (!text.trim() || isLoading) return;
-      stickToBottom.current = true;
+      if (scrolledFor.current === undefined) scrolledFor.current = "";
       send(text, source);
       setInput("");
       if (inputRef.current) inputRef.current.style.height = "";
@@ -103,6 +121,12 @@ export default function ChatPane({
   const followUps =
     !isLoading && last && !last.isUser && !last.isError ? (last.suggestions ?? []) : [];
   const empty = messages.length === 0;
+  // Exchanges: each starts with a question and holds the reply after it.
+  const turns: Message[][] = [];
+  for (const message of messages) {
+    if (message.isUser || turns.length === 0) turns.push([message]);
+    else turns[turns.length - 1].push(message);
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -140,11 +164,7 @@ export default function ChatPane({
       {/* Conversation */}
       <div
         ref={scrollRef}
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-        }}
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-6"
+        className="relative min-h-0 flex-1 overflow-y-auto px-4 py-6"
       >
         <div className="mx-auto w-full max-w-[42rem]">
         {/* The intro opens the conversation and stays at the top of it. */}
@@ -175,49 +195,56 @@ export default function ChatPane({
             )}
         </div>
         {!empty && (
-          <div className="mt-12 space-y-10 border-t border-background-inverse/10 pt-10">
-            {messages.map((message) =>
-              message.isUser ? (
-                <div
-                  key={message.id}
-                  className="rounded-lg bg-background-secondary px-4 py-3 text-sm leading-[1.7] whitespace-pre-wrap"
+          <div className="mt-12 space-y-16 border-t border-background-inverse/10 pt-10">
+            {turns.map((turn, index) => {
+              const isLast = index === turns.length - 1;
+              return (
+                <section
+                  key={turn[0].id}
+                  ref={isLast ? lastTurnRef : undefined}
+                  style={isLast && viewportHeight ? { minHeight: viewportHeight - 48 } : undefined}
+                  className="space-y-6"
                 >
-                  {message.text}
-                </div>
-              ) : !message.text && !message.widgets?.length ? null : (
-                <div key={message.id} className="space-y-3">
-                  {message.text && (
-                    <div
-                      className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
-                    >
-                      <ChatMarkdown text={message.text} />
-                    </div>
+                  {turn.map((message) =>
+                    message.isUser ? (
+                      <Question key={message.id} message={message} />
+                    ) : !message.text && !message.widgets?.length ? null : (
+                      <div key={message.id} className="space-y-4">
+                        {message.text && (
+                          <div
+                            className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
+                          >
+                            <ChatMarkdown text={message.text} />
+                          </div>
+                        )}
+                        {message.widgets?.length ? <ChatWidgets widgets={message.widgets} /> : null}
+                      </div>
+                    ),
                   )}
-                  {message.widgets?.length ? <ChatWidgets widgets={message.widgets} /> : null}
-                </div>
-              ),
-            )}
-            {isLoading && !last?.text && (
-              <p className="shimmer-text text-xs" aria-label="Thinking">
-                Thinking…
-              </p>
-            )}
-            {followUps.length > 0 && (
-              <ul className="space-y-0.5 pt-1">
-                {followUps.map((question, index) => (
-                  <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-                    <button
-                      type="button"
-                      onClick={() => submit(question, "follow_up")}
-                      className="group flex w-full items-center gap-2 rounded-md px-2 py-1 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-                    >
-                      <span className="text-foreground-secondary group-hover:text-foreground">↳</span>
-                      {question}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                  {isLast && isLoading && !last?.text && (
+                    <p className="shimmer-text text-xs" aria-label="Thinking">
+                      Thinking…
+                    </p>
+                  )}
+                  {isLast && followUps.length > 0 && (
+                    <ul className="space-y-0.5 pt-2">
+                      {followUps.map((question, i) => (
+                        <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${i * 60}ms` }}>
+                          <button
+                            type="button"
+                            onClick={() => submit(question, "follow_up")}
+                            className="group flex w-full items-center gap-2 rounded-md px-2 py-1 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
+                          >
+                            <span className="text-foreground-secondary group-hover:text-foreground">↳</span>
+                            {question}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
         </div>
@@ -298,6 +325,36 @@ export default function ChatPane({
         This clears our whole conversation and your AI Notes, and there&apos;s no way to get
         them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
       </ConfirmDialog>
+    </div>
+  );
+}
+
+const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
+
+/**
+ * The visitor's question, set as the headline of its exchange: a short
+ * rule, "You" and the time, then the question in the heading face. Long
+ * questions step down a size.
+ */
+function Question({ message }: { message: Message }) {
+  const long = message.text.length > 120;
+  return (
+    <div className="animate-suggestion-in">
+      <p className="flex items-center gap-2.5 text-xs text-foreground-secondary">
+        <span aria-hidden="true" className="h-px w-5 bg-foreground" />
+        You
+        <span aria-hidden="true">·</span>
+        <time dateTime={new Date(message.timestamp).toISOString()}>
+          {timeFormat.format(new Date(message.timestamp))}
+        </time>
+      </p>
+      <p
+        className={`font-heading mt-3 font-medium tracking-tight whitespace-pre-wrap text-foreground ${
+          long ? "text-lg leading-[1.45]" : "text-xl sm:text-2xl leading-[1.3]"
+        }`}
+      >
+        {message.text}
+      </p>
     </div>
   );
 }
