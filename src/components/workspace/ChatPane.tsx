@@ -170,19 +170,20 @@ export default function ChatPane({
         ref={scrollRef}
         className="relative min-h-0 flex-1 overflow-y-auto px-4 py-6"
       >
+        {/* Braun-grille dots, anchored to the right edge of the chat area
+            and fading in towards the text. Scrolls away with the intro. */}
+        <DotGrille className="absolute top-0 right-0 h-[min(85vh,52rem)] w-[min(50%,40rem)] [mask-image:radial-gradient(ellipse_at_100%_40%,black_15%,transparent_72%)]" />
         <div className="mx-auto w-full max-w-[42rem]">
         {/* The intro opens the conversation and stays at the top of it. */}
-        <div ref={introRef} className={`relative animate-suggestion-in ${empty ? "pt-[6vh] lg:pt-[11vh]" : "pt-6"}`}>
-          {/* Braun-grille dots behind the intro, fading out towards the text. */}
-          <DotGrille className="absolute -top-6 -right-4 h-[calc(100%+3rem)] w-[62%] [mask-image:radial-gradient(ellipse_at_78%_38%,black_10%,transparent_68%)]" />
+        <div ref={introRef} className={`relative animate-suggestion-in ${empty ? "pt-[6vh] lg:pt-[9vh]" : "pt-6"}`}>
           <div className="relative">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
-            <p className="mt-4 text-xl sm:text-2xl tracking-tight text-foreground-secondary">{title}.</p>
+            <p className="mt-5 text-xl sm:text-2xl tracking-tight text-foreground-secondary">{title}.</p>
 
             {facts.length > 0 && (
-              <dl className="mt-10 grid max-w-xl grid-cols-1 gap-x-8 gap-y-4 border-t border-background-inverse/10 pt-5 sm:grid-cols-3">
+              <dl className="mt-12 grid max-w-lg grid-cols-1 gap-x-16 gap-y-5 border-t border-background-inverse/10 pt-6 sm:grid-cols-2">
                 {facts.map((fact) => (
                   <div key={fact.label}>
                     <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
@@ -192,12 +193,12 @@ export default function ChatPane({
               </dl>
             )}
 
-            <p className="mt-10 max-w-md text-sm leading-[1.75] text-foreground-secondary">
+            <p className="mt-12 max-w-md text-sm leading-[1.75] text-foreground-secondary">
               I built this AI agent to answer as me. Ask me anything about my work experience,
               career goals, hobbies, recent projects, the music I listen to… anything, really.
             </p>
             {empty && (
-            <ul className="mt-8 space-y-1">
+            <ul className="mt-10 space-y-1.5">
               {starters.map((question, index) => (
                 <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
                   <button
