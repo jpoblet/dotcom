@@ -15,6 +15,8 @@ export interface ProjectCardData {
   accent: string;
   /** Brand logo and its background (empty logo: use the cover). */
   logo: string;
+  /** The compact mark (symbol where there is one), drawn in text colour. */
+  logoMark: string;
   brandBackground: string;
   /** Set only when the case-study page is published. */
   href?: string;

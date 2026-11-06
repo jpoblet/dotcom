@@ -326,6 +326,7 @@ export function toProjectCard(project: Project): ProjectCardData {
     thumbnail: project.thumbnail,
     accent: project.accent,
     logo: project.logo,
+    logoMark: project.logoMark,
     brandBackground: project.brandBackground,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };

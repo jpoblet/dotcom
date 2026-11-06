@@ -1,151 +1,226 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import ProjectLogoTile from "@/components/ProjectLogoTile";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import LogoMark from "@/components/LogoMark";
 import { useWorkspace } from "@/components/workspace/WorkspaceContext";
 import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
-/** Horizontal card: brand tile on the left, details on the right. */
-function ProjectCard({ project }: { project: ProjectCardData }) {
-  const workspace = useWorkspace();
-  const body = (
-    <>
-      <ProjectLogoTile
-        project={project}
-        sizes="8rem"
-        compact
-        className="w-24 sm:w-32 shrink-0 self-stretch min-h-24 border-0 border-r"
-      />
-      <div className="min-w-0 flex-1 p-4 space-y-1">
-        {project.meta && (
-          <p className="text-xs text-foreground-secondary truncate">
-            {project.meta}
-          </p>
-        )}
-        <p className="text-sm font-bold">{project.name}</p>
-        {project.summary && (
-          <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-2">
-            {project.summary}
-          </p>
-        )}
-        <p className="pt-1 text-xs">
-          {project.href ? (
-            <span className="inline-flex items-center gap-1 underline underline-offset-2">
-              View project
-            </span>
-          ) : (
-            <span className="text-foreground-secondary">
-              Case study coming soon
-            </span>
-          )}
-        </p>
-      </div>
-    </>
-  );
+const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
-  const className =
-    "group flex w-full sm:w-[28rem] overflow-hidden rounded-sm border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
+/**
+ * A screenshot that floats beside the pointer while it rests on a project,
+ * trailing it slightly. Pointers that hover only; touch screens skip it.
+ */
+function Peek({ project, anchor }: { project: ProjectCardData | null; anchor: HTMLElement | null }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState<ProjectCardData | null>(null);
 
-  // In the split workspace, cards open the project beside the chat.
-  if (workspace && project.href) {
-    return (
-      <button
-        type="button"
-        onClick={() => workspace.openProject(project.slug)}
-        className={`${className} text-left cursor-pointer hover:bg-background-secondary`}
+  // Keep the last project while fading out, so the image doesn't vanish.
+  useEffect(() => {
+    if (!project) return;
+    const timeout = setTimeout(() => setShown(project));
+    return () => clearTimeout(timeout);
+  }, [project]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !anchor) return;
+    let x = 0;
+    let y = 0;
+    let tx = 0;
+    let ty = 0;
+    let frame = 0;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const onMove = (e: PointerEvent) => {
+      // Up and to the right of the pointer, clear of the line being read.
+      tx = e.clientX + 20;
+      ty = e.clientY - 172;
+      if (!x && !y) [x, y] = [tx, ty];
+    };
+    const loop = () => {
+      x += (tx - x) * (reduce ? 1 : 0.18);
+      y += (ty - y) * (reduce ? 1 : 0.18);
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      frame = requestAnimationFrame(loop);
+    };
+    anchor.addEventListener("pointermove", onMove);
+    frame = requestAnimationFrame(loop);
+    return () => {
+      anchor.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(frame);
+    };
+  }, [anchor]);
+
+  return (
+    <div ref={ref} aria-hidden="true" className="pointer-events-none fixed top-0 left-0 z-[60]">
+      <div
+        className={`w-56 overflow-hidden rounded-md shadow-[0_24px_48px_-20px_rgb(0_0_0/0.35),0_0_0_1px_rgb(0_0_0/0.04)] transition-[opacity,scale,rotate] duration-300 ${EASE} ${
+          project ? "scale-100 rotate-[-2deg] opacity-100" : "scale-90 rotate-0 opacity-0"
+        }`}
+        style={{ background: shown?.brandBackground || shown?.accent }}
       >
-        {body}
-      </button>
-    );
-  }
-
-  return project.href ? (
-    <Link
-      href={project.href}
-      prefetch={false}
-      className={`${className} hover:bg-background-secondary`}
-    >
-      {body}
-    </Link>
-  ) : (
-    <div className={className}>{body}</div>
+        {shown?.thumbnail ? (
+          <Image src={shown.thumbnail} alt="" width={448} height={280} className="block aspect-[16/10] w-full object-cover" />
+        ) : (
+          shown && (
+            <div className="flex aspect-[16/10] items-center justify-center text-white/90">
+              <LogoMark logo={shown.logoMark} name={shown.name} align="center" className="h-8 w-1/2" />
+            </div>
+          )
+        )}
+      </div>
+    </div>
   );
 }
 
+/**
+ * Projects as a plain list, like a contents page: the mark, the name, what
+ * I did and when, one line on what it is. Nothing boxed. Resting on a row
+ * floats its screenshot beside the pointer.
+ */
+function ProjectList({ projects }: { projects: ProjectCardData[] }) {
+  const workspace = useWorkspace();
+  const [hovered, setHovered] = useState<ProjectCardData | null>(null);
+  const [list, setList] = useState<HTMLUListElement | null>(null);
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => setCanHover(window.matchMedia("(hover: hover)").matches));
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <>
+      <ul ref={setList} className="w-full">
+        {projects.map((project, index) => {
+          const row = (
+            <>
+              <span className="flex h-11 w-14 shrink-0 items-center text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+                <LogoMark logo={project.logoMark} name={project.name} className="h-6 w-full" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <span className="font-heading text-base font-bold">{project.name}</span>
+                  {project.meta && (
+                    <span className="text-xs text-foreground-secondary">{project.meta}</span>
+                  )}
+                </span>
+                {project.summary && (
+                  <span className="mt-1 block truncate text-sm text-foreground-secondary">
+                    {project.summary}
+                  </span>
+                )}
+              </span>
+              <span className="self-center text-foreground-secondary transition-[translate,color] duration-300 group-hover:translate-x-1 group-hover:text-foreground">
+                {project.href ? <ArrowRight size={16} /> : <span className="text-xs">Soon</span>}
+              </span>
+            </>
+          );
+          const className = `group relative flex w-full items-start gap-4 py-3.5 text-left transition-[translate] duration-500 ${EASE} hover:translate-x-1`;
+          const handlers = {
+            onPointerEnter: () => canHover && setHovered(project),
+            onPointerLeave: () => setHovered(null),
+          };
+          return (
+            <li
+              key={project.slug}
+              className="animate-suggestion-in"
+              style={{ animationDelay: `${index * 80}ms` }}
+            >
+              {workspace && project.href ? (
+                <button
+                  type="button"
+                  onClick={() => workspace.openProject(project.slug)}
+                  className={`${className} cursor-pointer`}
+                  {...handlers}
+                >
+                  {row}
+                </button>
+              ) : project.href ? (
+                <Link href={project.href} prefetch={false} className={className} {...handlers}>
+                  {row}
+                </Link>
+              ) : (
+                <div className={className}>{row}</div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {canHover && <Peek project={hovered} anchor={list} />}
+    </>
+  );
+}
+
+/** Roles as a quiet table: years in the label face, then role and company. */
 function Timeline({ roles }: { roles: TimelineEntry[] }) {
   return (
-    <ol className="w-full sm:max-w-md rounded-sm border border-background-inverse/10 p-5">
-      {roles.map((role, index) => {
-        const current = role.end === "Present";
-        return (
-          <li
-            key={`${role.company}-${role.start}`}
-            className="relative pl-6 pb-4 last:pb-0"
-          >
-            {/* Connector line + dot */}
-            {index < roles.length - 1 && (
-              <span className="absolute left-[0.2rem] top-3 bottom-0 w-px bg-background-inverse/15" />
-            )}
-            <span
-              className={`absolute left-0 top-1.5 size-2 rounded-full border border-foreground ${current ? "bg-foreground" : "bg-background"}`}
-            />
-            <p className="text-sm font-bold">{role.role}</p>
-            <p className="text-xs text-foreground-secondary">
-              {role.company} · {role.start} – {role.end}
-            </p>
-          </li>
-        );
-      })}
+    <ol className="w-full space-y-3">
+      {roles.map((role, index) => (
+        <li
+          key={`${role.company}-${role.start}`}
+          className="animate-suggestion-in grid grid-cols-[7.5rem_1fr] gap-4 text-sm"
+          style={{ animationDelay: `${index * 60}ms` }}
+        >
+          <span className="font-label text-xs leading-[1.6rem] tabular-nums text-foreground-secondary">
+            {role.start} – {role.end === "Present" ? "Now" : role.end}
+          </span>
+          <span className="leading-[1.6rem]">
+            <span className="font-bold">{role.role}</span>
+            <span className="text-foreground-secondary"> · {role.company}</span>
+          </span>
+        </li>
+      ))}
     </ol>
   );
 }
 
-function ContactCard({
-  email,
-  links,
-}: {
-  email: string;
-  links: { label: string; href: string }[];
-}) {
+/** The email as a big link, the profiles as a line of small ones. */
+function Contact({ email, links }: { email: string; links: { label: string; href: string }[] }) {
   return (
-    <div className="w-full sm:max-w-md rounded-sm border border-background-inverse/10 p-5 space-y-4">
+    <div className="animate-suggestion-in space-y-3">
       <a
         href={`mailto:${email}`}
-        className="inline-flex items-center rounded-full bg-background-inverse px-5 py-3 text-xs text-background hover:opacity-70 transition-opacity duration-200"
+        className="group inline-flex items-center gap-2 font-heading text-xl sm:text-2xl font-bold tracking-tight underline decoration-background-inverse/20 decoration-1 underline-offset-[0.2em] transition-[text-decoration-color] hover:decoration-foreground"
       >
         {email}
+        <ArrowUpRight size={20} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
       </a>
-      <div className="flex flex-wrap gap-2">
+      <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground-secondary">
         {links.map((link) => (
           <a
             key={link.href}
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-background-inverse/8 px-4 py-2 text-xs text-foreground hover:bg-background-inverse/15 transition-colors duration-200"
+            className="hover:text-foreground"
           >
-            {link.label}
+            {link.label} ↗
           </a>
         ))}
-      </div>
+      </p>
     </div>
   );
 }
 
-/** Rich blocks shown under an AI reply. */
+/**
+ * Rich blocks under an AI reply. Projects shown in the same reply are
+ * gathered into one list.
+ */
 export default function ChatWidgets({ widgets }: { widgets: Widget[] }) {
+  const projects = widgets.flatMap((w) => (w.kind === "project" ? [w.project] : []));
+  const others = widgets.filter((w) => w.kind !== "project");
   return (
-    <div className="mt-4 flex flex-wrap gap-3">
-      {widgets.map((widget, index) => {
+    <div className="mt-2 space-y-6">
+      {projects.length > 0 && <ProjectList projects={projects} />}
+      {others.map((widget, index) => {
         switch (widget.kind) {
-          case "project":
-            return <ProjectCard key={index} project={widget.project} />;
           case "timeline":
             return <Timeline key={index} roles={widget.roles} />;
           case "contact":
-            return (
-              <ContactCard key={index} email={widget.email} links={widget.links} />
-            );
+            return <Contact key={index} email={widget.email} links={widget.links} />;
         }
       })}
     </div>

@@ -272,7 +272,11 @@ export default function ChatPane({
                                     <ChatMarkdown text={message.text} />
                                   </div>
                                 )}
-                                {message.widgets?.length ? <ChatWidgets widgets={message.widgets} /> : null}
+                                {/* Projects, timeline and contact wait for the whole
+                                    reply, so nothing lands above them once shown. */}
+                                {message.widgets?.length && !(isLast && isLoading) ? (
+                                  <ChatWidgets widgets={message.widgets} />
+                                ) : null}
                               </div>
                             ),
                           )}
