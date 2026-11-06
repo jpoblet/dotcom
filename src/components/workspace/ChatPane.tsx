@@ -118,6 +118,8 @@ export default function ChatPane({
             }`}
           >
             {name}
+            {/* Same `title` as the intro: both come from content/profile.yaml. */}
+            <span className="hidden sm:inline"> · {title}</span>
           </span>
         </div>
         <div className="flex items-center gap-1">

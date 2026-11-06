@@ -506,6 +506,53 @@ html[data-fonts="systematic"] :is(.font-label, [data-workspace] h2) {
 html[data-fonts="modernist"] :is(.font-label, [data-workspace] h2) {
   font-family: var(--font-plex-mono);
 }
+/* Font pairings, third round. */
+html[data-fonts="omnibus"] {
+  --font-sans: var(--font-chivo);
+  --font-heading: var(--font-chivo);
+}
+html[data-fonts="funnel"] {
+  --font-sans: var(--font-funnel-sans);
+  --font-heading: var(--font-funnel-display);
+}
+html[data-fonts="host"] {
+  --font-sans: var(--font-host);
+  --font-heading: var(--font-host);
+}
+html[data-fonts="product-ui"] {
+  --font-sans: var(--font-wix-text);
+  --font-heading: var(--font-wix-display);
+}
+html[data-fonts="swedish"] {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-familjen);
+}
+html[data-fonts="industrial"] {
+  --font-sans: var(--font-mona);
+  --font-heading: var(--font-hubot);
+}
+html[data-fonts="urban-geometric"] {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-urbanist);
+}
+html[data-fonts="american-gothic"] {
+  --font-sans: var(--font-franklin);
+  --font-heading: var(--font-franklin);
+}
+html[data-fonts="low-contrast"] {
+  --font-sans: var(--font-gantari);
+  --font-heading: var(--font-gantari);
+}
+html[data-fonts="editorial-modern"] {
+  --font-sans: var(--font-public-sans);
+  --font-heading: var(--font-epilogue);
+}
+html[data-fonts="omnibus"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-chivo-mono);
+}
+html[data-fonts="low-contrast"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-martian);
+}
 :is(h1, h3, .font-heading) {
   font-family: var(--font-heading);
 }
