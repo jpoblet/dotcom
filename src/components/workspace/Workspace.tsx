@@ -91,6 +91,34 @@ export default function Workspace({
   }, [projectOpen, closeProject]);
 
   const actions = useMemo(() => ({ openProject }), [openProject]);
+
+  // Desktop: the tabs float over both headers and glide between them. With
+  // the panel closed they sit at the chat header's right (left of the "new
+  // conversation" button); open, at the start of the panel's header. The
+  // panel's widths here mirror its classes below.
+  const navRef = useRef<HTMLDivElement>(null);
+  const [navLeft, setNavLeft] = useState<number | null>(null);
+  useEffect(() => {
+    const place = () => {
+      const width = window.innerWidth;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const navWidth = navRef.current?.offsetWidth ?? 0;
+      const panelWidth = projectOpen ? Math.min(width * 0.62, 60 * rem) : 24 * rem;
+      setNavLeft(
+        panelOpen
+          ? width - panelWidth + 1.5 * rem
+          : width - 1 * rem - 2 * rem - 0.75 * rem - navWidth,
+      );
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    if (navRef.current) observer.observe(navRef.current);
+    window.addEventListener("resize", place);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [panelOpen, projectOpen]);
   const topicCount = session.topics.length;
 
   // The header buttons open the panel on a tab, or close it if that tab
@@ -110,16 +138,23 @@ export default function Workspace({
     closeProject();
   };
 
+  // The one set of tabs. Closed panel: both are quiet links that open it.
+  // Open panel: the current tab is underlined.
   const tabs = (
     <div className="flex items-center gap-5">
       {(["work", "notes"] as const).map((value) => (
         <button
           key={value}
           type="button"
-          onClick={() => setTab(value)}
-          aria-pressed={tab === value}
+          onClick={() => {
+            setTab(value);
+            setPanelOpen(true);
+          }}
+          aria-pressed={panelOpen && tab === value}
           className={`relative h-12 text-xs cursor-pointer transition-colors ${
-            tab === value ? "text-foreground" : "text-foreground-secondary hover:text-foreground"
+            panelOpen && tab === value
+              ? "text-foreground"
+              : "text-foreground-secondary hover:text-foreground"
           }`}
         >
           {value === "work" ? "Work" : "AI Notes"}
@@ -128,7 +163,7 @@ export default function Workspace({
           )}
           <span
             className={`absolute inset-x-0 bottom-0 h-px origin-left bg-foreground transition-transform duration-500 ${EASE} ${
-              tab === value ? "scale-x-100" : "scale-x-0"
+              panelOpen && tab === value ? "scale-x-100" : "scale-x-0"
             }`}
           />
         </button>
@@ -139,6 +174,15 @@ export default function Workspace({
   return (
     <WorkspaceContext.Provider value={actions}>
       <div data-workspace className="h-dvh w-full overflow-hidden lg:flex">
+        <div
+          ref={navRef}
+          style={{ left: navLeft ?? undefined }}
+          className={`fixed top-0 z-[55] hidden lg:block transition-[left,opacity] duration-[520ms] ${EASE} ${
+            navLeft === null ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          {tabs}
+        </div>
         {/* Chat */}
         <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <ChatPane
@@ -155,7 +199,7 @@ export default function Workspace({
               closeProject();
             }}
             panelButtons={
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 lg:hidden">
                 {(["work", "notes"] as const).map((value) => {
                   const active = panelOpen && tab === value;
                   return (
@@ -201,7 +245,7 @@ export default function Workspace({
               >
                 <ArrowLeft size={16} />
               </button>
-              {tabs}
+              <div className="lg:hidden">{tabs}</div>
             </div>
             <button
               type="button"
