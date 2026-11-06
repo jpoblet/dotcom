@@ -135,7 +135,7 @@ export default function Workspace({
         const turn = reply?.closest("section");
         const scroller = turn?.closest<HTMLElement>(".overflow-y-auto");
         if (!turn || !scroller) return;
-        scroller.scrollTo({ top: turn.offsetTop - 96, behavior: "smooth" });
+        scroller.scrollTo({ top: turn.offsetTop - 112, behavior: "smooth" });
       });
     },
     [closePanel],
@@ -161,7 +161,7 @@ export default function Workspace({
           type="button"
           onClick={() => selectTab(value)}
           aria-pressed={panelOpen && tab === value}
-          className={`group/tab relative flex h-16 items-center text-xs cursor-pointer transition-colors ${
+          className={`group/tab relative flex h-20 items-center text-xs cursor-pointer transition-colors ${
             panelOpen && tab === value
               ? "text-foreground"
               : "text-foreground-secondary hover:text-foreground"
@@ -263,7 +263,7 @@ export default function Workspace({
             panelOpen ? "translate-x-0 lg:static" : "translate-x-full lg:fixed lg:inset-y-0 lg:left-full"
           }`}
         >
-          <div className="flex h-16 shrink-0 items-center justify-between gap-4 px-4">
+          <div className="flex h-20 shrink-0 items-center justify-between gap-4 px-4">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -338,7 +338,6 @@ export default function Workspace({
                 topics={session.topics}
                 messages={session.messages}
                 name={name}
-                onOpenProject={openProject}
                 onJumpTo={jumpTo}
               />
             </div>

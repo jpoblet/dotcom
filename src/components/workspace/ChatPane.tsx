@@ -28,7 +28,7 @@ interface Props {
  * all things the agent can talk about.
  */
 /** Where a new question lands: just below the header. */
-const QUESTION_TOP = 96;
+const QUESTION_TOP = 112;
 
 const ASIDES = [
   "the music I listen to",
@@ -213,8 +213,8 @@ export default function ChatPane({
           to the top edge behind it. The controls move into the panel's
           header while it's open (desktop). */}
       {/* One size for the logo, panel open or closed. */}
-      <div className="absolute inset-x-0 top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
-        <Logo className="vt-logo h-9 fill-current shrink-0" />
+      <div className="absolute inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 px-4 sm:px-6">
+        <Logo className="vt-logo h-12 fill-current shrink-0" />
         <div className="flex items-center gap-1">{headerControls}</div>
       </div>
 
@@ -223,7 +223,7 @@ export default function ChatPane({
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={scrollRef}
-className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt-24"
+className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt-28"
           >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. */}

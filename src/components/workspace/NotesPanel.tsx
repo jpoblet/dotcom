@@ -29,7 +29,6 @@ interface Props {
   topics: NoteTopic[];
   messages: Message[];
   name: string;
-  onOpenProject: (slug: string) => void;
   /** Scrolls the chat to the reply where a topic came up. */
   onJumpTo: (messageId: string) => void;
 }
@@ -40,7 +39,7 @@ interface Props {
  * points so far, each jumping back to where it came up. Once a summary
  * exists, the talking points fold away under it.
  */
-export default function NotesPanel({ topics, messages, name, onOpenProject, onJumpTo }: Props) {
+export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) {
   const [summary, setSummary] = useState<string>();
   const [writing, setWriting] = useState(false);
   const [error, setError] = useState<string>();
@@ -173,28 +172,25 @@ export default function NotesPanel({ topics, messages, name, onOpenProject, onJu
           ) : (
             <ol className="animate-suggestion-in mt-3 border-t border-background-inverse/10">
               {topics.map((topic, index) => (
-                <li key={topic.label} className="flex items-center gap-2 border-b border-background-inverse/10">
+                <li key={topic.label} className="border-b border-background-inverse/10">
+                  {/* The whole row goes back to where it came up; an arrow
+                      shows on hover. */}
                   <button
                     type="button"
                     onClick={() => onJumpTo(topic.messageId)}
                     title="Go to this part of the conversation"
-                    className="group -mx-2 flex min-w-0 flex-1 items-center gap-4 rounded-md px-2 py-3.5 text-left transition-colors hover:bg-background-inverse/[0.04] cursor-pointer"
+                    className="group -mx-2 flex w-[calc(100%+1rem)] items-center gap-4 rounded-md px-2 py-3.5 text-left transition-colors hover:bg-background-inverse/[0.04] cursor-pointer"
                   >
                     <span className="w-6 text-xs tabular-nums text-foreground-secondary">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="flex-1 truncate text-sm">{topic.label}</span>
+                    <ArrowRight
+                      size={14}
+                      aria-hidden="true"
+                      className="-translate-x-1 text-foreground-secondary opacity-0 transition-[opacity,translate] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
+                    />
                   </button>
-                  {topic.project && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenProject(topic.project!)}
-                      className="group inline-flex shrink-0 items-center gap-1 text-xs text-foreground-secondary hover:text-foreground cursor-pointer"
-                    >
-                      Open
-                      <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  )}
                 </li>
               ))}
             </ol>
