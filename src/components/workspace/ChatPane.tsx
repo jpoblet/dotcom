@@ -8,57 +8,27 @@ import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
+import type { HeroPrompt as HeroPromptItem, Project } from "@/lib/content";
 import ConfirmDialog from "./ConfirmDialog";
 import DotGrille from "./DotGrille";
+import HeroPrompt from "./HeroPrompt";
 
 interface Props {
   name: string;
   title: string;
   email: string;
   links: { label: string; href: string }[];
-  starterQuestions: string[];
   tagline: string;
+  heroPrompts: HeroPromptItem[];
+  /** Case studies, shown as logos on the empty page. */
+  work: Pick<Project, "slug" | "name" | "logoMark">[];
+  onOpenProject: (slug: string) => void;
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
   reset: () => void;
   /** Buttons that open the Work and AI Notes panel. */
   panelButtons?: React.ReactNode;
-}
-
-/**
- * The intro ends with two of these, picked at random on each visit. All true,
- * all things the agent can talk about.
- */
-const ASIDES = [
-  "the music I listen to",
-  "the time I herded cattle in Namibia",
-  "why the dung beetle is my favourite animal",
-  "five months crossing Africa overland",
-  "surfing every day in Lanzarote",
-  "rescuing kangaroos in Melbourne",
-  "playing roller hockey for Australia",
-  "being an Espanyol fan in Barcelona",
-  "my love of Test cricket",
-  "playing guitar at my own wedding",
-  "my first triathlon at Elwood Beach",
-];
-
-/** Up to `count` random items (picked after mount, so hydration agrees). */
-function useRandomPick(items: string[], count: number): string[] {
-  const [picked, setPicked] = useState<string[]>([]);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const pool = [...items];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      setPicked(pool.slice(0, count));
-    });
-    return () => clearTimeout(timeout);
-  }, [items, count]);
-  return picked;
 }
 
 /**
@@ -71,8 +41,10 @@ export default function ChatPane({
   title,
   email,
   links,
-  starterQuestions,
   tagline,
+  heroPrompts,
+  work,
+  onOpenProject,
   messages,
   isLoading,
   send,
@@ -86,15 +58,6 @@ export default function ChatPane({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const starters = useRandomPick(starterQuestions, 4);
-  const picked = useRandomPick(ASIDES, 2);
-  const asides = picked.length ? picked : null;
-  const composerRef = useRef<HTMLDivElement>(null);
-  const suggestionsRef = useRef<HTMLUListElement>(null);
-  // How far the input is lifted from its place at the bottom (empty chat).
-  const [raise, setRaise] = useState(0);
-  // No transition until the first placement, so it doesn't slide in on load.
-  const [placed, setPlaced] = useState(false);
   const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
 
@@ -134,43 +97,6 @@ export default function ChatPane({
     observer.observe(intro);
     return () => observer.disconnect();
   }, []);
-
-  // Empty chat: lift the input to just under the intro, as long as there's
-  // room below it for the suggestions. Otherwise it stays at the bottom.
-  const isEmpty = messages.length === 0;
-  useEffect(() => {
-    const place = () => {
-      const intro = introRef.current;
-      const composer = composerRef.current;
-      const pane = composer?.parentElement;
-      if (!intro || !composer || !pane) return;
-      let next = 0;
-      if (isEmpty) {
-        // offsetTop ignores transforms, so this is the resting position even
-        // mid-animation.
-        const naturalTop = pane.getBoundingClientRect().top + composer.offsetTop;
-        const target = intro.getBoundingClientRect().bottom + 40;
-        // The suggestions hang below the input and must clear the footer,
-        // which starts where the input naturally ends.
-        const suggestionsRoom = (suggestionsRef.current?.offsetHeight ?? 184) + 24;
-        const floor = naturalTop + composer.offsetHeight;
-        const room = floor - (target + composer.offsetHeight + suggestionsRoom);
-        next = room >= 0 ? Math.max(0, naturalTop - target) : 0;
-      }
-      setRaise(next);
-    };
-    place();
-    const timeout = setTimeout(() => setPlaced(true), 50);
-    const observer = new ResizeObserver(place);
-    if (introRef.current) observer.observe(introRef.current);
-    if (suggestionsRef.current) observer.observe(suggestionsRef.current);
-    window.addEventListener("resize", place);
-    return () => {
-      clearTimeout(timeout);
-      observer.disconnect();
-      window.removeEventListener("resize", place);
-    };
-  }, [isEmpty]);
 
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
@@ -237,48 +163,29 @@ export default function ChatPane({
             and fading in towards the text. Scrolls away with the intro. */}
         <DotGrille className="absolute top-0 right-0 h-[min(85vh,52rem)] w-[min(50%,40rem)] [mask-image:radial-gradient(ellipse_at_100%_40%,black_15%,transparent_72%)]" />
         <div className="w-full">
-        {/* The intro opens the conversation and stays at the top of it. */}
-        <div ref={introRef} className={`relative mx-auto max-w-[60rem] animate-suggestion-in ${empty ? "pt-[5vh] lg:pt-[8vh]" : "pt-6"}`}>
-          <div className="relative">
-            {/* The name on the left, the tagline beside it on the right. */}
-            <div className="grid gap-8 sm:grid-cols-[1fr_auto] sm:items-start sm:gap-16">
-              <div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
-                  Hi, I&apos;m {name.split(" ")[0]}.
-                </h1>
-                <p className="mt-8 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
-                  I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
-                  <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
-                    {(asides ?? ASIDES.slice(0, 2)).join(", ")}
-                  </span>
-                  : anything, really.
-                </p>
-              </div>
-              {/* Secondary to the name: small, muted, top-aligned with it. */}
-              <p className="text-sm leading-[1.6] text-foreground-secondary sm:max-w-[16rem] sm:pt-2">
-                {tagline}
-              </p>
-            </div>
-
-            {/* No room to lift the input (small screens): suggestions here. */}
-            {empty && placed && !raise && (
-              <ul className="mt-8 space-y-1.5">
-                {starters.map((question, index) => (
-                  <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-                    <button
-                      type="button"
-                      onClick={() => submit(question, "starter")}
-                      className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-                    >
-                      <span className="text-foreground-secondary group-hover:text-foreground">→</span>
-                      {question}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+        {empty ? (
+          /* The empty page is one sentence: "Ask me about ___". */
+          <div
+            ref={introRef}
+            className="relative mx-auto flex min-h-full max-w-[60rem] flex-col pt-[4vh] lg:pt-[10vh] animate-suggestion-in"
+          >
+            <HeroPrompt
+              name={name}
+              tagline={tagline}
+              prompts={heroPrompts}
+              work={work}
+              onAsk={(text, source) => submit(text, source)}
+              onOpenProject={onOpenProject}
+              disabled={isLoading}
+            />
           </div>
-        </div>
+        ) : (
+          /* Once talking: who's answering, at the top of the history. */
+          <div ref={introRef} className="relative mx-auto max-w-[60rem] pt-6">
+            <p className="font-heading text-3xl sm:text-4xl font-bold tracking-[-0.02em]">{name}</p>
+            <p className="mt-3 max-w-xl text-sm leading-[1.7] text-foreground-secondary">{tagline}</p>
+          </div>
+        )}
         {!empty && (
           <>
           {/* Where the conversation begins: a title and a gentle wavy rule
@@ -345,15 +252,10 @@ export default function ChatPane({
         </div>
       </div>
 
-      {/* Input. On the empty chat it sits high, right under the intro, with
-          the suggestions below it; the first question sends it gliding down
-          to its place at the bottom. */}
-      <div
-        ref={composerRef}
-        style={{ transform: raise ? `translateY(-${raise}px)` : undefined }}
-        className={`relative z-10 mx-auto w-full max-w-[calc(60rem+2rem)] shrink-0 px-4 ${
-          placed ? "transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
-      >
+      {/* Input, once the conversation has started (the empty page asks in
+          its own big field). */}
+      {!empty && (
+      <div className="relative z-10 mx-auto w-full max-w-[calc(60rem+2rem)] shrink-0 px-4 animate-suggestion-in">
         {/* One clean field: hairline border, the send button inline. */}
         <form
           onSubmit={(e) => {
@@ -412,30 +314,8 @@ export default function ChatPane({
             <ArrowUp size={16} strokeWidth={2.25} />
           </button>
         </form>
-        {/* Suggestions below the lifted box (empty chat). When there's no
-            room to lift it, they sit in the intro instead. */}
-        <ul
-          ref={suggestionsRef}
-          aria-hidden={!(empty && raise)}
-          className={`absolute inset-x-4 top-full mt-6 space-y-1.5 transition-opacity duration-300 ${
-            empty && raise ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
-        >
-          {starters.map((question, index) => (
-            <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-              <button
-                type="button"
-                tabIndex={empty && raise ? 0 : -1}
-                onClick={() => submit(question, "starter")}
-                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-              >
-                <span className="text-foreground-secondary group-hover:text-foreground">→</span>
-                {question}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
+      )}
 
       {/* Footer: the full width of the chat column. */}
       <div className="shrink-0 px-4 pt-3 pb-3">

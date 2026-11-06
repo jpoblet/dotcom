@@ -71,3 +71,38 @@ starter_questions:
   - How do you work with engineers?
   - Do you code as well as design?
   - What's your design process like?
+
+# The home page reads "Ask me about ___" and types these into the blank, one
+# after another. `about` finishes that sentence; `question` is what gets
+# asked when the visitor presses Enter on it. Mostly work: most visitors
+# come for that. `personal` ones are mixed in now and then.
+hero_prompts:
+  - about: the courier app I designed at Glovo
+    question: Tell me about the Glovo courier app
+  - about: being the first designer at Rillet
+    question: What was it like being the first designer at Rillet?
+  - about: AthleteID
+    question: What is AthleteID?
+  - about: what a Lead Product Designer does at Veriff
+    question: What does a Lead Product Designer do at Veriff?
+  - about: how I work with engineers
+    question: How do you work with engineers?
+  - about: my design process
+    question: What's your design process like?
+  - about: Legend Numbers
+    question: What is Legend Numbers?
+  - about: What The Flag
+    question: Tell me about What The Flag
+  - about: why I call myself a product builder
+    question: What do you mean by product builder?
+  - about: how I got into product design
+    question: How did you get into product design?
+  - about: the time I herded cattle in Namibia
+    question: What was it like herding cattle in Namibia?
+    personal: true
+  - about: crossing Africa overland
+    question: What was it like crossing Africa overland?
+    personal: true
+  - about: playing roller hockey for Australia
+    question: Did you really play roller hockey for Australia?
+    personal: true

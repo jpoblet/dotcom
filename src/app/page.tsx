@@ -2,7 +2,7 @@ import Workspace from "@/components/workspace/Workspace";
 import { getCurrentRole, getProfile, getProjects, hasPage } from "@/lib/content";
 
 export default function Home() {
-  const { name, title, email, links, starter_questions } = getProfile();
+  const { name, title, email, links, hero_prompts } = getProfile();
   const projects = getProjects();
   const current = getCurrentRole();
   // One line beside the name: what I do, where, and what now. All from /content.
@@ -18,7 +18,7 @@ export default function Home() {
       title={title}
       email={email}
       links={links}
-      starterQuestions={starter_questions ?? []}
+      heroPrompts={hero_prompts ?? []}
       tagline={tagline}
       caseStudies={projects.filter((p) => p.type !== "client" && hasPage(p))}
       websites={projects.filter((p) => p.type === "client")}

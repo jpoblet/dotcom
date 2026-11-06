@@ -23,6 +23,16 @@ export interface Profile {
   conversation_starters?: string[];
   /** Questions suggested on the empty chat. */
   starter_questions?: string[];
+  /** "Ask me about ___" on the home page; see content/profile.yaml. */
+  hero_prompts?: HeroPrompt[];
+}
+
+export interface HeroPrompt {
+  /** Finishes "Ask me about…". */
+  about: string;
+  /** What gets asked when the visitor picks it. */
+  question: string;
+  personal?: boolean;
 }
 
 export interface Role {
