@@ -12,13 +12,13 @@ interface Props {
 
 /**
  * A live website, shown as a product shot: the desktop screenshot in a
- * plain rounded shot and, overlapping its corner, a phone showing another part
+ * wireframe browser and, overlapping its corner, a phone showing another part
  * of the site, to show it's responsive. Sizes are relative, so the
  * composition scales down on phones.
  */
 export default function DeviceShowcase({ name, url, desktopImage, mobileImage, colors = {} }: Props) {
   return (
-    <div className="relative aspect-[25/14]">
+    <div className="relative aspect-[25/15]">
       <BrowserFrame
         src={desktopImage}
         tint={colors[desktopImage]}
