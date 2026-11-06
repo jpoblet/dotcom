@@ -253,7 +253,7 @@ export default function ChatPane({
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={scrollRef}
-className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 @[72rem]:pt-24"
+className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt-24"
           >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. */}
