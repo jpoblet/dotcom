@@ -168,8 +168,19 @@ export default function ChatPane({
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Logo className="h-6 fill-current shrink-0" />
-          <span className="flex min-w-0 items-center gap-2 lg:hidden">
-            <span className="truncate font-heading text-sm font-bold">{name}</span>
+          {/* Phones: always here, standing in for the card. Desktop: arrives
+              as the card folds away for the panel, a beat after it starts. */}
+          <span
+            className={`flex min-w-0 items-center gap-2 lg:transition-[opacity,translate,filter] lg:duration-500 ${EASE} ${
+              panelOpen
+                ? "lg:translate-y-0 lg:opacity-100 lg:blur-0 lg:delay-200"
+                : "lg:pointer-events-none lg:translate-y-3 lg:opacity-0 lg:blur-[3px] lg:delay-0"
+            }`}
+          >
+            <span className="truncate text-sm">
+              <span className="font-heading font-bold">{name}</span>
+              <span className="hidden text-foreground-secondary lg:inline"> · {title}</span>
+            </span>
             <Online />
           </span>
         </div>
@@ -197,7 +208,12 @@ export default function ChatPane({
             panelOpen ? "w-0 opacity-0" : "w-[clamp(20rem,38%,34rem)] opacity-100"
           }`}
         >
-          <div className="flex h-full w-[clamp(20rem,38vw,34rem)] flex-col gap-8 overflow-y-auto px-10 pt-[2.375rem] pb-8">
+          {/* Shrinks up towards the header as it goes, where the name reappears. */}
+          <div
+            className={`flex h-full w-[clamp(20rem,38vw,34rem)] origin-top-left flex-col gap-8 overflow-y-auto px-10 pt-[2.375rem] pb-8 transition-[scale,translate,filter] duration-[520ms] ${EASE} ${
+              panelOpen ? "-translate-y-6 scale-[0.85] blur-[2px]" : "translate-y-0 scale-100 blur-0"
+            }`}
+          >
             <p className="flex items-center gap-2 text-sm">
               <Online />
               Online · answers instantly
