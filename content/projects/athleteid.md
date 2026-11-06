@@ -5,7 +5,7 @@ type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "One athlete profile in the cloud for entering sports competitions: a browser extension fills race registration forms, and races using Register with AthleteID take your details in one click."
 company: ""
-role: "Design and development"
+role: "Founder, design and development"
 year: "2026"
 tags: [Product, Web app, Chrome extension, Design system, Sport]
 # Path under /public, e.g. /images/projects/athleteid.jpg

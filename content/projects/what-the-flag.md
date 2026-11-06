@@ -5,7 +5,7 @@ type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "A native iOS game about flags: every flag starts blank and you colour it in, one section at a time, with five lives to get it right."
 company: ""
-role: "Design and development"
+role: "Founder, design and development"
 year: "2026"
 tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
@@ -25,6 +25,8 @@ mobile_gallery:
 accent: "#E63946"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/what-the-flag.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/what-the-flag.png"
 brand_background: "#BDCCD6"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

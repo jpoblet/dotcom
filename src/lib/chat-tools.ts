@@ -9,6 +9,7 @@ import {
   getCardProjects,
   getExperience,
   getProfile,
+  getProjects,
   toProjectCard,
 } from "./content";
 import type { Widget } from "./widgets";
@@ -29,6 +30,7 @@ const NO_INPUT: Tool["input_schema"] = {
 export function buildTools(): Tool[] {
   const first = getProfile().name.split(" ")[0];
   const slugs = getCardProjects().map((p) => p.slug);
+  const allSlugs = getProjects().map((p) => p.slug).sort();
   const tools: Tool[] = [];
 
   if (slugs.length > 0) {
@@ -70,18 +72,42 @@ export function buildTools(): Tool[] {
   );
 
   tools.push({
-    name: SUGGEST_FOLLOW_UPS,
-    description: `Offer the visitor two or three follow-up questions as tappable chips under your reply. Call it once per reply, as the very last thing, after your written answer. Write each question as the visitor would ask it, short (under 60 characters), in the visitor's language, about something the knowledge base can actually answer and that hasn't been covered yet. Skip it when you are declining an off-topic request.`,
+    name: WRAP_UP,
+    description: `Call once per reply, as the very last thing, after your written answer. It does two things: offers the visitor two or three follow-up questions as tappable chips, and records the topics this reply covered in the visitor's notes. Skip it when you are declining an off-topic request.`,
     input_schema: {
       type: "object",
       properties: {
         questions: {
           type: "array",
           items: { type: "string" },
-          description: "Two or three short follow-up questions.",
+          description: `Two or three follow-up questions, written as the visitor would ask them: short (under 60 characters), in the visitor's language, about something the knowledge base can answer and that hasn't been covered yet. Once the conversation is underway, make one of them personal (travels, sport, life outside work) so the visitor discovers more than the CV.`,
+        },
+        topics: {
+          type: "array",
+          description: `The one to three topics this reply was about, for the visitor's notes. Reuse the exact same label when a topic comes up again.`,
+          items: {
+            type: "object",
+            properties: {
+              label: {
+                type: "string",
+                description: `Two to four words naming the topic, e.g. "Africa overland trip", "Rillet", "What The Flag".`,
+              },
+              note: {
+                type: "string",
+                description: `One sentence (under 160 characters) of what the visitor learned, in the third person about ${first}, in the visitor's language. Only facts from your reply.`,
+              },
+              project: {
+                type: "string",
+                enum: ["", ...allSlugs],
+                description: "The project's slug when the topic is one of the projects, otherwise an empty string.",
+              },
+            },
+            required: ["label", "note", "project"],
+            additionalProperties: false,
+          },
         },
       },
-      required: ["questions"],
+      required: ["questions", "topics"],
       additionalProperties: false,
     },
     strict: true,
@@ -91,7 +117,17 @@ export function buildTools(): Tool[] {
   return tools;
 }
 
-export const SUGGEST_FOLLOW_UPS = "suggest_follow_ups";
+export const WRAP_UP = "wrap_up";
+
+export interface Topic {
+  label: string;
+  note: string;
+  /** Project slug, when the topic is a project. */
+  project?: string;
+}
+
+const clean = (value: unknown, max: number) =>
+  typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, max) : "";
 
 /** Cleans the follow-up questions Claude suggested (never trusted as-is). */
 export function parseFollowUps(input: unknown): string[] {
@@ -101,6 +137,25 @@ export function parseFollowUps(input: unknown): string[] {
     .filter((q): q is string => typeof q === "string")
     .map((q) => q.replace(/\s+/g, " ").trim())
     .filter((q) => q.length > 0 && q.length <= 100)
+    .slice(0, 3);
+}
+
+/** Cleans the topics Claude recorded for the visitor's notes. */
+export function parseTopics(input: unknown): Topic[] {
+  const raw = (input as { topics?: unknown } | null)?.topics;
+  if (!Array.isArray(raw)) return [];
+  const slugs = new Set(getProjects().map((p) => p.slug));
+  return raw
+    .map((item) => {
+      const { label, note, project } = (item ?? {}) as Record<string, unknown>;
+      const slug = clean(project, 80);
+      return {
+        label: clean(label, 60),
+        note: clean(note, 240),
+        ...(slugs.has(slug) ? { project: slug } : {}),
+      };
+    })
+    .filter((topic) => topic.label && topic.note)
     .slice(0, 3);
 }
 

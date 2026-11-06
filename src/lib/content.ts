@@ -74,10 +74,14 @@ export interface Project {
   /** More screenshots of the live site, for the case study. */
   gallery: string[];
   mobileGallery: string[];
+  /** Background colour of each screenshot (see npm run screen-colors). */
+  screenColors: Record<string, string>;
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
   logo: string;
+  /** Transparent version of the logo, drawn in the text colour. */
+  logoMark: string;
   brandBackground: string;
   /** Public URL when the project itself is live (website, app). */
   liveUrl: string;
@@ -240,10 +244,29 @@ export function getProjects(): Project[] {
   });
 }
 
+/** content/screen-colors.json, written by scripts/screen-colors.mjs. */
+function readScreenColors(): Record<string, string> {
+  try {
+    return JSON.parse(readFile("screen-colors.json")) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
 function readProjects(): Project[] {
+  const allColors = readScreenColors();
   return listMarkdown("projects").map((file) => {
     const { data, body } = readMarkdown("projects", file);
+    const images = [
+      str(data.thumbnail),
+      str(data.mobile_image),
+      ...(Array.isArray(data.gallery) ? data.gallery.map(str) : []),
+      ...(Array.isArray(data.mobile_gallery) ? data.mobile_gallery.map(str) : []),
+    ].filter(Boolean);
     return {
+      screenColors: Object.fromEntries(
+        images.filter((src) => allColors[src]).map((src) => [src, allColors[src]]),
+      ),
       slug: file.replace(/\.md$/, ""),
       name: str(data.name),
       type: (PROJECT_TYPES.some((t) => t.type === data.type)
@@ -260,6 +283,7 @@ function readProjects(): Project[] {
       mobileGallery: Array.isArray(data.mobile_gallery) ? data.mobile_gallery.map(str) : [],
       accent: str(data.accent) || "#64748B",
       logo: str(data.logo),
+      logoMark: str(data.logo_mark) || str(data.logo),
       brandBackground: str(data.brand_background) || "#FFFFFF",
       liveUrl: str(data.live_url),
       draft: data.draft !== false,
@@ -300,6 +324,7 @@ export function toProjectCard(project: Project): ProjectCardData {
     thumbnail: project.thumbnail,
     accent: project.accent,
     logo: project.logo,
+    logoMark: project.logoMark,
     brandBackground: project.brandBackground,
     href: project.draft ? undefined : `/projects/${project.slug}`,
   };

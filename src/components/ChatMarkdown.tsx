@@ -1,23 +1,45 @@
+"use client";
+
+import type { ReactNode } from "react";
 import Link from "next/link";
 import ReactMarkdown, { type Components } from "react-markdown";
+import { projectSlugFromHref, useWorkspace } from "@/components/workspace/WorkspaceContext";
 
-const components: Components = {
-  a({ href = "", children }) {
-    // Site pages (e.g. /projects/okasewa) navigate in-app; everything else
-    // opens in a new tab. No prefetch: answers can mention many pages.
-    if (href.startsWith("/")) {
-      return (
-        <Link href={href} prefetch={false}>
-          {children}
-        </Link>
-      );
-    }
+function MarkdownLink({ href = "", children }: { href?: string; children?: ReactNode }) {
+  const workspace = useWorkspace();
+  const slug = projectSlugFromHref(href);
+  // In the split workspace, project links open beside the chat.
+  if (workspace && slug) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
+      <a
+        href={href}
+        onClick={(event) => {
+          event.preventDefault();
+          workspace.openProject(slug);
+        }}
+      >
         {children}
       </a>
     );
-  },
+  }
+  // Site pages (e.g. /projects/okasewa) navigate in-app; everything else
+  // opens in a new tab. No prefetch: answers can mention many pages.
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} prefetch={false}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
+}
+
+const components: Components = {
+  a: ({ href, children }) => <MarkdownLink href={href}>{children}</MarkdownLink>,
 };
 
 /**

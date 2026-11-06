@@ -1,11 +1,11 @@
 ---
-name: Glovo - Delivery Flow
+name: "Delivery Flow"
 # work: a case study from a job. personal: something I made myself. client: a site made for a client.
 type: work
 # One sentence shown on project cards and given to the AI.
 summary: "A redesign of the delivery flow in Glovo's courier app, the screens couriers rely on during every order, built around one idea: take the courier from point A to point B."
 company: "Glovo"
-role: "Project lead"
+role: "Product Designer"
 year: "2020 - 2021"
 tags: [Mobile app, User research, UX, UI, iOS and Android]
 # Path under /public, e.g. /images/projects/glovo-delivery-flow.jpg
@@ -14,6 +14,8 @@ thumbnail: ""
 accent: "#FFC244"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/glovo-delivery-flow.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/glovo-delivery-flow-symbol.png"
 brand_background: "#FFC042"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

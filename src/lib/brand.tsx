@@ -9,7 +9,7 @@ import path from "node:path";
 // globals.css; the image renderer doesn't understand oklch().
 export const BRAND = {
   ink: "#030712",
-  paper: "#fbf7ef",
+  paper: "#f8fafc",
   muted: "#6b7280",
 };
 
@@ -34,15 +34,15 @@ const FONT_DIR = path.join(process.cwd(), "src/assets/fonts");
 export function brandFonts() {
   return [
     {
-      name: "DM Mono",
-      data: fs.readFileSync(path.join(FONT_DIR, "DMMono-Regular.ttf")),
+      name: "DM Sans",
+      data: fs.readFileSync(path.join(FONT_DIR, "DMSans-400.woff")),
       weight: 400 as const,
       style: "normal" as const,
     },
     {
-      name: "DM Mono",
-      data: fs.readFileSync(path.join(FONT_DIR, "DMMono-Medium.ttf")),
-      weight: 500 as const,
+      name: "DM Sans",
+      data: fs.readFileSync(path.join(FONT_DIR, "DMSans-700.woff")),
+      weight: 700 as const,
       style: "normal" as const,
     },
   ];

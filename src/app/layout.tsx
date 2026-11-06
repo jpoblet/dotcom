@@ -1,16 +1,9 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { DM_Mono } from "next/font/google";
 import Script from "next/script";
 import SiteFooter from "@/components/SiteFooter";
+import { fontVariables } from "./fonts";
 import { getProfile } from "@/lib/content";
-
-const dmMono = DM_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-dm-mono",
-  display: "swap",
-});
 
 const profile = getProfile();
 
@@ -61,6 +54,7 @@ export const viewport: Viewport = {
 // a light flash. Must stay in sync with components/ThemeSwitcher.tsx.
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
+
 // Umami analytics (cookieless). The website id is public by design. Events
 // are only recorded on the live domains, so local runs and previews don't
 // count.
@@ -75,11 +69,13 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={dmMono.variable} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
-      <body className="font-sans">
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
+      <body>
+        {/* Next puts beforeInteractive scripts in the head, ahead of
+            hydration, so React never renders a raw <script> itself. */}
+        <Script id="theme" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
         {children}
         <SiteFooter email={profile.email} links={profile.links} />
         {modal}

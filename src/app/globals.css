@@ -5,13 +5,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-sans: var(--font-dm-mono);
+  --font-sans: var(--font-dm-sans);
+  --font-heading: var(--font-dm-sans);
+  --font-label: var(--font-dm-sans);
 
   --polar: oklch(100% 0 0);
-  /* Light theme background: a soft warm cream instead of pure white, and a
-     slightly deeper cream for hover states and secondary surfaces. */
-  --cream: oklch(98.2% 0.013 85);
-  --cream-200: oklch(95.4% 0.018 85);
+  /* Light theme: pure white, with a cool light grey for hover states and
+     secondary surfaces. */
+  --paper: oklch(100% 0 0);
+  --paper-200: oklch(96.8% 0.004 250);
+  /* Secondary text. Both pass WCAG AA (4.5:1) on every background they sit
+     on: light ~6:1 on white and ~5.5:1 on paper-200; dark ~7:1 on
+     boulder-900 and ~5.9:1 on boulder-800. */
+  --muted-light: oklch(0.5 0.027 264);
+  --muted-dark: oklch(0.72 0.022 261);
 
   --apricot-50: oklch(97.44% 0.016 70.54);
   --apricot-100: oklch(94.43% 0.036 70.02);
@@ -41,12 +48,23 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
-  --color-background: var(--cream);
-  --color-background-secondary: var(--cream-200);
+  /* DM Mono, for names and titles, roles, numbers, dates and addresses. */
+  --font-mono: var(--font-dm-mono);
+
+  /* Type scale: nothing below 14px; body text at 15-16px. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.55;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.65;
+  --text-base: 1rem;
+  --text-base--line-height: 1.7;
+
+  --color-background: var(--paper);
+  --color-background-secondary: var(--paper-200);
   --color-background-inverse: var(--boulder-950);
   --color-foreground: var(--boulder-950);
-  --color-foreground-secondary: var(--boulder-500);
-  --color-foreground-inverse: var(--cream);
+  --color-foreground-secondary: var(--muted-light);
+  --color-foreground-inverse: var(--paper);
   --color-accent: var(--boulder-950);
 }
 
@@ -55,7 +73,7 @@
   --color-background-secondary: var(--boulder-800);
   --color-background-inverse: var(--polar);
   --color-foreground: var(--boulder-100);
-  --color-foreground-secondary: var(--boulder-500);
+  --color-foreground-secondary: var(--muted-dark);
   --color-foreground-inverse: var(--boulder-950);
   --color-accent: var(--polar);
 }
@@ -67,11 +85,21 @@ html.dark {
   color-scheme: dark;
 }
 
+/* DM Sans is the main face. DM Mono (.font-mono) is kept for the name and
+   its subtitle, project names and roles, numbers, dates and addresses;
+   figures set in columns (.tabular-nums) take it too. DM Mono has no bold:
+   bold mono text takes its medium weight rather than a faked bold. */
+html {
+  font-synthesis-weight: none;
+}
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-weight: 300;
+}
+.tabular-nums {
+  font-family: var(--font-mono);
 }
 
 @keyframes fade-in {
@@ -358,3 +386,153 @@ body {
   font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
   line-height: 1.55;
 }
+
+/* The split workspace has its own footer in the chat column. */
+body:has([data-workspace]) [data-site-footer] {
+  display: none;
+}
+
+/* "Thinking…": a light sweeping across the text. */
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.shimmer-text {
+  background: linear-gradient(
+      90deg,
+      var(--color-foreground-secondary) 30%,
+      var(--color-foreground) 50%,
+      var(--color-foreground-secondary) 70%
+    )
+    0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Headings in AI-written text (e.g. the conversation summary). */
+.chat-message :is(h1, h2, h3) {
+  font-weight: 700;
+  line-height: 1.35;
+}
+.chat-message h1 {
+  font-size: 1rem;
+}
+.chat-message :is(h2, h3) {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-foreground-secondary);
+}
+
+/* Workspace type: smaller body text with generous line spacing. */
+[data-workspace] .chat-message {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+[data-workspace] .case-study {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+[data-workspace] :is(.chat-message, .case-study) > * + * {
+  margin-top: 1.1em;
+}
+[data-workspace] :is(.chat-message, .case-study) li + li {
+  margin-top: 0.4rem;
+}
+
+/* Labels: the mono face, all caps, lightly tracked. */
+:is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Dialogs settle in: a slight lift and scale. */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-dialog-in {
+  animation: dialog-in 0.2s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* "Conversation started here": a wavy rule in the current colour, drawn in
+   from the left. */
+.wiggle-rule {
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6' viewBox='0 0 12 6'%3E%3Cpath d='M0 3 Q 3 0.6 6 3 T 12 3' fill='none' stroke='black' stroke-width='1.1'/%3E%3C/svg%3E") repeat-x left center / 12px 6px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6' viewBox='0 0 12 6'%3E%3Cpath d='M0 3 Q 3 0.6 6 3 T 12 3' fill='none' stroke='black' stroke-width='1.1'/%3E%3C/svg%3E") repeat-x left center / 12px 6px;
+  animation: wiggle-draw 1.2s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@keyframes wiggle-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wiggle-rule { animation: none; }
+}
+
+/* Opening and closing the side panel (desktop) runs as a view transition.
+   Each named piece moves from its old place to its new one: the tabs cross
+   into the panel, the chat glides aside, and the panel slides in from the
+   right. See Workspace.tsx. */
+.vt-panel { view-transition-name: jp-panel; }
+.vt-chat { view-transition-name: jp-chat; }
+.vt-controls { view-transition-name: jp-controls; }
+/* The logo moves as itself rather than fading between two copies. */
+.vt-logo { view-transition-name: jp-logo; }
+/* The footer's two ends move with the chat as themselves, rather than
+   fading between two copies at different widths. */
+.vt-foot-start { view-transition-name: jp-foot-start; }
+.vt-foot-end { view-transition-name: jp-foot-end; }
+/* One element moving and scaling, not two cross-fading: drop the old
+   picture and carry the new one from the old place and size to its own.
+   The tabs too, so they never fade out on the way to the panel. */
+/* These travel above the sliding panel and the chat, so nothing passes
+   over them on the way. */
+::view-transition-group(jp-logo),
+::view-transition-group(jp-controls),
+::view-transition-group(jp-foot-start),
+::view-transition-group(jp-foot-end) {
+  z-index: 10;
+}
+::view-transition-old(jp-logo),
+::view-transition-old(jp-controls),
+::view-transition-old(jp-foot-start),
+::view-transition-old(jp-foot-end) {
+  display: none;
+}
+::view-transition-new(jp-logo),
+::view-transition-new(jp-controls),
+::view-transition-new(jp-foot-start),
+::view-transition-new(jp-foot-end) {
+  animation: none;
+  width: 100%;
+  height: 100%;
+}
+
+::view-transition-group(*) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+/* The chat keeps its size while its box moves: no stretching, it slides. */
+::view-transition-old(jp-chat),
+::view-transition-new(jp-chat) {
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  object-position: center top;
+}
+/* The panel waits just past the right edge while closed, so its own
+   morph slides it in and out. */

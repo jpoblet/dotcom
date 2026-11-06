@@ -4,6 +4,7 @@
  */
 import type { ChatStreamEvent } from "@/app/api/chat/route";
 import type { QuestionSource } from "@/lib/chat-log";
+import type { Topic } from "@/lib/chat-tools";
 import type { Widget } from "@/lib/widgets";
 
 export interface Message {
@@ -16,6 +17,8 @@ export interface Message {
   isError?: boolean;
   /** Follow-up questions the AI suggested after this reply. */
   suggestions?: string[];
+  /** Topics this reply covered, for the visitor's notes. */
+  topics?: Topic[];
   /** Cards the AI showed under this reply (project, timeline, contact). */
   widgets?: Widget[];
 }

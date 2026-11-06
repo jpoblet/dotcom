@@ -14,7 +14,8 @@ const OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 /**
  * Light / dark / system switcher. The inline script in layout.tsx applies
  * the saved theme before first paint; this keeps it in sync afterwards.
- * The menu opens upwards, since the switcher lives in the footer.
+ * The menu opens upwards (the switcher lives in the footer), aligned to the
+ * button's right edge so it stays on screen, and above the chat input.
  */
 export default function ThemeSwitcher() {
   const [theme, setTheme] = useState<Theme | null>(null);
@@ -72,13 +73,13 @@ export default function ThemeSwitcher() {
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className={`-my-2 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${
+        className={`-my-2.5 flex items-center gap-2 px-3 sm:px-3.5 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${
           isOpen ? "border-background-inverse" : "border-background-inverse/10"
         }`}
       >
-        <Current size={14} />
+        <Current size={17} />
         <ChevronDown
-          size={12}
+          size={14}
           className={`hidden sm:block transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
@@ -86,7 +87,7 @@ export default function ThemeSwitcher() {
       {isOpen && (
         <div
           role="menu"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
+          className="absolute bottom-full right-0 z-50 mb-3 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
         >
           {OPTIONS.map(({ value, label, icon: Icon }) => (
             <button

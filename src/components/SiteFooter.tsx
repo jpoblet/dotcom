@@ -12,7 +12,7 @@ interface SiteFooterProps {
  */
 export default function SiteFooter({ email, links }: SiteFooterProps) {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-background before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent px-4 sm:px-10 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] text-[0.6250rem] sm:text-xs text-foreground">
+    <footer data-site-footer className="fixed bottom-0 left-0 right-0 z-50 bg-background before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent px-4 sm:px-10 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] text-xs text-foreground">
       {/* Phones: spread evenly (a perfectly centred switcher would crop the
           email). Larger screens: switcher exactly in the centre. */}
       <div className="h-11 sm:h-12 flex justify-between items-center gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-3">

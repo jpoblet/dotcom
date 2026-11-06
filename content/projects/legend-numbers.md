@@ -5,7 +5,7 @@ type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "A Chrome extension that spots shirt numbers on any website and, on hover, shows the sporting legends who wore them."
 company: ""
-role: "Design and development"
+role: "Founder, design and development"
 year: "2026"
 tags: [Chrome extension, Sport, Data curation, Privacy first]
 # Path under /public, e.g. /images/projects/legend-numbers.jpg
@@ -25,6 +25,8 @@ mobile_gallery:
 accent: "#16A34A"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/legend-numbers.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/legend-numbers-symbol.png"
 brand_background: "#13161D"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

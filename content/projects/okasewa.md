@@ -16,6 +16,8 @@ mobile_image: "/images/projects/okasewa-mobile.jpg"
 accent: "#B45309"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/okasewa.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/okasewa.png"
 brand_background: "#DBF0DE"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

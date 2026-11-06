@@ -19,7 +19,7 @@ function toItem(project: Project, href?: string, external = false): IndexItem {
 
 function SectionTitle({ title, count }: { title: string; count: number }) {
   return (
-    <div className="flex items-baseline justify-between text-xs uppercase tracking-[0.12em]">
+    <div className="flex items-baseline justify-between text-xs font-medium ">
       <h2 className="font-medium">{title}</h2>
       <span className="tabular-nums text-foreground-secondary">
         {String(count).padStart(2, "0")}

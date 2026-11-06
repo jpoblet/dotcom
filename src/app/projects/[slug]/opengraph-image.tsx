@@ -55,7 +55,7 @@ export default async function ProjectImage({
           display: "flex",
           background: BRAND.ink,
           color: BRAND.paper,
-          fontFamily: "DM Mono",
+          fontFamily: "DM Sans",
         }}
       >
         <div
@@ -78,7 +78,7 @@ export default async function ProjectImage({
             <div
               style={{
                 fontSize: thumb ? 52 : 64,
-                fontWeight: 500,
+                fontWeight: 700,
                 letterSpacing: -1.5,
                 lineHeight: 1.15,
               }}

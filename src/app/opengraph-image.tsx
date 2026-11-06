@@ -21,12 +21,12 @@ export default function OpengraphImage() {
           padding: 80,
           background: BRAND.ink,
           color: BRAND.paper,
-          fontFamily: "DM Mono",
+          fontFamily: "DM Sans",
         }}
       >
         <JLogo height={140} color={BRAND.paper} />
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ fontSize: 72, fontWeight: 500, letterSpacing: -2 }}>
+          <div style={{ fontSize: 72, fontWeight: 700, letterSpacing: -2 }}>
             {profile.name}
           </div>
           <div style={{ fontSize: 34, color: BRAND.muted }}>

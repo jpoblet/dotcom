@@ -16,6 +16,8 @@ mobile_image: "/images/projects/medal-mobile.jpg"
 accent: "#D4A017"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/medal.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/medal.png"
 brand_background: "#1C2229"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

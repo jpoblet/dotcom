@@ -50,7 +50,7 @@ function mediaBlocks(project: Project): ReactNode[] {
   if (first) {
     blocks.push(
       <figure>
-        <BrowserFrame src={first} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 960px, 100vw" />
+        <BrowserFrame src={first} tint={project.screenColors[first]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 960px, 100vw" />
       </figure>,
     );
   }
@@ -59,7 +59,7 @@ function mediaBlocks(project: Project): ReactNode[] {
       <figure>
         <div className="grid grid-cols-3 gap-[4%] px-[6%]">
           {project.mobileGallery.slice(0, 3).map((src) => (
-            <PhoneFrame key={src} src={src} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
+            <PhoneFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
           ))}
         </div>
         {caption("The same site on a phone.")}
@@ -70,7 +70,7 @@ function mediaBlocks(project: Project): ReactNode[] {
     blocks.push(
       <figure className="grid gap-6 sm:grid-cols-2">
         {rest.map((src) => (
-          <BrowserFrame key={src} src={src} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 470px, 100vw" />
+          <BrowserFrame key={src} src={src} tint={project.screenColors[src]} url={url} alt={`${project.name}: a section of the website`} sizes="(min-width: 1008px) 470px, 100vw" />
         ))}
       </figure>,
     );
@@ -118,7 +118,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
       <header className="relative px-6 sm:px-10 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:pb-16">
         <div className="relative mx-auto max-w-[90rem]">
           <div className="flex items-center justify-between gap-6">
-            <p className="text-xs uppercase tracking-[0.14em] opacity-70">
+            <p className="text-xs font-medium text-foreground-secondary">
               {position >= 0 && (
                 <>
                   Case study {String(position + 1).padStart(2, "0")} /{" "}
@@ -145,14 +145,14 @@ export default function ProjectDetail({ project, linkMode }: Props) {
 
           <div className="mt-10 sm:mt-14 grid gap-8 sm:grid-cols-[1.5fr_1fr] sm:items-end">
             {project.summary && (
-              <p className="max-w-2xl text-base sm:text-xl leading-relaxed opacity-80">
+              <p className="max-w-2xl text-base sm:text-xl leading-relaxed text-foreground-secondary">
                 {project.summary}
               </p>
             )}
             <dl className="grid grid-cols-3 gap-4 text-xs">
               {facts.map((fact) => (
                 <div key={fact.label}>
-                  <dt className="uppercase tracking-[0.14em] opacity-60">{fact.label}</dt>
+                  <dt className="font-medium text-foreground-secondary">{fact.label}</dt>
                   <dd className="mt-1.5 leading-snug">{fact.value}</dd>
                 </div>
               ))}
@@ -171,6 +171,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               url={project.liveUrl}
               desktopImage={project.thumbnail}
               mobileImage={project.mobileImage || undefined}
+              colors={project.screenColors}
             />
           </div>
         </div>
@@ -208,7 +209,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               {sections.map((section, index) => (
                 <div key={section.id} className="space-y-16 sm:space-y-24">
                   <section id={section.id} className="scroll-mt-24">
-                    <h2 className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
+                    <h2 className="text-xs font-medium text-foreground-secondary">
                       <span className="tabular-nums mr-3">{String(index + 1).padStart(2, "0")}</span>
                       {section.title}
                     </h2>
@@ -274,7 +275,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
           style={{ background: next.brandBackground, color: readableOn(next.brandBackground) }}
         >
           <span className="mx-auto flex max-w-[90rem] flex-col gap-4 px-6 sm:px-10 py-16 sm:py-24">
-            <span className="text-xs uppercase tracking-[0.14em] opacity-70">
+            <span className="text-xs font-medium text-foreground-secondary">
               Next case study
             </span>
             <span className="flex items-end justify-between gap-6">
