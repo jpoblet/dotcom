@@ -8,7 +8,6 @@ import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
-import RotatingSuggestion from "@/components/RotatingSuggestion";
 import ConfirmDialog from "./ConfirmDialog";
 import DotGrille from "./DotGrille";
 
@@ -27,6 +26,22 @@ interface Props {
   panelButtons?: React.ReactNode;
 }
 
+/** Up to `count` random items (picked after mount, so hydration agrees). */
+function useRandomPick(items: string[], count: number): string[] {
+  const [picked, setPicked] = useState<string[]>([]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const pool = [...items];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      setPicked(pool.slice(0, count));
+    });
+    return () => clearTimeout(timeout);
+  }, [items, count]);
+  return picked;
+}
 
 /**
  * The chat column, in the spirit of an editor's assistant panel: plain
@@ -53,7 +68,9 @@ export default function ChatPane({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const starters = useRandomPick(starterQuestions, 4);
   const composerRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
   // How far the input is lifted from its place at the bottom (empty chat).
   const [raise, setRaise] = useState(0);
   // No transition until the first placement, so it doesn't slide in on load.
@@ -108,15 +125,16 @@ export default function ChatPane({
       const pane = composer?.parentElement;
       if (!intro || !composer || !pane) return;
       let next = 0;
-      // Phones: the chips wrap onto several lines, so the input stays at the
-      // bottom and the chips sit in the intro.
-      if (isEmpty && window.innerWidth >= 640) {
+      if (isEmpty) {
         // offsetTop ignores transforms, so this is the resting position even
         // mid-animation.
         const naturalTop = pane.getBoundingClientRect().top + composer.offsetTop;
         const target = intro.getBoundingClientRect().bottom + 40;
-        const suggestionsRoom = 2 * 44 + 24; // a row or two of chips
-        const room = pane.getBoundingClientRect().bottom - (target + composer.offsetHeight + suggestionsRoom);
+        // The suggestions hang below the input and must clear the footer,
+        // which starts where the input naturally ends.
+        const suggestionsRoom = (suggestionsRef.current?.offsetHeight ?? 184) + 24;
+        const floor = naturalTop + composer.offsetHeight;
+        const room = floor - (target + composer.offsetHeight + suggestionsRoom);
         next = room >= 0 ? Math.max(0, naturalTop - target) : 0;
       }
       setRaise(next);
@@ -125,6 +143,7 @@ export default function ChatPane({
     const timeout = setTimeout(() => setPlaced(true), 50);
     const observer = new ResizeObserver(place);
     if (introRef.current) observer.observe(introRef.current);
+    if (suggestionsRef.current) observer.observe(suggestionsRef.current);
     window.addEventListener("resize", place);
     return () => {
       clearTimeout(timeout);
@@ -201,39 +220,56 @@ export default function ChatPane({
         {/* The intro opens the conversation and stays at the top of it. */}
         <div ref={introRef} className={`relative mx-auto max-w-[60rem] animate-suggestion-in ${empty ? "pt-[5vh] lg:pt-[8vh]" : "pt-6"}`}>
           <div className="relative">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
-              Hi, I&apos;m {name.split(" ")[0]}.
-            </h1>
-            {/* A horizontal stack across the width: what I do, where, and now. */}
-            <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-5 border-t border-background-inverse/10 pt-6 sm:grid-cols-[1.4fr_1fr_1fr]">
-              {[{ label: "What I do", value: title }, ...facts].map((fact) => (
-                <div key={fact.label}>
-                  <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
-                  <dd className="mt-1.5 text-base leading-snug">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
-
-            <div className="mt-12 max-w-2xl">
-              <p className="font-heading text-2xl sm:text-3xl font-bold tracking-tight leading-[1.2]">
-                Skip the CV. Just ask.
-              </p>
-              <p className="mt-3 text-sm leading-[1.75] text-foreground-secondary">
-                I built this AI agent to answer as me. My work, my projects, my career goals,
-                the music I listen to, the time I herded cattle in Namibia: anything, really.
-              </p>
+            {/* The name on the left, the facts stacked beside it on the right. */}
+            <div className="grid gap-10 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-16">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
+                Hi, I&apos;m {name.split(" ")[0]}.
+              </h1>
+              <dl className="space-y-4 border-l border-background-inverse/10 pl-6 sm:min-w-[15rem]">
+                {[{ label: "What I do", value: title }, ...facts].map((fact) => (
+                  <div key={fact.label}>
+                    <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
+                    <dd className="mt-1 text-base leading-snug">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
+
+            <p className="mt-12 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
+              I built this AI agent to answer as me. My work, my projects, my career goals,
+              the music I listen to, the time I herded cattle in Namibia: anything, really.
+            </p>
 
             {/* No room to lift the input (small screens): suggestions here. */}
             {empty && placed && !raise && (
-              <div className="mt-8">
-                <RotatingSuggestion questions={starterQuestions} onPick={(q) => submit(q, "starter")} />
-              </div>
+              <ul className="mt-8 space-y-1.5">
+                {starters.map((question, index) => (
+                  <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
+                    <button
+                      type="button"
+                      onClick={() => submit(question, "starter")}
+                      className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
+                    >
+                      <span className="text-foreground-secondary group-hover:text-foreground">→</span>
+                      {question}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
         {!empty && (
-          <div className="mx-auto mt-12 max-w-[42rem] space-y-16 border-t border-background-inverse/10 pt-10">
+          <>
+          {/* Where the conversation begins: a title and a wavy rule drawn
+              across the whole chat column. */}
+          <div className="-mx-4 mt-16" aria-hidden="true">
+            <p className="animate-suggestion-in mx-auto max-w-[42rem] px-4 font-label text-xs text-foreground-secondary">
+              Conversation started here
+            </p>
+            <div className="wiggle-rule mt-4 h-2 text-background-inverse/25" />
+          </div>
+          <div className="mx-auto mt-12 max-w-[42rem] space-y-16">
             {turns.map((turn, index) => {
               const isLast = index === turns.length - 1;
               return (
@@ -284,6 +320,7 @@ export default function ChatPane({
               );
             })}
           </div>
+          </>
         )}
         </div>
       </div>
@@ -341,16 +378,27 @@ export default function ChatPane({
         </p>
         {/* Suggestions below the lifted box (empty chat). When there's no
             room to lift it, they sit in the intro instead. */}
-        <div
+        <ul
+          ref={suggestionsRef}
           aria-hidden={!(empty && raise)}
-          className={`absolute inset-x-4 top-full mt-6 transition-opacity duration-300 ${
+          className={`absolute inset-x-4 top-full mt-6 space-y-1.5 transition-opacity duration-300 ${
             empty && raise ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          {empty && raise > 0 && (
-            <RotatingSuggestion questions={starterQuestions} onPick={(q) => submit(q, "starter")} />
-          )}
-        </div>
+          {starters.map((question, index) => (
+            <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
+              <button
+                type="button"
+                tabIndex={empty && raise ? 0 : -1}
+                onClick={() => submit(question, "starter")}
+                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
+              >
+                <span className="text-foreground-secondary group-hover:text-foreground">→</span>
+                {question}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Footer: the full width of the chat column. */}
