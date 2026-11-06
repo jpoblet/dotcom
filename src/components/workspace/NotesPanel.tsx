@@ -25,6 +25,34 @@ function mailtoHref(subject: string, body: string, siteUrl: string): string {
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
 }
 
+/** A section title that folds its section away. */
+function SectionToggle({
+  label,
+  count,
+  open,
+  onToggle,
+}: {
+  label: string;
+  count?: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className="flex w-full items-center justify-between text-xs font-medium text-foreground-secondary hover:text-foreground cursor-pointer"
+    >
+      <span className="font-label">
+        {label}
+        {count !== undefined && <span className="ml-1.5 tabular-nums tracking-normal">{count}</span>}
+      </span>
+      <ChevronDown size={14} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
+    </button>
+  );
+}
+
 interface Props {
   topics: NoteTopic[];
   messages: Message[];
@@ -34,10 +62,10 @@ interface Props {
 }
 
 /**
- * The visitor's notes: "Create summary" at the top, with a line on what it
- * does (then the write-up, to email, copy or download), and the talking
- * points so far, each jumping back to where it came up. Once a summary
- * exists, the talking points fold away under it.
+ * The visitor's notes: the talking points so far, each jumping back to
+ * where it came up, then "Create summary" with a line on what it does.
+ * Once written, both sections fold: the talking points close, and the
+ * summary shows its actions above the write-up.
  */
 export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) {
   const [summary, setSummary] = useState<string>();
@@ -48,6 +76,9 @@ export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) 
   // it, unless the visitor opens them again.
   const [pointsToggle, setPointsToggle] = useState<boolean | null>(null);
   const pointsOpen = pointsToggle ?? !summary;
+  const [summaryOpen, setSummaryOpen] = useState(true);
+  const about =
+    "Writes up our conversation in a few lines, with links to everything we covered, ready to email to yourself, copy or download.";
   const hasConversation = messages.some((m) => m.isUser);
 
   const writeSummary = async () => {
@@ -78,89 +109,16 @@ export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) 
 
   return (
     <div className="px-6 py-8">
-      {/* The summary first: a quiet button, then the write-up with its
-          actions (email, copy, download, update). */}
+      {/* Talking points first: each one jumps back to where it came up.
+          Once there's a summary they fold away above it. */}
       <section>
-        {!summary ? (
-          <>
-            <button
-              type="button"
-              onClick={writeSummary}
-              disabled={!hasConversation || writing}
-              className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs transition-colors hover:bg-background-secondary cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {writing ? <span className="shimmer-text">Writing your summary…</span> : "Create summary"}
-            </button>
-            <p className="mt-3 max-w-md text-xs leading-[1.6] text-foreground-secondary">
-              Writes up our conversation in a few lines, with links to everything we covered,
-              ready to email to yourself, copy or download.
-            </p>
-            {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
-          </>
-        ) : (
-          <div className="animate-suggestion-in">
-            <h2 className="text-xs font-medium text-foreground-secondary">Summary</h2>
-            <div className="chat-message mt-3 rounded-sm border border-background-inverse/10 bg-background p-5 text-sm leading-[1.75]">
-              <ChatMarkdown text={summary} />
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <a
-                href={mailtoHref(subject, toPlainText(summary), siteUrl)}
-                onClick={() => track("Notes emailed")}
-                className="inline-flex items-center gap-2 rounded-full bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-80"
-              >
-                <Mail size={14} />
-                Email it to me
-              </a>
-              <button
-                type="button"
-                onClick={async () => {
-                  await navigator.clipboard.writeText(summary);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
-                }}
-                className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary cursor-pointer"
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-                {copied ? "Copied" : "Copy"}
-              </button>
-              <a
-                href={`data:text/markdown;charset=utf-8,${encodeURIComponent(summary)}`}
-                download={`${name.toLowerCase().replace(/\s+/g, "-")}-notes.md`}
-                className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary"
-              >
-                <Download size={14} />
-                Download
-              </a>
-              <button
-                type="button"
-                onClick={writeSummary}
-                disabled={writing}
-                className="ml-auto text-xs text-foreground-secondary underline underline-offset-2 hover:text-foreground cursor-pointer disabled:opacity-40"
-              >
-                {writing ? "Updating…" : "Update"}
-              </button>
-            </div>
-            {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
-          </div>
-        )}
-      </section>
-
-      {/* Talking points: each one jumps back to where it came up. Once a
-          summary exists they collapse under a toggle. */}
-      <section className="mt-10">
         {summary ? (
-          <button
-            type="button"
-            onClick={() => setPointsToggle(!pointsOpen)}
-            aria-expanded={pointsOpen}
-            className="group flex w-full items-center justify-between text-xs font-medium text-foreground-secondary hover:text-foreground cursor-pointer"
-          >
-            <span className="font-label">
-              Talking points <span className="ml-1 tabular-nums tracking-normal">{topics.length}</span>
-            </span>
-            <ChevronDown size={14} className={`transition-transform duration-300 ${pointsOpen ? "rotate-180" : ""}`} />
-          </button>
+          <SectionToggle
+            label="Talking points"
+            count={topics.length}
+            open={pointsOpen}
+            onToggle={() => setPointsToggle(!pointsOpen)}
+          />
         ) : (
           <h2 className="text-xs font-medium text-foreground-secondary">Talking points</h2>
         )}
@@ -195,6 +153,76 @@ export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) 
               ))}
             </ol>
           ))}
+      </section>
+
+      {/* The summary: a quiet button and a line on what it does; once
+          written, the same line, its actions, then the write-up. */}
+      <section className="mt-10">
+        {!summary ? (
+          <>
+            <button
+              type="button"
+              onClick={writeSummary}
+              disabled={!hasConversation || writing}
+              className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs transition-colors hover:bg-background-secondary cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {writing ? <span className="shimmer-text">Writing your summary…</span> : "Create summary"}
+            </button>
+            <p className="mt-3 max-w-md text-xs leading-[1.6] text-foreground-secondary">{about}</p>
+            {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
+          </>
+        ) : (
+          <div className="animate-suggestion-in">
+            <SectionToggle label="Summary" open={summaryOpen} onToggle={() => setSummaryOpen(!summaryOpen)} />
+            {summaryOpen && (
+              <>
+                <p className="mt-3 max-w-md text-xs leading-[1.6] text-foreground-secondary">{about}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <a
+                    href={mailtoHref(subject, toPlainText(summary), siteUrl)}
+                    onClick={() => track("Notes emailed")}
+                    className="inline-flex items-center gap-2 rounded-full bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-80"
+                  >
+                    <Mail size={14} />
+                    Email it to me
+                  </a>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(summary);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary cursor-pointer"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? "Copied" : "Copy"}
+                  </button>
+                  <a
+                    href={`data:text/markdown;charset=utf-8,${encodeURIComponent(summary)}`}
+                    download={`${name.toLowerCase().replace(/\s+/g, "-")}-notes.md`}
+                    className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary"
+                  >
+                    <Download size={14} />
+                    Download
+                  </a>
+                  <button
+                    type="button"
+                    onClick={writeSummary}
+                    disabled={writing}
+                    className="ml-auto text-xs text-foreground-secondary underline underline-offset-2 hover:text-foreground cursor-pointer disabled:opacity-40"
+                  >
+                    {writing ? "Updating…" : "Update"}
+                  </button>
+                </div>
+                {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
+                <div className="chat-message mt-5 rounded-sm border border-background-inverse/10 bg-background p-5 text-sm leading-[1.75]">
+                  <ChatMarkdown text={summary} />
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </section>
     </div>
   );

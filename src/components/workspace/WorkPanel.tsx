@@ -204,6 +204,18 @@ export function ProjectView({
       <article className="mx-auto max-w-[52rem] px-6 sm:px-10 py-10">
         <p className="font-mono text-xs text-foreground-secondary">{meta(project)}</p>
         <h1 className="mt-2 font-mono text-2xl sm:text-3xl font-bold tracking-tight">{project.name}</h1>
+        {/* The live site, right under the name. */}
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1 font-mono text-xs underline underline-offset-2 hover:opacity-70"
+          >
+            {displayUrl(url)}
+            <ArrowUpRight size={12} />
+          </a>
+        )}
         {project.summary && (
           <p className="mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
             {project.summary}
@@ -226,24 +238,13 @@ export function ProjectView({
           )}
         </div>
 
-        {(project.tags.length > 0 || url) && (
+        {project.tags.length > 0 && (
           <div className="mt-8 flex flex-wrap items-center gap-1.5">
             {project.tags.map((tag) => (
               <span key={tag} className="rounded-full bg-background-inverse/6 px-3 py-1.5 text-xs">
                 {tag}
               </span>
             ))}
-            {url && (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-auto inline-flex items-center gap-1 font-mono text-xs underline underline-offset-2 hover:opacity-70"
-              >
-                {displayUrl(url)}
-                <ArrowUpRight size={12} />
-              </a>
-            )}
           </div>
         )}
 
