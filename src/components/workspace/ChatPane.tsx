@@ -69,6 +69,11 @@ export default function ChatPane({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const starters = useRandomPick(starterQuestions, 4);
+  const composerRef = useRef<HTMLDivElement>(null);
+  // How far the input is lifted from its place at the bottom (empty chat).
+  const [raise, setRaise] = useState(0);
+  // No transition until the first placement, so it doesn't slide in on load.
+  const [placed, setPlaced] = useState(false);
   const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
 
@@ -109,6 +114,39 @@ export default function ChatPane({
     return () => observer.disconnect();
   }, []);
 
+  // Empty chat: lift the input to just under the intro, as long as there's
+  // room below it for the suggestions. Otherwise it stays at the bottom.
+  const isEmpty = messages.length === 0;
+  useEffect(() => {
+    const place = () => {
+      const intro = introRef.current;
+      const composer = composerRef.current;
+      const pane = composer?.parentElement;
+      if (!intro || !composer || !pane) return;
+      let next = 0;
+      if (isEmpty) {
+        // offsetTop ignores transforms, so this is the resting position even
+        // mid-animation.
+        const naturalTop = pane.getBoundingClientRect().top + composer.offsetTop;
+        const target = intro.getBoundingClientRect().bottom + 40;
+        const suggestionsRoom = 4 * 40 + 24;
+        const room = pane.getBoundingClientRect().bottom - (target + composer.offsetHeight + suggestionsRoom);
+        next = room >= 0 ? Math.max(0, naturalTop - target) : 0;
+      }
+      setRaise(next);
+    };
+    place();
+    const timeout = setTimeout(() => setPlaced(true), 50);
+    const observer = new ResizeObserver(place);
+    if (introRef.current) observer.observe(introRef.current);
+    window.addEventListener("resize", place);
+    return () => {
+      clearTimeout(timeout);
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [isEmpty]);
+
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
       if (!text.trim() || isLoading) return;
@@ -132,7 +170,7 @@ export default function ChatPane({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="relative flex h-full min-h-0 flex-col">
       {/* Header */}
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
         <div className="flex items-center gap-3 min-w-0">
@@ -173,50 +211,54 @@ export default function ChatPane({
         {/* Braun-grille dots, anchored to the right edge of the chat area
             and fading in towards the text. Scrolls away with the intro. */}
         <DotGrille className="absolute top-0 right-0 h-[min(85vh,52rem)] w-[min(50%,40rem)] [mask-image:radial-gradient(ellipse_at_100%_40%,black_15%,transparent_72%)]" />
-        <div className="mx-auto w-full max-w-[42rem]">
+        <div className="w-full">
         {/* The intro opens the conversation and stays at the top of it. */}
-        <div ref={introRef} className={`relative animate-suggestion-in ${empty ? "pt-[6vh] lg:pt-[9vh]" : "pt-6"}`}>
+        <div ref={introRef} className={`relative mx-auto max-w-[60rem] animate-suggestion-in ${empty ? "pt-[5vh] lg:pt-[8vh]" : "pt-6"}`}>
           <div className="relative">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
-            <p className="mt-5 text-xl sm:text-2xl tracking-tight text-foreground-secondary">{title}.</p>
-
-            {facts.length > 0 && (
-              <dl className="mt-12 grid max-w-lg grid-cols-1 gap-x-16 gap-y-5 border-t border-background-inverse/10 pt-6 sm:grid-cols-2">
-                {facts.map((fact) => (
-                  <div key={fact.label}>
-                    <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
-                    <dd className="mt-1 text-sm">{fact.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-
-            <p className="mt-12 max-w-md text-sm leading-[1.75] text-foreground-secondary">
-              I built this AI agent to answer as me. Ask me anything about my work experience,
-              career goals, hobbies, recent projects, the music I listen to… anything, really.
-            </p>
-            {empty && (
-            <ul className="mt-10 space-y-1.5">
-              {starters.map((question, index) => (
-                <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-                  <button
-                    type="button"
-                    onClick={() => submit(question, "starter")}
-                    className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-                  >
-                    <span className="text-foreground-secondary group-hover:text-foreground">→</span>
-                    {question}
-                  </button>
-                </li>
+            {/* A horizontal stack across the width: what I do, where, and now. */}
+            <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-5 border-t border-background-inverse/10 pt-6 sm:grid-cols-[1.4fr_1fr_1fr]">
+              {[{ label: "What I do", value: title }, ...facts].map((fact) => (
+                <div key={fact.label}>
+                  <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
+                  <dd className="mt-1.5 text-base leading-snug">{fact.value}</dd>
+                </div>
               ))}
-            </ul>
+            </dl>
+
+            <div className="mt-12 max-w-2xl">
+              <p className="font-heading text-2xl sm:text-3xl font-bold tracking-tight leading-[1.2]">
+                Skip the CV. Just ask.
+              </p>
+              <p className="mt-3 text-sm leading-[1.75] text-foreground-secondary">
+                I built this AI agent to answer as me. My work, my projects, my career goals,
+                the music I listen to, the time I herded cattle in Namibia: anything, really.
+              </p>
+            </div>
+
+            {/* No room to lift the input (small screens): suggestions here. */}
+            {empty && placed && !raise && (
+              <ul className="mt-8 space-y-1.5">
+                {starters.map((question, index) => (
+                  <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
+                    <button
+                      type="button"
+                      onClick={() => submit(question, "starter")}
+                      className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
+                    >
+                      <span className="text-foreground-secondary group-hover:text-foreground">→</span>
+                      {question}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
         {!empty && (
-          <div className="mt-12 space-y-16 border-t border-background-inverse/10 pt-10">
+          <div className="mx-auto mt-12 max-w-[42rem] space-y-16 border-t border-background-inverse/10 pt-10">
             {turns.map((turn, index) => {
               const isLast = index === turns.length - 1;
               return (
@@ -271,8 +313,16 @@ export default function ChatPane({
         </div>
       </div>
 
-      {/* Input */}
-      <div className="mx-auto w-full max-w-[calc(42rem+2rem)] shrink-0 px-4">
+      {/* Input. On the empty chat it sits high, right under the intro, with
+          the suggestions below it; the first question sends it gliding down
+          to its place at the bottom. */}
+      <div
+        ref={composerRef}
+        style={{ transform: raise ? `translateY(-${raise}px)` : undefined }}
+        className={`relative z-10 mx-auto w-full shrink-0 px-4 ${
+          empty ? "max-w-[calc(60rem+2rem)]" : "max-w-[calc(42rem+2rem)]"
+        } ${placed ? "transition-[transform,max-width] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
+      >
         {/* One clean field: hairline border, the send button inline. */}
         <form
           onSubmit={(e) => {
@@ -314,6 +364,28 @@ export default function ChatPane({
         <p className="mt-2 px-1 text-xs text-foreground-secondary">
           Questions are stored anonymously.
         </p>
+        {/* Suggestions below the lifted box (empty chat). When there's no
+            room to lift it, they sit in the intro instead. */}
+        <ul
+          aria-hidden={!(empty && raise)}
+          className={`absolute inset-x-4 top-full mt-6 space-y-1.5 transition-opacity duration-300 ${
+            empty && raise ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+        >
+          {starters.map((question, index) => (
+            <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
+              <button
+                type="button"
+                tabIndex={empty && raise ? 0 : -1}
+                onClick={() => submit(question, "starter")}
+                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
+              >
+                <span className="text-foreground-secondary group-hover:text-foreground">→</span>
+                {question}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Footer: the full width of the chat column. */}
