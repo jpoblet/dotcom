@@ -246,9 +246,10 @@ export default function ChatPane({
           heroHidden ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
-        <p className="w-fit font-heading text-base font-bold leading-tight @[56rem]:text-lg @[72rem]:text-2xl">{name}</p>
+        {/* Two sizes, keeping the same ratio: 24/16 with room, 18/14 without. */}
+        <p className="w-fit font-heading text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
         {/* Two lines, broken after the "&". */}
-        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-sm">
+        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-base">
           {title.includes("& ") ? (
             <>
               {title.slice(0, title.indexOf("& ") + 1)}
