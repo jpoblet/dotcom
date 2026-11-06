@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, RotateCcw } from "lucide-react";
+import { ArrowUp, Info, RotateCcw } from "lucide-react";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
@@ -241,27 +241,29 @@ export default function ChatPane({
         <div ref={introRef} className={`relative mx-auto max-w-[60rem] animate-suggestion-in ${empty ? "pt-[5vh] lg:pt-[8vh]" : "pt-6"}`}>
           <div className="relative">
             {/* The name on the left, the facts stacked beside it on the right. */}
-            <div className="grid gap-10 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-16">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
-                Hi, I&apos;m {name.split(" ")[0]}.
-              </h1>
-              <dl className="space-y-4 border-l border-background-inverse/10 pl-6 sm:min-w-[15rem]">
+            <div className="grid gap-8 sm:grid-cols-[1fr_auto] sm:items-start sm:gap-16">
+              <div>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
+                  Hi, I&apos;m {name.split(" ")[0]}.
+                </h1>
+                <p className="mt-8 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
+                  I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
+                  <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
+                    {(asides ?? ASIDES.slice(0, 2)).join(", ")}
+                  </span>
+                  : anything, really.
+                </p>
+              </div>
+              {/* Secondary to the name: small, muted, top-aligned with it. */}
+              <dl className="space-y-3 sm:pt-2 sm:min-w-[13rem]">
                 {[{ label: "What I do", value: title }, ...facts].map((fact) => (
                   <div key={fact.label}>
                     <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
-                    <dd className="mt-1 text-base leading-snug">{fact.value}</dd>
+                    <dd className="mt-0.5 text-sm leading-snug text-foreground-secondary">{fact.value}</dd>
                   </div>
                 ))}
               </dl>
             </div>
-
-            <p className="mt-12 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
-              I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
-              <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
-                {(asides ?? ASIDES.slice(0, 2)).join(", ")}
-              </span>
-              : anything, really.
-            </p>
 
             {/* No room to lift the input (small screens): suggestions here. */}
             {empty && placed && !raise && (
@@ -284,13 +286,13 @@ export default function ChatPane({
         </div>
         {!empty && (
           <>
-          {/* Where the conversation begins: a title and a wavy rule drawn
-              across the whole chat column. */}
-          <div className="-mx-4 mt-16" aria-hidden="true">
-            <p className="animate-suggestion-in mx-auto max-w-[42rem] px-4 font-label text-xs text-foreground-secondary">
+          {/* Where the conversation begins: a title and a gentle wavy rule
+              as wide as the intro. */}
+          <div className="mx-auto mt-16 max-w-[60rem]" aria-hidden="true">
+            <p className="animate-suggestion-in font-label text-xs text-foreground-secondary">
               Conversation started here
             </p>
-            <div className="wiggle-rule mt-4 h-2 text-background-inverse/25" />
+            <div className="wiggle-rule mt-3 h-1 text-background-inverse/20" />
           </div>
           <div className="mx-auto mt-12 max-w-[42rem] space-y-16">
             {turns.map((turn, index) => {
@@ -387,6 +389,24 @@ export default function ChatPane({
             placeholder="Ask me anything…"
             className="block min-h-8 flex-1 resize-none bg-transparent py-1 text-base sm:text-sm leading-[1.6] placeholder:text-foreground-secondary focus:outline-none"
           />
+          {/* Privacy note, on hover or focus (a tap on phones). */}
+          <span className="group/info relative shrink-0">
+            <button
+              type="button"
+              aria-label="About your questions"
+              aria-describedby="privacy-note"
+              className="flex size-8 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:text-foreground focus-visible:text-foreground cursor-pointer"
+            >
+              <Info size={15} />
+            </button>
+            <span
+              id="privacy-note"
+              role="tooltip"
+              className="pointer-events-none absolute right-0 bottom-full mb-2 translate-y-1 whitespace-nowrap rounded-md bg-background-inverse px-2.5 py-1.5 text-xs text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+            >
+              Questions are stored anonymously.
+            </span>
+          </span>
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
@@ -396,9 +416,6 @@ export default function ChatPane({
             <ArrowUp size={16} strokeWidth={2.25} />
           </button>
         </form>
-        <p className="mt-2 px-1 text-xs text-foreground-secondary">
-          Questions are stored anonymously.
-        </p>
         {/* Suggestions below the lifted box (empty chat). When there's no
             room to lift it, they sit in the intro instead. */}
         <ul

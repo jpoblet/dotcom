@@ -461,8 +461,8 @@ body:has([data-workspace]) [data-site-footer] {
    from the left. */
 .wiggle-rule {
   background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 C 6 0, 6 0, 12 4 S 18 8, 24 4' fill='none' stroke='black' stroke-width='1.25'/%3E%3C/svg%3E") repeat-x left center / 24px 8px;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 C 6 0, 6 0, 12 4 S 18 8, 24 4' fill='none' stroke='black' stroke-width='1.25'/%3E%3C/svg%3E") repeat-x left center / 24px 8px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='4' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 C 5 0.5, 5 0.5, 10 2 S 15 3.5, 20 2' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") repeat-x left center / 20px 4px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='4' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 C 5 0.5, 5 0.5, 10 2 S 15 3.5, 20 2' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") repeat-x left center / 20px 4px;
   animation: wiggle-draw 1.2s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 @keyframes wiggle-draw {

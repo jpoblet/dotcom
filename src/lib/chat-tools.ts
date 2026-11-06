@@ -80,7 +80,7 @@ export function buildTools(): Tool[] {
         questions: {
           type: "array",
           items: { type: "string" },
-          description: `Two or three follow-up questions, written as the visitor would ask them: short (under 60 characters), in the visitor's language, about something the knowledge base can answer and that hasn't been covered yet.`,
+          description: `Two or three follow-up questions, written as the visitor would ask them: short (under 60 characters), in the visitor's language, about something the knowledge base can answer and that hasn't been covered yet. Once the conversation is underway, make one of them personal (travels, sport, life outside work) so the visitor discovers more than the CV.`,
         },
         topics: {
           type: "array",
