@@ -60,6 +60,9 @@ export default function ChatPane({
 }: Props) {
   const [input, setInput] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
+  const introRef = useRef<HTMLDivElement>(null);
+  const [introVisible, setIntroVisible] = useState(true);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const stickToBottom = useRef(true);
@@ -71,6 +74,19 @@ export default function ChatPane({
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, isLoading]);
+
+  // Watch the intro within the conversation's own scroll area.
+  useEffect(() => {
+    const intro = introRef.current;
+    const root = scrollRef.current;
+    if (!intro || !root) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntroVisible(entry.isIntersecting),
+      { root, threshold: 0.15 },
+    );
+    observer.observe(intro);
+    return () => observer.disconnect();
+  }, []);
 
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
@@ -94,7 +110,15 @@ export default function ChatPane({
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
         <div className="flex items-center gap-3 min-w-0">
           <Logo className="h-6 fill-current shrink-0" />
-          <span className="truncate text-xs text-foreground-secondary">{name}</span>
+          {/* Shown once the intro (which says the same) scrolls out of view. */}
+          <span
+            aria-hidden={introVisible}
+            className={`truncate text-xs text-foreground-secondary transition-[opacity,translate] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              introVisible ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
+            }`}
+          >
+            {name}
+          </span>
         </div>
         <div className="flex items-center gap-1">
           {panelButtons}
@@ -121,8 +145,8 @@ export default function ChatPane({
         className="min-h-0 flex-1 overflow-y-auto px-4 py-6"
       >
         <div className="mx-auto w-full max-w-[42rem]">
-        {empty ? (
-          <div className="animate-suggestion-in pt-[8vh] lg:pt-[14vh]">
+        {/* The intro opens the conversation and stays at the top of it. */}
+        <div ref={introRef} className={`animate-suggestion-in ${empty ? "pt-[8vh] lg:pt-[14vh]" : "pt-6"}`}>
             <h1 className="text-3xl sm:text-4xl font-medium tracking-tight leading-[1.15]">
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
@@ -131,6 +155,7 @@ export default function ChatPane({
               This is an AI that answers as me, from my own notes. Ask about my work, a project
               or my life. Projects open alongside as we talk.
             </p>
+            {empty && (
             <ul className="mt-8 space-y-1">
               {starters.map((question, index) => (
                 <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
@@ -145,9 +170,10 @@ export default function ChatPane({
                 </li>
               ))}
             </ul>
-          </div>
-        ) : (
-          <div className="space-y-5">
+            )}
+        </div>
+        {!empty && (
+          <div className="mt-12 space-y-5 border-t border-background-inverse/10 pt-8">
             {messages.map((message) =>
               message.isUser ? (
                 <div
