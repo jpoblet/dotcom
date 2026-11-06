@@ -152,7 +152,7 @@ export default function Workspace({
         >
           {value === "work" ? "Work" : "AI Notes"}
           {value === "notes" && topicCount > 0 && (
-            <span className="ml-1.5 tabular-nums text-foreground-secondary">{topicCount}</span>
+            <span className="ml-1.5 inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-background-inverse px-1 align-[0.1em] text-[0.6875rem] leading-none tabular-nums text-background">{topicCount}</span>
           )}
           <span
             className={`absolute inset-x-0 bottom-0 h-px origin-left bg-foreground transition-transform duration-300 ${EASE} ${
@@ -201,7 +201,7 @@ export default function Workspace({
             }`}
           >
             {value === "work" ? "Work" : "AI Notes"}
-            {value === "notes" && topicCount > 0 && <span className="ml-1.5 tabular-nums">{topicCount}</span>}
+            {value === "notes" && topicCount > 0 && <span className="ml-1.5 inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-background-inverse px-1 align-[0.1em] text-[0.6875rem] leading-none tabular-nums text-background">{topicCount}</span>}
           </button>
         );
       })}

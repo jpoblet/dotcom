@@ -33,8 +33,8 @@ interface Props {
 }
 
 /**
- * The visitor's notes: the topics covered so far, and one action fixed at
- * the bottom to write up the conversation and send it to themselves.
+ * The visitor's notes: a quiet "Create summary" at the top (then the
+ * write-up, to email, copy or download), and the talking points so far.
  */
 export default function NotesPanel({ topics, messages, name, onOpenProject }: Props) {
   const [summary, setSummary] = useState<string>();
@@ -70,102 +70,101 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
   const siteUrl = typeof window === "undefined" ? "" : window.location.origin;
 
   return (
-    <div className="flex min-h-full flex-col">
-      <div className="flex-1 px-6 py-8">
-        <h2 className="text-xs font-medium text-foreground-secondary">Topics so far</h2>
-        {topics.length === 0 ? (
-          <p className="mt-4 text-sm leading-[1.7] text-foreground-secondary">
-            Nothing yet. The topics we talk about will be listed here as we go.
-          </p>
-        ) : (
-          <ol className="mt-3 border-t border-background-inverse/10">
-            {topics.map((topic, index) => (
-              <li
-                key={topic.label}
-                className="animate-suggestion-in flex items-center gap-4 border-b border-background-inverse/10 py-3.5"
-              >
-                <span className="w-6 text-xs tabular-nums text-foreground-secondary">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="flex-1 text-sm">{topic.label}</span>
-                {topic.project && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenProject(topic.project!)}
-                    className="group inline-flex items-center gap-1 text-xs text-foreground-secondary hover:text-foreground cursor-pointer"
-                  >
-                    Open
-                    <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {summary && (
-          <div className="animate-suggestion-in mt-10">
-            <h2 className="text-xs font-medium text-foreground-secondary">Summary</h2>
-            <div className="chat-message mt-3 rounded-sm border border-background-inverse/10 p-5 text-sm leading-[1.7]">
-              <ChatMarkdown text={summary} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Fixed at the bottom of the panel. */}
-      <div className="sticky bottom-0 border-t border-background-inverse/10 bg-background px-6 py-4">
+    <div className="px-6 py-8">
+      {/* The summary first: a quiet button, then the write-up with its
+          actions (email, copy, download, update). */}
+      <section>
         {!summary ? (
           <>
             <button
               type="button"
               onClick={writeSummary}
               disabled={!hasConversation || writing}
-              className="w-full rounded-lg bg-background-inverse px-4 py-3 text-sm text-background transition-opacity hover:opacity-85 cursor-pointer disabled:cursor-default disabled:bg-background-inverse/10 disabled:text-foreground-secondary"
+              className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs transition-colors hover:bg-background-secondary cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {writing ? (
-                <span className="shimmer-text">Writing your summary…</span>
-              ) : (
-                "Write up and send me a summary of this conversation"
-              )}
+              {writing ? <span className="shimmer-text">Writing your summary…</span> : "Create summary"}
             </button>
-            {error && <p className="mt-2 text-xs text-foreground-secondary">{error}</p>}
+            {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
           </>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <a
-              href={mailtoHref(subject, toPlainText(summary), siteUrl)}
-              onClick={() => track("Notes emailed")}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-background-inverse px-4 py-3 text-sm text-background hover:opacity-85"
-            >
-              <Mail size={15} />
-              Send it to me
-            </a>
-            <button
-              type="button"
-              onClick={async () => {
-                await navigator.clipboard.writeText(summary);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1500);
-              }}
-              aria-label="Copy the summary"
-              title="Copy"
-              className="flex size-11 items-center justify-center rounded-lg border border-background-inverse/15 hover:bg-background-secondary cursor-pointer"
-            >
-              {copied ? <Check size={15} /> : <Copy size={15} />}
-            </button>
-            <a
-              href={`data:text/markdown;charset=utf-8,${encodeURIComponent(summary)}`}
-              download={`${name.toLowerCase().replace(/\s+/g, "-")}-notes.md`}
-              aria-label="Download the summary"
-              title="Download"
-              className="flex size-11 items-center justify-center rounded-lg border border-background-inverse/15 hover:bg-background-secondary"
-            >
-              <Download size={15} />
-            </a>
+          <div className="animate-suggestion-in">
+            <h2 className="text-xs font-medium text-foreground-secondary">Summary</h2>
+            <div className="chat-message mt-3 rounded-sm border border-background-inverse/10 bg-background p-5 text-sm leading-[1.75]">
+              <ChatMarkdown text={summary} />
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <a
+                href={mailtoHref(subject, toPlainText(summary), siteUrl)}
+                onClick={() => track("Notes emailed")}
+                className="inline-flex items-center gap-2 rounded-full bg-background-inverse px-4 py-2 text-xs text-background hover:opacity-80"
+              >
+                <Mail size={14} />
+                Email it to me
+              </a>
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(summary);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary cursor-pointer"
+              >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+              <a
+                href={`data:text/markdown;charset=utf-8,${encodeURIComponent(summary)}`}
+                download={`${name.toLowerCase().replace(/\s+/g, "-")}-notes.md`}
+                className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs hover:bg-background-secondary"
+              >
+                <Download size={14} />
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={writeSummary}
+                disabled={writing}
+                className="ml-auto text-xs text-foreground-secondary underline underline-offset-2 hover:text-foreground cursor-pointer disabled:opacity-40"
+              >
+                {writing ? "Updating…" : "Update"}
+              </button>
+            </div>
+            {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
           </div>
         )}
-      </div>
+      </section>
+
+      <h2 className="mt-10 text-xs font-medium text-foreground-secondary">Talking points</h2>
+      {topics.length === 0 ? (
+        <p className="mt-4 text-sm leading-[1.7] text-foreground-secondary">
+          Nothing yet. The topics we talk about will be listed here as we go.
+        </p>
+      ) : (
+        <ol className="mt-3 border-t border-background-inverse/10">
+          {topics.map((topic, index) => (
+            <li
+              key={topic.label}
+              className="animate-suggestion-in flex items-center gap-4 border-b border-background-inverse/10 py-3.5"
+            >
+              <span className="w-6 text-xs tabular-nums text-foreground-secondary">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="flex-1 text-sm">{topic.label}</span>
+              {topic.project && (
+                <button
+                  type="button"
+                  onClick={() => onOpenProject(topic.project!)}
+                  className="group inline-flex items-center gap-1 text-xs text-foreground-secondary hover:text-foreground cursor-pointer"
+                >
+                  Open
+                  <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
