@@ -23,6 +23,8 @@ interface Props {
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
+  /** Short facts shown under the intro ("Based in", "Now", "Building"). */
+  facts: { label: string; value: string }[];
   caseStudies: Project[];
   websites: Project[];
 }
@@ -38,6 +40,7 @@ export default function Workspace({
   email,
   links,
   starterQuestions,
+  facts,
   caseStudies,
   websites,
 }: Props) {
@@ -190,6 +193,7 @@ export default function Workspace({
             email={email}
             links={links}
             starterQuestions={starterQuestions}
+            facts={facts}
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}

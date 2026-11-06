@@ -9,6 +9,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
 import ConfirmDialog from "./ConfirmDialog";
+import DotGrille from "./DotGrille";
 
 interface Props {
   name: string;
@@ -16,6 +17,7 @@ interface Props {
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
+  facts: { label: string; value: string }[];
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
@@ -52,6 +54,7 @@ export default function ChatPane({
   email,
   links,
   starterQuestions,
+  facts,
   messages,
   isLoading,
   send,
@@ -169,12 +172,27 @@ export default function ChatPane({
       >
         <div className="mx-auto w-full max-w-[42rem]">
         {/* The intro opens the conversation and stays at the top of it. */}
-        <div ref={introRef} className={`animate-suggestion-in ${empty ? "pt-[8vh] lg:pt-[14vh]" : "pt-6"}`}>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight leading-[1.15]">
+        <div ref={introRef} className={`relative animate-suggestion-in ${empty ? "pt-[6vh] lg:pt-[11vh]" : "pt-6"}`}>
+          {/* Braun-grille dots behind the intro, fading out towards the text. */}
+          <DotGrille className="absolute -top-6 -right-4 h-[calc(100%+3rem)] w-[62%] [mask-image:radial-gradient(ellipse_at_78%_38%,black_10%,transparent_68%)]" />
+          <div className="relative">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
-            <p className="mt-2 text-lg sm:text-xl tracking-tight text-foreground-secondary">{title}.</p>
-            <p className="mt-8 max-w-md text-sm leading-[1.75] text-foreground-secondary">
+            <p className="mt-4 text-xl sm:text-2xl tracking-tight text-foreground-secondary">{title}.</p>
+
+            {facts.length > 0 && (
+              <dl className="mt-10 grid max-w-xl grid-cols-1 gap-x-8 gap-y-4 border-t border-background-inverse/10 pt-5 sm:grid-cols-3">
+                {facts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
+                    <dd className="mt-1 text-sm">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            <p className="mt-10 max-w-md text-sm leading-[1.75] text-foreground-secondary">
               I built this AI agent to answer as me. Ask me anything about my work experience,
               career goals, hobbies, recent projects, the music I listen to… anything, really.
             </p>
@@ -194,6 +212,7 @@ export default function ChatPane({
               ))}
             </ul>
             )}
+          </div>
         </div>
         {!empty && (
           <div className="mt-12 space-y-16 border-t border-background-inverse/10 pt-10">

@@ -22,7 +22,7 @@ export function BrowserFrame({
 }) {
   return (
     <div
-      className={`overflow-hidden rounded-[0.6rem] border border-background-inverse/15 bg-background shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)] ${className}`}
+      className={`overflow-hidden rounded-[0.6rem] border border-background-inverse/15 bg-background ${className}`}
     >
       <div className="flex h-[clamp(1.25rem,3.2vw,2rem)] items-center gap-[0.35em] border-b border-background-inverse/10 px-[0.8em] text-[clamp(0.45rem,1vw,0.6875rem)]">
         <span className="size-[0.7em] rounded-full bg-background-inverse/15" />
@@ -53,7 +53,7 @@ export function PhoneFrame({
 }) {
   return (
     <div
-      className={`aspect-[9/19.5] overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground shadow-[0_24px_60px_-16px_rgb(0_0_0/0.45)] ${className}`}
+      className={`aspect-[9/19.5] overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground ${className}`}
     >
       <div className="relative h-full w-full overflow-hidden rounded-[clamp(0.6rem,2vw,1.35rem)]">
         <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
