@@ -154,8 +154,8 @@ export default function ChatPane({
             </h1>
             <p className="mt-2 text-lg sm:text-xl tracking-tight text-foreground-secondary">{title}.</p>
             <p className="mt-8 max-w-md text-[0.8125rem] leading-[1.85] text-foreground-secondary">
-              This is an AI that answers as me, from my own notes. Ask about my work, a project
-              or my life. Projects open alongside as we talk.
+              I built this AI agent to answer as me. Ask me anything about my work experience,
+              career goals, hobbies, recent projects, the music I listen to… anything, really.
             </p>
             {empty && (
             <ul className="mt-8 space-y-1">

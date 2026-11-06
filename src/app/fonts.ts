@@ -1,17 +1,23 @@
 import {
   Albert_Sans,
   Archivo,
+  Atkinson_Hyperlegible_Mono,
+  Atkinson_Hyperlegible_Next,
+  Barlow,
   Chivo,
   Chivo_Mono,
   DM_Mono,
   DM_Sans,
   Epilogue,
   Familjen_Grotesk,
+  Figtree,
+  Fragment_Mono,
   Funnel_Display,
   Funnel_Sans,
   Gantari,
   Geist,
   Geist_Mono,
+  Geologica,
   Hanken_Grotesk,
   Host_Grotesk,
   Hubot_Sans,
@@ -22,18 +28,26 @@ import {
   Inter_Tight,
   JetBrains_Mono,
   Jost,
+  Kumbh_Sans,
   Libre_Franklin,
   Manrope,
   Martian_Mono,
   Mona_Sans,
+  Onest,
   Outfit,
+  Overpass,
+  Overpass_Mono,
+  Plus_Jakarta_Sans,
   Public_Sans,
   Red_Hat_Display,
   Red_Hat_Mono,
   Red_Hat_Text,
+  Rethink_Sans,
   Schibsted_Grotesk,
   Sora,
   Space_Grotesk,
+  Spline_Sans,
+  Spline_Sans_Mono,
   Urbanist,
   Wix_Madefor_Display,
   Wix_Madefor_Text,
@@ -116,6 +130,22 @@ const gantari = Gantari({ subsets: ["latin"], variable: "--font-gantari", displa
 const martian = Martian_Mono({ subsets: ["latin"], variable: "--font-martian", display: "swap", preload: false });
 const epilogue = Epilogue({ subsets: ["latin"], variable: "--font-epilogue", display: "swap", preload: false });
 
+// Fourth round of pairings.
+const barlow = Barlow({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-barlow", display: "swap", preload: false });
+const overpass = Overpass({ subsets: ["latin"], variable: "--font-overpass", display: "swap", preload: false });
+const overpassMono = Overpass_Mono({ subsets: ["latin"], variable: "--font-overpass-mono", display: "swap", preload: false });
+const atkinson = Atkinson_Hyperlegible_Next({ subsets: ["latin"], variable: "--font-atkinson", display: "swap", preload: false });
+const atkinsonMono = Atkinson_Hyperlegible_Mono({ subsets: ["latin"], variable: "--font-atkinson-mono", display: "swap", preload: false });
+const spline = Spline_Sans({ subsets: ["latin"], variable: "--font-spline", display: "swap", preload: false });
+const splineMono = Spline_Sans_Mono({ subsets: ["latin"], variable: "--font-spline-mono", display: "swap", preload: false });
+const rethink = Rethink_Sans({ subsets: ["latin"], variable: "--font-rethink", display: "swap", preload: false });
+const onest = Onest({ subsets: ["latin"], variable: "--font-onest", display: "swap", preload: false });
+const geologica = Geologica({ subsets: ["latin"], variable: "--font-geologica", display: "swap", preload: false });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap", preload: false });
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree", display: "swap", preload: false });
+const kumbh = Kumbh_Sans({ subsets: ["latin"], variable: "--font-kumbh", display: "swap", preload: false });
+const fragmentMono = Fragment_Mono({ subsets: ["latin"], weight: "400", variable: "--font-fragment-mono", display: "swap", preload: false });
+
 export const fontVariables = [
   jost,
   inter,
@@ -155,6 +185,20 @@ export const fontVariables = [
   gantari,
   martian,
   epilogue,
+  barlow,
+  overpass,
+  overpassMono,
+  atkinson,
+  atkinsonMono,
+  spline,
+  splineMono,
+  rethink,
+  onest,
+  geologica,
+  jakarta,
+  figtree,
+  kumbh,
+  fragmentMono,
 ]
   .map((font) => font.variable)
   .join(" ");

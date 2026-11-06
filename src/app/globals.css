@@ -553,6 +553,59 @@ html[data-fonts="omnibus"] :is(.font-label, [data-workspace] h2) {
 html[data-fonts="low-contrast"] :is(.font-label, [data-workspace] h2) {
   font-family: var(--font-martian);
 }
+/* Font pairings, fourth round. */
+html[data-fonts="din"] {
+  --font-sans: var(--font-barlow);
+  --font-heading: var(--font-barlow);
+}
+html[data-fonts="highway"] {
+  --font-sans: var(--font-overpass);
+  --font-heading: var(--font-overpass);
+}
+html[data-fonts="highway"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-overpass-mono);
+}
+html[data-fonts="hyperlegible"] {
+  --font-sans: var(--font-atkinson);
+  --font-heading: var(--font-atkinson);
+}
+html[data-fonts="hyperlegible"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-atkinson-mono);
+}
+html[data-fonts="spline"] {
+  --font-sans: var(--font-spline);
+  --font-heading: var(--font-spline);
+}
+html[data-fonts="spline"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-spline-mono);
+}
+html[data-fonts="rethink"] {
+  --font-sans: var(--font-rethink);
+  --font-heading: var(--font-rethink);
+}
+html[data-fonts="onest"] {
+  --font-sans: var(--font-onest);
+  --font-heading: var(--font-onest);
+}
+html[data-fonts="geologica"] {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-geologica);
+}
+html[data-fonts="jakarta"] {
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
+}
+html[data-fonts="figtree"] {
+  --font-sans: var(--font-figtree);
+  --font-heading: var(--font-figtree);
+}
+html[data-fonts="kumbh"] {
+  --font-sans: var(--font-kumbh);
+  --font-heading: var(--font-kumbh);
+}
+html[data-fonts="kumbh"] :is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-fragment-mono);
+}
 :is(h1, h3, .font-heading) {
   font-family: var(--font-heading);
 }

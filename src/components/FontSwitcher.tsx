@@ -58,9 +58,11 @@ export default function FontSwitcher() {
           </p>
           {FONT_PAIRINGS.map((pairing, index) => (
             <div key={pairing.id}>
-            {(index === 5 || index === 15 || pairing.id === "original") && (
+            {(index === 5 || index === 15 || index === 25 || pairing.id === "original") && (
               <p className="mx-2.5 mt-2 border-t border-background-inverse/10 pt-3 pb-1 text-[0.6875rem] text-foreground-secondary">
-                {pairing.id === "original" ? "Baseline" : index === 5 ? "Second round" : "Third round"}
+                {pairing.id === "original"
+                  ? "Baseline"
+                  : { 5: "Second round", 15: "Third round", 25: "Fourth round" }[index]}
               </p>
             )}
             <button
