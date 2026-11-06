@@ -20,7 +20,11 @@ function sections(markdown: string) {
     .filter((s) => s.body);
 }
 
-/** The default view: case studies and websites, quietly listed. */
+/**
+ * The default view, laid out like a product catalogue: cells divided by
+ * hairlines. Case studies in two columns with their logo, details and a
+ * short summary; websites in three smaller columns linking to the sites.
+ */
 export function WorkOverview({
   caseStudies,
   websites,
@@ -32,32 +36,45 @@ export function WorkOverview({
 }) {
   return (
     <div className="px-6 py-8">
-      <h2 className="text-xs font-medium text-foreground-secondary">
-        Case studies
-      </h2>
-      <ul className="mt-2">
+      <p className="text-sm text-foreground-secondary">
+        {caseStudies.length} case studies and {websites.length} websites, most recent first.
+      </p>
+
+      <h2 className="mt-10 text-xs font-medium text-foreground-secondary">Case studies</h2>
+      {/* Hairline grid: the gap shows the background-inverse layer beneath. */}
+      <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
         {caseStudies.map((project, index) => (
-          <li key={project.slug} className="animate-suggestion-in" style={{ animationDelay: `${index * 50}ms` }}>
+          <li
+            key={project.slug}
+            className="animate-suggestion-in bg-background"
+            style={{ animationDelay: `${index * 60}ms` }}
+          >
             <button
               type="button"
               onClick={() => onOpen(project.slug)}
-              className="group grid w-full grid-cols-[4.5rem_1fr_auto] items-center gap-4 rounded-md px-2 py-4 -mx-2 text-left cursor-pointer hover:bg-background-inverse/[0.04] transition-colors"
+              className="group relative flex h-full w-full flex-col p-5 text-left cursor-pointer transition-colors duration-300 hover:bg-background-secondary"
             >
-              <LogoMark
-                logo={project.logoMark}
-                name={project.name}
-                className="h-6 w-full text-foreground/70 transition-colors group-hover:text-foreground"
-              />
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium">{project.name}</span>
-                <span className="mt-0.5 block truncate text-xs text-foreground-secondary">
-                  {meta(project)}
-                </span>
+              <span className="flex items-center justify-between text-xs tabular-nums text-foreground-secondary">
+                {String(index + 1).padStart(2, "0")}
+                <ArrowRight
+                  size={15}
+                  className="-translate-x-1 text-foreground opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                />
               </span>
-              <ArrowRight
-                size={14}
-                className="-translate-x-1 opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-              />
+              <span className="flex h-28 items-center">
+                <LogoMark
+                  logo={project.logoMark}
+                  name={project.name}
+                  className="h-12 w-1/2 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
+                />
+              </span>
+              <span className="text-sm font-medium">{project.name}</span>
+              <span className="mt-1 text-xs text-foreground-secondary">{meta(project)}</span>
+              {project.summary && (
+                <span className="mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
+                  {project.summary}
+                </span>
+              )}
             </button>
           </li>
         ))}
@@ -65,45 +82,54 @@ export function WorkOverview({
 
       {websites.length > 0 && (
         <>
-          <h2 className="mt-10 text-xs font-medium text-foreground-secondary">
-            Websites
-          </h2>
-          <ul className="mt-2">
-            {websites.map((site) => {
-              const row = (
+          <h2 className="mt-12 text-xs font-medium text-foreground-secondary">Websites</h2>
+          <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
+            {websites.map((site, index) => {
+              const cell = (
                 <>
-                  <LogoMark
-                    logo={site.logoMark}
-                    name={site.name}
-                    className="h-5 w-full text-foreground/60 transition-colors group-hover:text-foreground"
-                  />
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm">{site.name}</span>
-                    <span className="mt-0.5 block truncate text-xs text-foreground-secondary">
-                      {site.year}
-                    </span>
+                  <span className="flex h-5 items-center justify-end text-foreground-secondary">
+                    {site.liveUrl ? (
+                      <ArrowUpRight
+                        size={14}
+                        className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      />
+                    ) : (
+                      <span className="text-xs">Soon</span>
+                    )}
                   </span>
-                  {site.liveUrl ? (
-                    <ArrowUpRight size={14} className="text-foreground-secondary group-hover:text-foreground" />
-                  ) : (
-                    <span />
-                  )}
+                  <span className="flex h-16 items-center">
+                    <LogoMark
+                      logo={site.logoMark}
+                      name={site.name}
+                      className="h-6 w-3/4 text-foreground/75 transition-colors duration-300 group-hover:text-foreground"
+                    />
+                  </span>
+                  <span className="truncate text-sm">{site.name}</span>
+                  <span className="mt-0.5 text-xs text-foreground-secondary">{site.year}</span>
                 </>
               );
               const className =
-                "group grid grid-cols-[4.5rem_1fr_auto] items-center gap-4 rounded-md px-2 py-3 -mx-2 hover:bg-background-inverse/[0.04] transition-colors";
+                "group flex h-full flex-col p-4 transition-colors duration-300 hover:bg-background-secondary";
               return (
-                <li key={site.slug}>
+                <li
+                  key={site.slug}
+                  className="animate-suggestion-in bg-background"
+                  style={{ animationDelay: `${(caseStudies.length + index) * 50}ms` }}
+                >
                   {site.liveUrl ? (
                     <a href={site.liveUrl} target="_blank" rel="noopener noreferrer" className={className}>
-                      {row}
+                      {cell}
                     </a>
                   ) : (
-                    <div className={className}>{row}</div>
+                    <div className={className}>{cell}</div>
                   )}
                 </li>
               );
             })}
+            {/* Fill the last row so the hairline grid stays even. */}
+            {Array.from({ length: (3 - (websites.length % 3)) % 3 }, (_, i) => (
+              <li key={`filler-${i}`} aria-hidden="true" className="hidden bg-background sm:block" />
+            ))}
           </ul>
         </>
       )}

@@ -29,8 +29,7 @@ interface Props {
 
 /**
  * The home page. The chat starts on its own; "Work" and "AI Notes" open a
- * narrow panel beside it, which widens when a project is opened (the chat
- * narrows to make room). Each side scrolls on its own. On phones the panel
+ * panel beside it, and the two then share the screen half and half. Each side scrolls on its own. On phones the panel
  * is a sheet that slides over the chat.
  */
 export default function Workspace({
@@ -103,7 +102,7 @@ export default function Workspace({
       const width = window.innerWidth;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       const navWidth = navRef.current?.offsetWidth ?? 0;
-      const panelWidth = projectOpen ? Math.min(width * 0.62, 60 * rem) : 24 * rem;
+      const panelWidth = width / 2;
       setNavLeft(
         panelOpen
           ? width - panelWidth + 1.5 * rem
@@ -118,7 +117,7 @@ export default function Workspace({
       observer.disconnect();
       window.removeEventListener("resize", place);
     };
-  }, [panelOpen, projectOpen]);
+  }, [panelOpen]);
   const topicCount = session.topics.length;
 
   // The header buttons open the panel on a tab, or close it if that tab
@@ -226,12 +225,12 @@ export default function Workspace({
           />
         </div>
 
-        {/* Work and notes. Desktop: a panel that opens narrow for the list
-            and widens for a project. Phones: a sheet over the chat. */}
+        {/* Work and notes. Desktop: half the screen beside the chat.
+            Phones: a sheet over the chat. */}
         <div
           className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate,width] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:relative lg:inset-auto lg:z-auto lg:shrink-0 lg:translate-x-0 lg:pt-0 lg:border-background-inverse/10 ${
             panelOpen ? "translate-x-0 lg:border-l" : "translate-x-full lg:border-l-0"
-          } ${!panelOpen ? "lg:w-0" : projectOpen ? "lg:w-[min(62vw,60rem)]" : "lg:w-[24rem]"}`}
+          } ${panelOpen ? "lg:w-1/2" : "lg:w-0"}`}
         >
           {/* Keeps the content from squeezing while the panel closes. */}
           <div className="flex h-full min-h-0 flex-col lg:min-w-[24rem]">
