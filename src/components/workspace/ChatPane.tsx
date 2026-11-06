@@ -259,9 +259,9 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
               {/* The name opens the page. */}
               <div ref={heroRef} className="mb-10">
                 <h1
-                  className="w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em]"
+                  className="font-heading text-5xl sm:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-balance"
                 >
-                  {name}
+                  Hi, I am {name}
                 </h1>
                 <p className="mt-3 w-fit text-base text-foreground-secondary">
                   {title}
