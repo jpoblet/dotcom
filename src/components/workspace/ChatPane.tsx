@@ -26,6 +26,24 @@ interface Props {
   panelButtons?: React.ReactNode;
 }
 
+/**
+ * The intro ends with two of these, picked at random on each visit. All true,
+ * all things the agent can talk about.
+ */
+const ASIDES = [
+  "the music I listen to",
+  "the time I herded cattle in Namibia",
+  "why the dung beetle is my favourite animal",
+  "five months crossing Africa overland",
+  "surfing every day in Lanzarote",
+  "rescuing kangaroos in Melbourne",
+  "playing roller hockey for Australia",
+  "being an Espanyol fan in Barcelona",
+  "my love of Test cricket",
+  "playing guitar at my own wedding",
+  "my first triathlon at Elwood Beach",
+];
+
 /** Up to `count` random items (picked after mount, so hydration agrees). */
 function useRandomPick(items: string[], count: number): string[] {
   const [picked, setPicked] = useState<string[]>([]);
@@ -69,6 +87,8 @@ export default function ChatPane({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const starters = useRandomPick(starterQuestions, 4);
+  const picked = useRandomPick(ASIDES, 2);
+  const asides = picked.length ? picked : null;
   const composerRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
   // How far the input is lifted from its place at the bottom (empty chat).
@@ -236,8 +256,11 @@ export default function ChatPane({
             </div>
 
             <p className="mt-12 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
-              I built this AI agent to answer as me. My work, my projects, my career goals,
-              the music I listen to, the time I herded cattle in Namibia: anything, really.
+              I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
+              <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
+                {(asides ?? ASIDES.slice(0, 2)).join(", ")}
+              </span>
+              : anything, really.
             </p>
 
             {/* No room to lift the input (small screens): suggestions here. */}
