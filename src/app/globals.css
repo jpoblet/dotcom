@@ -8,10 +8,13 @@
   --font-sans: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
-  /* Light theme background: a soft warm cream instead of pure white, and a
-     slightly deeper cream for hover states and secondary surfaces. */
-  --cream: oklch(98.2% 0.013 85);
-  --cream-200: oklch(95.4% 0.018 85);
+  /* Light theme background: nearly white with a hint of blue, and a
+     slightly deeper tint for hover states and secondary surfaces. */
+  --paper: oklch(98.9% 0.004 250);
+  --paper-200: oklch(96.4% 0.007 250);
+  /* Dark theme background: a touch deeper than the boulder scale. */
+  --ink-900: oklch(0.175 0.026 262);
+  --ink-800: oklch(0.235 0.028 262);
 
   --apricot-50: oklch(97.44% 0.016 70.54);
   --apricot-100: oklch(94.43% 0.036 70.02);
@@ -41,18 +44,18 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
-  --color-background: var(--cream);
-  --color-background-secondary: var(--cream-200);
+  --color-background: var(--paper);
+  --color-background-secondary: var(--paper-200);
   --color-background-inverse: var(--boulder-950);
   --color-foreground: var(--boulder-950);
   --color-foreground-secondary: var(--boulder-500);
-  --color-foreground-inverse: var(--cream);
+  --color-foreground-inverse: var(--paper);
   --color-accent: var(--boulder-950);
 }
 
 .dark {
-  --color-background: var(--boulder-900);
-  --color-background-secondary: var(--boulder-800);
+  --color-background: var(--ink-900);
+  --color-background-secondary: var(--ink-800);
   --color-background-inverse: var(--polar);
   --color-foreground: var(--boulder-100);
   --color-foreground-secondary: var(--boulder-500);
@@ -401,4 +404,17 @@ body:has([data-workspace]) [data-site-footer] {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-foreground-secondary);
+}
+
+/* Workspace type: smaller body text with generous line spacing. */
+[data-workspace] .chat-message,
+[data-workspace] .case-study {
+  font-size: 0.8125rem;
+  line-height: 1.85;
+}
+[data-workspace] :is(.chat-message, .case-study) > * + * {
+  margin-top: 1rem;
+}
+[data-workspace] :is(.chat-message, .case-study) li + li {
+  margin-top: 0.4rem;
 }

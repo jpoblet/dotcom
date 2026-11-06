@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { track } from "@/lib/analytics";
 import type { Project } from "@/lib/content";
 import { useChatSession } from "@/lib/use-chat-session";
@@ -28,10 +28,10 @@ interface Props {
 }
 
 /**
- * The home page: the chat on the left and the work beside it, each
- * scrolling on its own. Projects opened from the chat slide in on the
- * right. On phones the right side becomes a sheet that slides over the
- * chat.
+ * The home page. The chat starts on its own; "Work" and "AI Notes" open a
+ * narrow panel beside it, which widens when a project is opened (the chat
+ * narrows to make room). Each side scrolls on its own. On phones the panel
+ * is a sheet that slides over the chat.
  */
 export default function Workspace({
   name,
@@ -44,7 +44,8 @@ export default function Workspace({
 }: Props) {
   const session = useChatSession(email);
   const [tab, setTab] = useState<Tab>("work");
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // Whether the side panel is showing (a sheet over the chat on phones).
+  const [panelOpen, setPanelOpen] = useState(false);
   // The project on screen, and whether its panel is slid in. The slug
   // outlives the panel by one transition, so it can slide out with content.
   const [slug, setSlug] = useState<string | null>(null);
@@ -63,7 +64,7 @@ export default function Workspace({
       clearTimeout(closeTimer.current);
       track("Project opened", { project: next });
       setTab("work");
-      setSheetOpen(true);
+      setPanelOpen(true);
       setSlug(next);
       projectScroll.current?.scrollTo({ top: 0 });
       // Next frame, so a freshly mounted panel animates in from the side.
@@ -83,7 +84,7 @@ export default function Workspace({
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (projectOpen) closeProject();
-      else setSheetOpen(false);
+      else setPanelOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -92,9 +93,21 @@ export default function Workspace({
   const actions = useMemo(() => ({ openProject }), [openProject]);
   const topicCount = session.topics.length;
 
-  const openSheet = (next: Tab) => {
+  // The header buttons open the panel on a tab, or close it if that tab
+  // is already showing.
+  const togglePanel = (next: Tab) => {
+    if (panelOpen && tab === next) {
+      setPanelOpen(false);
+      closeProject();
+      return;
+    }
     setTab(next);
-    setSheetOpen(true);
+    setPanelOpen(true);
+  };
+
+  const closePanel = () => {
+    setPanelOpen(false);
+    closeProject();
   };
 
   const tabs = (
@@ -109,7 +122,7 @@ export default function Workspace({
             tab === value ? "text-foreground" : "text-foreground-secondary hover:text-foreground"
           }`}
         >
-          {value === "work" ? "Work" : "Notes"}
+          {value === "work" ? "Work" : "AI Notes"}
           {value === "notes" && topicCount > 0 && (
             <span className="ml-1.5 tabular-nums text-foreground-secondary">{topicCount}</span>
           )}
@@ -125,9 +138,9 @@ export default function Workspace({
 
   return (
     <WorkspaceContext.Provider value={actions}>
-      <div data-workspace className="h-dvh w-full overflow-hidden lg:grid lg:grid-cols-[minmax(22rem,30rem)_1fr]">
+      <div data-workspace className="h-dvh w-full overflow-hidden lg:flex">
         {/* Chat */}
-        <div className="h-full min-h-0 lg:border-r lg:border-background-inverse/10 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <ChatPane
             name={name}
             title={title}
@@ -141,46 +154,64 @@ export default function Workspace({
               session.reset();
               closeProject();
             }}
-            mobileNav={
-              <div className="flex items-center gap-1 lg:hidden">
-                <button
-                  type="button"
-                  onClick={() => openSheet("work")}
-                  className="rounded-md px-2.5 py-1.5 text-xs hover:bg-background-inverse/6 cursor-pointer"
-                >
-                  Work
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openSheet("notes")}
-                  className="rounded-md px-2.5 py-1.5 text-xs hover:bg-background-inverse/6 cursor-pointer"
-                >
-                  Notes
-                  {topicCount > 0 && (
-                    <span className="ml-1 tabular-nums text-foreground-secondary">{topicCount}</span>
-                  )}
-                </button>
+            panelButtons={
+              <div className="flex items-center gap-1">
+                {(["work", "notes"] as const).map((value) => {
+                  const active = panelOpen && tab === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => togglePanel(value)}
+                      aria-pressed={active}
+                      className={`rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
+                        active
+                          ? "bg-background-inverse/8 text-foreground"
+                          : "text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground"
+                      }`}
+                    >
+                      {value === "work" ? "Work" : "AI Notes"}
+                      {value === "notes" && topicCount > 0 && (
+                        <span className="ml-1.5 tabular-nums opacity-60">{topicCount}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             }
           />
         </div>
 
-        {/* Work and notes. Phones: a sheet that slides over the chat. */}
+        {/* Work and notes. Desktop: a panel that opens narrow for the list
+            and widens for a project. Phones: a sheet over the chat. */}
         <div
-          className={`fixed inset-0 z-50 flex flex-col bg-background transition-transform duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:static lg:z-auto lg:translate-x-0 lg:pt-0 ${
-            sheetOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate,width] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:relative lg:inset-auto lg:z-auto lg:shrink-0 lg:translate-x-0 lg:pt-0 lg:border-background-inverse/10 ${
+            panelOpen ? "translate-x-0 lg:border-l" : "translate-x-full lg:border-l-0"
+          } ${!panelOpen ? "lg:w-0" : projectOpen ? "lg:w-[min(62vw,60rem)]" : "lg:w-[24rem]"}`}
         >
-          <div className="flex h-12 shrink-0 items-center gap-4 border-b border-background-inverse/10 px-6 sm:px-10">
+          {/* Keeps the content from squeezing while the panel closes. */}
+          <div className="flex h-full min-h-0 flex-col lg:min-w-[24rem]">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-background-inverse/10 px-6">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={closePanel}
+                aria-label="Back to the chat"
+                className="-ml-2 flex size-8 items-center justify-center rounded-md hover:bg-background-inverse/6 cursor-pointer lg:hidden"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              {tabs}
+            </div>
             <button
               type="button"
-              onClick={() => setSheetOpen(false)}
-              aria-label="Back to the chat"
-              className="-ml-2 flex size-8 items-center justify-center rounded-md hover:bg-background-inverse/6 cursor-pointer lg:hidden"
+              onClick={closePanel}
+              aria-label="Close panel"
+              title="Close"
+              className="-mr-2 hidden size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer lg:flex"
             >
-              <ArrowLeft size={16} />
+              <X size={15} />
             </button>
-            {tabs}
           </div>
 
           {/* Tabs slide side by side. */}
@@ -235,6 +266,7 @@ export default function Workspace({
                 onOpenProject={openProject}
               />
             </div>
+          </div>
           </div>
         </div>
       </div>

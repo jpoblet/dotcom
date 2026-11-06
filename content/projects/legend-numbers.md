@@ -25,6 +25,8 @@ mobile_gallery:
 accent: "#16A34A"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/legend-numbers.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/legend-numbers.png"
 brand_background: "#13161D"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.

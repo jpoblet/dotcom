@@ -9,7 +9,7 @@ import path from "node:path";
 // globals.css; the image renderer doesn't understand oklch().
 export const BRAND = {
   ink: "#030712",
-  paper: "#fbf7ef",
+  paper: "#f8fafc",
   muted: "#6b7280",
 };
 

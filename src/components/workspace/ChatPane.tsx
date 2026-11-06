@@ -19,8 +19,8 @@ interface Props {
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
   reset: () => void;
-  /** Mobile only: buttons that open the Work and Notes sheet. */
-  mobileNav?: React.ReactNode;
+  /** Buttons that open the Work and AI Notes panel. */
+  panelButtons?: React.ReactNode;
 }
 
 /** Up to `count` random items (picked after mount, so hydration agrees). */
@@ -55,7 +55,7 @@ export default function ChatPane({
   isLoading,
   send,
   reset,
-  mobileNav,
+  panelButtons,
 }: Props) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -95,7 +95,7 @@ export default function ChatPane({
           <span className="truncate text-xs text-foreground-secondary">{name}</span>
         </div>
         <div className="flex items-center gap-1">
-          {mobileNav}
+          {panelButtons}
           <button
             type="button"
             onClick={() => {
@@ -120,12 +120,14 @@ export default function ChatPane({
         }}
         className="min-h-0 flex-1 overflow-y-auto px-4 py-6"
       >
+        <div className="mx-auto w-full max-w-[42rem]">
         {empty ? (
-          <div className="animate-suggestion-in">
-            <p className="text-sm leading-relaxed">
-              Hi, I&apos;m {name.split(" ")[0]}. {title}.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+          <div className="animate-suggestion-in pt-[8vh] lg:pt-[14vh]">
+            <h1 className="text-3xl sm:text-4xl font-medium tracking-tight leading-[1.15]">
+              Hi, I&apos;m {name.split(" ")[0]}.
+            </h1>
+            <p className="mt-2 text-lg sm:text-xl tracking-tight text-foreground-secondary">{title}.</p>
+            <p className="mt-8 max-w-md text-[0.8125rem] leading-[1.85] text-foreground-secondary">
               This is an AI that answers as me, from my own notes. Ask about my work, a project
               or my life. Projects open alongside as we talk.
             </p>
@@ -150,7 +152,7 @@ export default function ChatPane({
               message.isUser ? (
                 <div
                   key={message.id}
-                  className="rounded-md border border-background-inverse/12 bg-background-inverse/[0.03] px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap"
+                  className="rounded-md border border-background-inverse/12 bg-background-inverse/[0.03] px-3 py-2 text-[0.8125rem] leading-[1.85] whitespace-pre-wrap"
                 >
                   {message.text}
                 </div>
@@ -158,7 +160,7 @@ export default function ChatPane({
                 <div key={message.id} className="space-y-3">
                   {message.text && (
                     <div
-                      className={`chat-message text-sm leading-relaxed ${message.isError ? "text-foreground-secondary" : ""}`}
+                      className={`chat-message text-[0.8125rem] leading-[1.85] ${message.isError ? "text-foreground-secondary" : ""}`}
                     >
                       <ChatMarkdown text={message.text} />
                     </div>
@@ -190,10 +192,11 @@ export default function ChatPane({
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* Input */}
-      <div className="shrink-0 px-4 pb-3">
+      <div className="mx-auto w-full max-w-[calc(42rem+2rem)] shrink-0 px-4 pb-3">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -219,7 +222,7 @@ export default function ChatPane({
             rows={2}
             aria-label="Ask me anything"
             placeholder="Ask me anything…"
-            className="block w-full resize-none bg-transparent px-3 pt-2.5 text-base sm:text-sm placeholder:text-foreground-secondary focus:outline-none"
+            className="block w-full resize-none bg-transparent px-3 pt-2.5 text-base sm:text-[0.8125rem] sm:leading-[1.7] placeholder:text-foreground-secondary focus:outline-none"
           />
           <div className="flex items-center justify-between gap-3 px-3 pb-2">
             <span className="text-[0.6875rem] text-foreground-secondary">

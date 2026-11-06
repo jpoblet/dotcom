@@ -78,6 +78,8 @@ export interface Project {
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
   logo: string;
+  /** Transparent version of the logo, drawn in the text colour. */
+  logoMark: string;
   brandBackground: string;
   /** Public URL when the project itself is live (website, app). */
   liveUrl: string;
@@ -260,6 +262,7 @@ function readProjects(): Project[] {
       mobileGallery: Array.isArray(data.mobile_gallery) ? data.mobile_gallery.map(str) : [],
       accent: str(data.accent) || "#64748B",
       logo: str(data.logo),
+      logoMark: str(data.logo_mark) || str(data.logo),
       brandBackground: str(data.brand_background) || "#FFFFFF",
       liveUrl: str(data.live_url),
       draft: data.draft !== false,

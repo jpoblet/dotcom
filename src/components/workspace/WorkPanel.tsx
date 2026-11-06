@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { BrowserFrame, PhoneFrame, displayUrl } from "@/components/DeviceFrames";
 import DeviceShowcase from "@/components/DeviceShowcase";
-import ProjectLogoTile from "@/components/ProjectLogoTile";
+import LogoMark from "@/components/LogoMark";
 import type { Project } from "@/lib/content";
 
 const meta = (p: Project) => [p.company, p.role, p.year].filter(Boolean).join(" · ");
@@ -31,33 +31,33 @@ export function WorkOverview({
   onOpen: (slug: string) => void;
 }) {
   return (
-    <div className="mx-auto max-w-[52rem] px-6 sm:px-10 py-10">
-      <p className="text-xs text-foreground-secondary">Selected work, most recent first.</p>
-
-      <h2 className="mt-10 text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+    <div className="px-6 py-8">
+      <h2 className="text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
         Case studies
       </h2>
-      <ul className="mt-4 grid gap-x-5 gap-y-8 sm:grid-cols-2">
-        {caseStudies.map((project) => (
-          <li key={project.slug}>
+      <ul className="mt-2">
+        {caseStudies.map((project, index) => (
+          <li key={project.slug} className="animate-suggestion-in" style={{ animationDelay: `${index * 50}ms` }}>
             <button
               type="button"
               onClick={() => onOpen(project.slug)}
-              className="group block w-full text-left cursor-pointer"
+              className="group grid w-full grid-cols-[4.5rem_1fr_auto] items-center gap-4 rounded-md px-2 py-4 -mx-2 text-left cursor-pointer hover:bg-background-inverse/[0.04] transition-colors"
             >
-              <ProjectLogoTile
-                project={project}
-                sizes="(min-width: 1024px) 400px, 100vw"
-                className="aspect-[16/10] rounded-sm transition-[filter] duration-300 group-hover:brightness-[0.97]"
+              <LogoMark
+                logo={project.logoMark}
+                name={project.name}
+                className="h-6 w-full text-foreground/70 transition-colors group-hover:text-foreground"
               />
-              <span className="mt-3 flex items-baseline justify-between gap-3">
-                <span className="text-sm font-medium">{project.name}</span>
-                <ArrowRight
-                  size={14}
-                  className="shrink-0 -translate-x-1 opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-                />
+              <span className="min-w-0">
+                <span className="block truncate text-[0.8125rem] font-medium">{project.name}</span>
+                <span className="mt-0.5 block truncate text-[0.6875rem] text-foreground-secondary">
+                  {meta(project)}
+                </span>
               </span>
-              <span className="mt-1 block text-xs text-foreground-secondary">{meta(project)}</span>
+              <ArrowRight
+                size={14}
+                className="-translate-x-1 opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+              />
             </button>
           </li>
         ))}
@@ -65,33 +65,33 @@ export function WorkOverview({
 
       {websites.length > 0 && (
         <>
-          <h2 className="mt-14 text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+          <h2 className="mt-10 text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
             Websites
           </h2>
-          <ul className="mt-3 border-t border-background-inverse/10">
+          <ul className="mt-2">
             {websites.map((site) => {
               const row = (
                 <>
-                  <ProjectLogoTile
-                    project={site}
-                    sizes="64px"
-                    compact
-                    className="w-16 aspect-[16/10] shrink-0 rounded-sm"
+                  <LogoMark
+                    logo={site.logoMark}
+                    name={site.name}
+                    className="h-5 w-full text-foreground/60 transition-colors group-hover:text-foreground"
                   />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm">{site.name}</span>
-                    <span className="block truncate text-xs text-foreground-secondary">
-                      {site.role || site.summary}
+                  <span className="min-w-0">
+                    <span className="block truncate text-[0.8125rem]">{site.name}</span>
+                    <span className="mt-0.5 block truncate text-[0.6875rem] text-foreground-secondary">
+                      {site.year}
                     </span>
                   </span>
-                  <span className="shrink-0 text-xs text-foreground-secondary">{site.year}</span>
-                  {site.liveUrl && (
-                    <ArrowUpRight size={14} className="shrink-0 text-foreground-secondary group-hover:text-foreground" />
+                  {site.liveUrl ? (
+                    <ArrowUpRight size={14} className="text-foreground-secondary group-hover:text-foreground" />
+                  ) : (
+                    <span />
                   )}
                 </>
               );
               const className =
-                "group flex items-center gap-4 py-3 border-b border-background-inverse/10";
+                "group grid grid-cols-[4.5rem_1fr_auto] items-center gap-4 rounded-md px-2 py-3 -mx-2 hover:bg-background-inverse/[0.04] transition-colors";
               return (
                 <li key={site.slug}>
                   {site.liveUrl ? (
@@ -175,7 +175,7 @@ export function ProjectView({
         <p className="text-xs text-foreground-secondary">{meta(project)}</p>
         <h1 className="mt-2 text-2xl sm:text-3xl font-medium tracking-tight">{project.name}</h1>
         {project.summary && (
-          <p className="mt-4 max-w-2xl text-sm sm:text-base leading-relaxed text-foreground-secondary">
+          <p className="mt-4 max-w-2xl text-[0.8125rem] leading-[1.85] text-foreground-secondary">
             {project.summary}
           </p>
         )}
@@ -189,7 +189,9 @@ export function ProjectView({
               mobileImage={project.mobileImage || undefined}
             />
           ) : (
-            <ProjectLogoTile project={project} sizes="760px" className="aspect-[2/1] rounded-sm" />
+            <div className="flex aspect-[2/1] items-center justify-center rounded-sm bg-background-inverse/[0.03]">
+              <LogoMark logo={project.logoMark} name={project.name} align="center" className="h-14 w-1/2" />
+            </div>
           )}
         </div>
 

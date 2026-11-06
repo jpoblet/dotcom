@@ -16,6 +16,8 @@ mobile_image: "/images/projects/sottobosco-mobile.jpg"
 accent: "#4D7C0F"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/sottobosco.png"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/sottobosco.png"
 brand_background: "#212121"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
