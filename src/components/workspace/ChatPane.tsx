@@ -200,10 +200,10 @@ export default function ChatPane({
 
   const footerLinks = (
     <>
-      <a href={`mailto:${email}`} className="truncate hover:text-foreground">
+      <a href={`mailto:${email}`} className="vt-foot-start truncate hover:text-foreground">
         {email}
       </a>
-      <div className="flex items-center gap-3">
+      <div className="vt-foot-end flex items-center gap-3">
         {links.map((link) => (
           <a
             key={link.href}

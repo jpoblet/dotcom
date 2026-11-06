@@ -73,13 +73,13 @@ export default function ThemeSwitcher() {
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className={`-my-2 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${
+        className={`-my-2.5 flex items-center gap-2 px-3 sm:px-3.5 py-2 bg-background hover:bg-background-inverse/10 rounded-full border transition-all duration-200 ${
           isOpen ? "border-background-inverse" : "border-background-inverse/10"
         }`}
       >
-        <Current size={14} />
+        <Current size={17} />
         <ChevronDown
-          size={12}
+          size={14}
           className={`hidden sm:block transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>

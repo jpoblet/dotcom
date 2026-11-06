@@ -494,6 +494,10 @@ body:has([data-workspace]) [data-site-footer] {
    pieces they scale smoothly instead of fading between two sizes. */
 .vt-logo { view-transition-name: jp-logo; }
 .vt-pin { view-transition-name: jp-pin; }
+/* The footer's two ends move with the chat as themselves, rather than
+   fading between two copies at different widths. */
+.vt-foot-start { view-transition-name: jp-foot-start; }
+.vt-foot-end { view-transition-name: jp-foot-end; }
 /* One element moving and scaling, not two cross-fading: drop the old
    picture and carry the new one from the old place and size to its own.
    The tabs too, so they never fade out on the way to the panel. */
@@ -501,17 +505,23 @@ body:has([data-workspace]) [data-site-footer] {
    over them on the way. */
 ::view-transition-group(jp-logo),
 ::view-transition-group(jp-pin),
-::view-transition-group(jp-controls) {
+::view-transition-group(jp-controls),
+::view-transition-group(jp-foot-start),
+::view-transition-group(jp-foot-end) {
   z-index: 10;
 }
 ::view-transition-old(jp-logo),
 ::view-transition-old(jp-pin),
-::view-transition-old(jp-controls) {
+::view-transition-old(jp-controls),
+::view-transition-old(jp-foot-start),
+::view-transition-old(jp-foot-end) {
   display: none;
 }
 ::view-transition-new(jp-logo),
 ::view-transition-new(jp-pin),
-::view-transition-new(jp-controls) {
+::view-transition-new(jp-controls),
+::view-transition-new(jp-foot-start),
+::view-transition-new(jp-foot-end) {
   animation: none;
   width: 100%;
   height: 100%;
