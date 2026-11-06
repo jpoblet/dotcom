@@ -232,7 +232,7 @@ export default function ChatPane({
           is pinned. Wide, the two never meet, so there is none. */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-background from-65% to-transparent transition-opacity duration-[900ms] @[72rem]:hidden ${
+        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-36 bg-gradient-to-b from-background from-80% to-transparent transition-opacity duration-[900ms] @[72rem]:hidden ${
           heroHidden ? "opacity-100" : "opacity-0"
         }`}
       />

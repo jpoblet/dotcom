@@ -34,14 +34,14 @@ const FONT_DIR = path.join(process.cwd(), "src/assets/fonts");
 export function brandFonts() {
   return [
     {
-      name: "Atkinson Hyperlegible Next",
-      data: fs.readFileSync(path.join(FONT_DIR, "AtkinsonHyperlegibleNext-400.woff")),
+      name: "DM Sans",
+      data: fs.readFileSync(path.join(FONT_DIR, "DMSans-400.woff")),
       weight: 400 as const,
       style: "normal" as const,
     },
     {
-      name: "Atkinson Hyperlegible Next",
-      data: fs.readFileSync(path.join(FONT_DIR, "AtkinsonHyperlegibleNext-700.woff")),
+      name: "DM Sans",
+      data: fs.readFileSync(path.join(FONT_DIR, "DMSans-700.woff")),
       weight: 700 as const,
       style: "normal" as const,
     },

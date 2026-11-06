@@ -21,7 +21,7 @@ export default function OpengraphImage() {
           padding: 80,
           background: BRAND.ink,
           color: BRAND.paper,
-          fontFamily: "Atkinson Hyperlegible Next",
+          fontFamily: "DM Sans",
         }}
       >
         <JLogo height={140} color={BRAND.paper} />

@@ -5,9 +5,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-sans: var(--font-atkinson);
-  --font-heading: var(--font-atkinson);
-  --font-label: var(--font-atkinson-mono);
+  --font-sans: var(--font-dm-sans);
+  --font-heading: var(--font-dm-sans);
+  --font-label: var(--font-dm-mono);
 
   --polar: oklch(100% 0 0);
   /* Light theme: pure white, with a cool light grey for hover states and

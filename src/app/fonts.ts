@@ -1,18 +1,19 @@
-import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from "next/font/google";
+import { DM_Mono, DM_Sans } from "next/font/google";
 
 /*
- * The site's type: Atkinson Hyperlegible Next for text and headings, and
- * Atkinson Hyperlegible Mono for labels (see globals.css).
+ * The site's type: DM Sans for text and headings, and DM Mono for labels
+ * (see globals.css).
  */
-const atkinson = Atkinson_Hyperlegible_Next({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-atkinson",
+  variable: "--font-dm-sans",
   display: "swap",
 });
-const atkinsonMono = Atkinson_Hyperlegible_Mono({
+const dmMono = DM_Mono({
   subsets: ["latin"],
-  variable: "--font-atkinson-mono",
+  weight: ["400", "500"],
+  variable: "--font-dm-mono",
   display: "swap",
 });
 
-export const fontVariables = `${atkinson.variable} ${atkinsonMono.variable}`;
+export const fontVariables = `${dmSans.variable} ${dmMono.variable}`;

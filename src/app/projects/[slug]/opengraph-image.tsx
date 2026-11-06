@@ -55,7 +55,7 @@ export default async function ProjectImage({
           display: "flex",
           background: BRAND.ink,
           color: BRAND.paper,
-          fontFamily: "Atkinson Hyperlegible Next",
+          fontFamily: "DM Sans",
         }}
       >
         <div
