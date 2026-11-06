@@ -490,10 +490,8 @@ body:has([data-workspace]) [data-site-footer] {
 .vt-panel { view-transition-name: jp-panel; }
 .vt-chat { view-transition-name: jp-chat; }
 .vt-controls { view-transition-name: jp-controls; }
-/* The logo and the pinned name resize with the chat's width; as their own
-   pieces they scale smoothly instead of fading between two sizes. */
+/* The logo moves as itself rather than fading between two copies. */
 .vt-logo { view-transition-name: jp-logo; }
-.vt-pin { view-transition-name: jp-pin; }
 /* The footer's two ends move with the chat as themselves, rather than
    fading between two copies at different widths. */
 .vt-foot-start { view-transition-name: jp-foot-start; }
@@ -504,21 +502,18 @@ body:has([data-workspace]) [data-site-footer] {
 /* These travel above the sliding panel and the chat, so nothing passes
    over them on the way. */
 ::view-transition-group(jp-logo),
-::view-transition-group(jp-pin),
 ::view-transition-group(jp-controls),
 ::view-transition-group(jp-foot-start),
 ::view-transition-group(jp-foot-end) {
   z-index: 10;
 }
 ::view-transition-old(jp-logo),
-::view-transition-old(jp-pin),
 ::view-transition-old(jp-controls),
 ::view-transition-old(jp-foot-start),
 ::view-transition-old(jp-foot-end) {
   display: none;
 }
 ::view-transition-new(jp-logo),
-::view-transition-new(jp-pin),
 ::view-transition-new(jp-controls),
 ::view-transition-new(jp-foot-start),
 ::view-transition-new(jp-foot-end) {

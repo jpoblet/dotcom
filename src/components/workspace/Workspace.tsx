@@ -123,6 +123,23 @@ export default function Workspace({
   }, [projectOpen, closeProject, closePanel]);
 
   const actions = useMemo(() => ({ openProject }), [openProject]);
+
+  // From a talking point back to where it came up: scroll the chat to that
+  // exchange (its question just under the header). On phones the panel is
+  // a sheet over the chat, so it closes first.
+  const jumpTo = useCallback(
+    (messageId: string) => {
+      if (!window.matchMedia("(min-width: 1024px)").matches) closePanel();
+      requestAnimationFrame(() => {
+        const reply = document.getElementById(`msg-${messageId}`);
+        const turn = reply?.closest("section");
+        const scroller = turn?.closest<HTMLElement>(".overflow-y-auto");
+        if (!turn || !scroller) return;
+        scroller.scrollTo({ top: turn.offsetTop - 96, behavior: "smooth" });
+      });
+    },
+    [closePanel],
+  );
   const topicCount = session.topics.length;
 
   // A tab opens the panel on it; on phones, tapping the open one closes it.
@@ -137,28 +154,32 @@ export default function Workspace({
   // The tabs. Closed panel: quiet links that open it. Open: the current
   // one is underlined.
   const tabs = (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-1">
       {(["work", "notes"] as const).map((value) => (
         <button
           key={value}
           type="button"
           onClick={() => selectTab(value)}
           aria-pressed={panelOpen && tab === value}
-          className={`relative h-12 text-xs cursor-pointer transition-colors ${
+          className={`group/tab relative flex h-16 items-center text-xs cursor-pointer transition-colors ${
             panelOpen && tab === value
               ? "text-foreground"
               : "text-foreground-secondary hover:text-foreground"
           }`}
         >
-          {value === "work" ? "Work" : "AI Notes"}
-          {value === "notes" && topicCount > 0 && (
-            <span className="ml-1.5 inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-background-inverse px-1 align-[0.1em] text-[0.6875rem] leading-none tabular-nums text-background">{topicCount}</span>
-          )}
-          <span
-            className={`absolute inset-x-0 bottom-0 h-px origin-left bg-foreground transition-transform duration-300 ${EASE} ${
-              panelOpen && tab === value ? "scale-x-100" : "scale-x-0"
-            }`}
-          />
+          {/* The same hover as "start over": a soft rounded ground. */}
+          <span className="relative flex items-center rounded-md px-2.5 py-1.5 transition-colors group-hover/tab:bg-background-inverse/6">
+            {value === "work" ? "Work" : "AI Notes"}
+            {value === "notes" && topicCount > 0 && (
+              <span className="ml-1.5 inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-background-inverse px-1 text-[0.6875rem] leading-none tabular-nums text-background">{topicCount}</span>
+            )}
+            {/* The current tab: a line just under the label. */}
+            <span
+              className={`absolute inset-x-2.5 -bottom-1 h-px origin-left bg-foreground transition-transform duration-300 ${EASE} ${
+                panelOpen && tab === value ? "scale-x-100" : "scale-x-0"
+              }`}
+            />
+          </span>
         </button>
       ))}
     </div>
@@ -242,7 +263,7 @@ export default function Workspace({
             panelOpen ? "translate-x-0 lg:static" : "translate-x-full lg:fixed lg:inset-y-0 lg:left-full"
           }`}
         >
-          <div className="flex h-12 shrink-0 items-center justify-between gap-4 px-4">
+          <div className="flex h-16 shrink-0 items-center justify-between gap-4 px-4">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -318,6 +339,7 @@ export default function Workspace({
                 messages={session.messages}
                 name={name}
                 onOpenProject={openProject}
+                onJumpTo={jumpTo}
               />
             </div>
           </div>

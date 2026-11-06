@@ -18,6 +18,8 @@ export interface NoteTopic {
   label: string;
   notes: string[];
   project?: string;
+  /** The reply where it first came up, to jump back to. */
+  messageId: string;
 }
 
 /** Topics across the conversation, merged by label, in order of first mention. */
@@ -31,7 +33,12 @@ function collectTopics(messages: Message[]): NoteTopic[] {
         if (!existing.notes.includes(topic.note)) existing.notes.push(topic.note);
         existing.project ??= topic.project;
       } else {
-        byLabel.set(key, { label: topic.label, notes: [topic.note], project: topic.project });
+        byLabel.set(key, {
+          label: topic.label,
+          notes: [topic.note],
+          project: topic.project,
+          messageId: message.id,
+        });
       }
     }
   }

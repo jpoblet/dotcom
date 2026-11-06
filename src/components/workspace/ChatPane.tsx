@@ -100,21 +100,6 @@ export default function ChatPane({
   const starters = useRandomPick(starterQuestions, 4);
   const picked = useRandomPick(ASIDES, 2);
   const asides = picked.length ? picked : null;
-  // Whether the big name has scrolled up behind the header: the small one
-  // then takes its place in the corner under the logo.
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [heroHidden, setHeroHidden] = useState(false);
-  useEffect(() => {
-    const hero = heroRef.current;
-    const root = scrollRef.current;
-    if (!hero || !root) return;
-    const observer = new IntersectionObserver(([entry]) => setHeroHidden(!entry.isIntersecting), {
-      root,
-      rootMargin: "-48px 0px 0px 0px",
-    });
-    observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
 
   // The latest exchange is at least a screen tall, so its question can sit
   // at the top of the view even while the reply is still short.
@@ -223,33 +208,14 @@ export default function ChatPane({
   );
 
   return (
-    // A size container: the logo and the pinned name grow with the room the
-    // chat has (wide with the panel closed, narrow with it open or on phones).
-    <div className="@container relative flex h-full min-h-0 flex-col">
+    <div className="relative flex h-full min-h-0 flex-col">
       {/* Header: transparent, floating over the chat, which scrolls right up
           to the top edge behind it. The controls move into the panel's
           header while it's open (desktop). */}
-      <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4 @[72rem]:h-16 @[72rem]:px-6">
-        <Logo className="vt-logo h-6 fill-current shrink-0 @[72rem]:h-8" />
+      {/* One size for the logo, panel open or closed. */}
+      <div className="absolute inset-x-0 top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
+        <Logo className="vt-logo h-9 fill-current shrink-0" />
         <div className="flex items-center gap-1">{headerControls}</div>
-      </div>
-
-      {/* The name, small, once the big one has scrolled away: two lines
-          (name, then title) turned a quarter anticlockwise, reading up the
-          left edge under the logo, centred on the screen's height. It fades
-          in, and back out the same way. Not on narrow screens, where there's
-          no margin beside the conversation for it. */}
-      <div
-        aria-hidden={!heroHidden}
-        className={`vt-pin pointer-events-none absolute top-1/2 left-4 z-20 hidden -translate-y-1/2 rotate-180 [writing-mode:vertical-rl] @[40rem]:block @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          heroHidden ? "translate-x-0 opacity-100" : "translate-x-1.5 opacity-0"
-        }`}
-      >
-        {/* Two sizes, keeping the same ratio: 24/16 with room, 18/14 without. */}
-        <p className="whitespace-nowrap font-mono text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
-        <p className="whitespace-nowrap font-mono text-xs leading-snug text-foreground-secondary @[72rem]:text-base">
-          {title}
-        </p>
       </div>
 
       <div className="flex min-h-0 flex-1">
@@ -261,7 +227,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
           >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. */}
-              <div ref={heroRef} className="mb-10">
+              <div className="mb-10">
                 <h1
                   className="font-mono text-5xl sm:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-balance"
                 >
@@ -310,7 +276,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
                             message.isUser ? (
                               <Question key={message.id} message={message} />
                             ) : !message.text && !message.widgets?.length ? null : (
-                              <div key={message.id} className="space-y-4">
+                              <div key={message.id} id={`msg-${message.id}`} className="space-y-4">
                                 {message.text && (
                                   <div
                                     className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
