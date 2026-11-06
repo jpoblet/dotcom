@@ -485,7 +485,7 @@ body:has([data-workspace]) [data-site-footer] {
 .vt-controls { view-transition-name: jp-controls; }
 
 ::view-transition-group(*) {
-  animation-duration: 560ms;
+  animation-duration: 450ms;
   animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 /* The chat keeps its size while its box moves: no stretching, it slides. */
@@ -496,16 +496,18 @@ body:has([data-workspace]) [data-site-footer] {
   object-fit: none;
   object-position: center top;
 }
-/* The panel arrives from, and leaves to, the right edge. */
-::view-transition-new(jp-panel):only-child {
-  animation: vt-from-right 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
+/* The panel waits just past the right edge while closed, so its own
+   morph slides it in and out. */
+
+/* The small name arriving in the corner as the big one scrolls away: it
+   shrinks into place from a larger size. */
+@keyframes name-pin {
+  from { opacity: 0; transform: translateY(10px) scale(1.6); filter: blur(3px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
-::view-transition-old(jp-panel):only-child {
-  animation: vt-to-right 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+.animate-name-pin {
+  animation: name-pin 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
-@keyframes vt-from-right {
-  from { transform: translateX(100%); }
-}
-@keyframes vt-to-right {
-  to { transform: translateX(100%); }
+@media (prefers-reduced-motion: reduce) {
+  .animate-name-pin { animation: none; }
 }

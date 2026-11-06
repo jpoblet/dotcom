@@ -26,6 +26,9 @@ interface Props {
 }
 
 
+/** Where a new question lands: below the header and the pinned name. */
+const QUESTION_TOP = 112;
+
 /** Up to `count` random items (picked after mount, so hydration agrees). */
 function useRandomPick(items: string[], count: number): string[] {
   const [picked, setPicked] = useState<string[]>([]);
@@ -69,6 +72,21 @@ export default function ChatPane({
   const [viewportHeight, setViewportHeight] = useState(0);
   const starters = useRandomPick(starterQuestions, 4);
   const firstName = name.split(" ")[0];
+  // Whether the big name has scrolled up behind the header: the small one
+  // then takes its place in the corner under the logo.
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [heroHidden, setHeroHidden] = useState(false);
+  useEffect(() => {
+    const hero = heroRef.current;
+    const root = scrollRef.current;
+    if (!hero || !root) return;
+    const observer = new IntersectionObserver(([entry]) => setHeroHidden(!entry.isIntersecting), {
+      root,
+      rootMargin: "-48px 0px 0px 0px",
+    });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   // The latest exchange is at least a screen tall, so its question can sit
   // at the top of the view even while the reply is still short.
@@ -91,7 +109,7 @@ export default function ChatPane({
     // Restored history jumps there; a question just sent glides.
     const behavior = scrolledFor.current === undefined ? "instant" : "smooth";
     scrolledFor.current = lastQuestionId;
-    container.scrollTo({ top: turn.offsetTop - 24, behavior });
+    container.scrollTo({ top: turn.offsetTop - QUESTION_TOP, behavior });
   }, [lastQuestionId, viewportHeight]);
 
   const submit = useCallback(
@@ -135,36 +153,50 @@ export default function ChatPane({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      {/* Header, on the page's own ground: the logo and the controls (which
-          move into the panel's header while it's open, on desktop). */}
-      <div className="flex h-12 shrink-0 items-center justify-between gap-3 px-4">
+      {/* Header: no background of its own. It floats over the chat, which
+          scrolls up behind it and fades out under it. The controls move
+          into the panel's header while it's open (desktop). */}
+      <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4">
         <Logo className="h-6 fill-current shrink-0" />
         <div className="flex items-center gap-1">{headerControls}</div>
+      </div>
+
+      {/* The name, shrunk into the corner under the logo: once the big one
+          has scrolled away, or (desktop) while the panel is open. */}
+      <div
+        className={`pointer-events-none absolute top-12 left-4 z-20 origin-top-left ${
+          heroHidden ? "block" : panelOpen ? "hidden lg:block" : "hidden"
+        } ${heroHidden && !panelOpen ? "animate-name-pin" : ""}`}
+      >
+        <p className="vt-name w-fit font-heading text-base font-bold leading-tight">{name}</p>
+        <p className="vt-title mt-0.5 w-fit text-xs text-foreground-secondary">{title}</p>
       </div>
 
       <div className="flex min-h-0 flex-1">
         {/* The thread */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
-            {/* Desktop, panel open: the name, shrunk into the corner under
-                the logo. It scrolls away with the conversation. */}
-            {panelOpen && (
-              <div className="absolute top-1 left-4 hidden lg:block">
-                <p className="vt-name w-fit font-heading text-base font-bold leading-tight">{name}</p>
-                <p className="vt-title mt-0.5 w-fit text-xs text-foreground-secondary">{title}</p>
-              </div>
-            )}
+          <div
+            ref={scrollRef}
+            // Content fades out under the header, and fully clears the
+            // pinned name when it's showing.
+            style={
+              (heroHidden || panelOpen
+                ? { "--clear": "5.75rem", "--fade": "7rem" }
+                : { "--clear": "2.5rem", "--fade": "3.75rem" }) as React.CSSProperties
+            }
+            className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 [mask-image:linear-gradient(to_bottom,transparent_0,transparent_var(--clear),black_var(--fade))]"
+          >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. While the panel is open it has shrunk
-                  into the panel's corner; its space stays, so nothing here
-                  jumps as it goes. */}
-              <div className={`mb-10 ${panelOpen ? "lg:invisible" : ""}`}>
+                  into the corner under the logo; its space stays, so nothing
+                  here jumps as it goes. */}
+              <div ref={heroRef} className={`mb-10 ${panelOpen ? "lg:invisible" : ""}`}>
                 <h1
-                  className={`w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em] ${panelOpen ? "" : "vt-name"}`}
+                  className={`w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em] ${heroHidden || panelOpen ? "" : "vt-name"}`}
                 >
                   {name}
                 </h1>
-                <p className={`mt-3 w-fit text-base text-foreground-secondary ${panelOpen ? "" : "vt-title"}`}>
+                <p className={`mt-3 w-fit text-base text-foreground-secondary ${heroHidden || panelOpen ? "" : "vt-title"}`}>
                   {title}
                 </p>
               </div>
@@ -198,7 +230,7 @@ export default function ChatPane({
                         <section
                           key={turn[0].id}
                           ref={isLast ? lastTurnRef : undefined}
-                          style={isLast && viewportHeight ? { minHeight: viewportHeight - 48 } : undefined}
+                          style={isLast && viewportHeight ? { minHeight: viewportHeight - QUESTION_TOP - 24 } : undefined}
                           className="space-y-6"
                         >
                           {turn.map((message) =>

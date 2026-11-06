@@ -155,7 +155,7 @@ export default function Workspace({
             <span className="ml-1.5 tabular-nums text-foreground-secondary">{topicCount}</span>
           )}
           <span
-            className={`absolute inset-x-0 bottom-0 h-px origin-left bg-foreground transition-transform duration-500 ${EASE} ${
+            className={`absolute inset-x-0 bottom-0 h-px origin-left bg-foreground transition-transform duration-300 ${EASE} ${
               panelOpen && tab === value ? "scale-x-100" : "scale-x-0"
             }`}
           />
@@ -177,14 +177,12 @@ export default function Workspace({
     </button>
   );
 
-  // Desktop: one set of controls, in the chat header while the panel is
-  // closed and in the panel's header while it's open (the view transition
-  // carries it across). Phones: compact buttons in the chat header.
+  // Desktop: the tabs sit in the chat header while the panel is closed and
+  // in the panel's header while it's open (the view transition carries them
+  // across). Phones: compact buttons in the chat header. "Start over" stays
+  // in the chat header either way.
   const desktopControls = (
-    <div className="vt-controls hidden items-center gap-4 lg:flex">
-      {tabs}
-      {startOver}
-    </div>
+    <div className="vt-controls hidden items-center lg:flex">{tabs}</div>
   );
   const phoneControls = (
     <div className="flex items-center gap-1 lg:hidden">
@@ -207,7 +205,6 @@ export default function Workspace({
           </button>
         );
       })}
-      {startOver}
     </div>
   );
 
@@ -230,15 +227,20 @@ export default function Workspace({
               <>
                 {!panelOpen && desktopControls}
                 {phoneControls}
+                {/* Always in the chat's header: it acts on the conversation. */}
+                <span className="ml-3 lg:ml-2">{startOver}</span>
               </>
             }
           />
         </main>
-        {/* Work and notes. Desktop: a column on the right, present only
-            while open. Phones: a sheet that slides in from the right. */}
+        {/* Work and notes. Desktop: a column on the right; while closed it
+            waits, fully rendered, just past the right edge, so it opens
+            with everything already in place. Phones: a sheet that slides
+            in from the right. */}
         <aside
-          className={`vt-panel fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:static lg:z-auto lg:h-full lg:w-[clamp(24rem,42%,40rem)] lg:shrink-0 lg:translate-x-0 lg:border-l lg:border-background-inverse/10 lg:pt-0 lg:transition-none ${
-            panelOpen ? "translate-x-0 lg:flex" : "translate-x-full lg:hidden"
+          inert={!panelOpen}
+          className={`vt-panel fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:z-auto lg:h-full lg:w-[clamp(24rem,42%,40rem)] lg:shrink-0 lg:translate-x-0 lg:border-l lg:border-background-inverse/10 lg:pt-0 lg:transition-none ${
+            panelOpen ? "translate-x-0 lg:static" : "translate-x-full lg:fixed lg:inset-y-0 lg:left-full"
           }`}
         >
           <div className="flex h-12 shrink-0 items-center justify-between gap-4 px-4">
