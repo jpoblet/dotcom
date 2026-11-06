@@ -12,7 +12,7 @@ interface Props {
 
 /**
  * A live website, shown as a product shot: the desktop screenshot in a
- * minimal browser window and, overlapping it, a phone showing another part
+ * plain rounded shot and, overlapping its corner, a phone showing another part
  * of the site, to show it's responsive. Sizes are relative, so the
  * composition scales down on phones.
  */
@@ -26,7 +26,7 @@ export default function DeviceShowcase({ name, url, desktopImage, mobileImage, c
         alt={`${name} website on a desktop browser`}
         priority
         sizes="(min-width: 1008px) 770px, 80vw"
-        className={`absolute top-0 left-0 ${mobileImage ? "w-[80%]" : "w-full"}`}
+        className={`absolute top-0 left-0 ${mobileImage ? "w-[85%]" : "w-full"}`}
       />
       {mobileImage && (
         <PhoneFrame
