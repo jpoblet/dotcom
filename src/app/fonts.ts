@@ -1,4 +1,6 @@
 import {
+  Albert_Sans,
+  Archivo,
   DM_Mono,
   DM_Sans,
   Geist,
@@ -6,7 +8,19 @@ import {
   IBM_Plex_Mono,
   IBM_Plex_Sans,
   Inter,
+  Hanken_Grotesk,
+  Instrument_Sans,
+  Inter_Tight,
+  JetBrains_Mono,
   Jost,
+  Manrope,
+  Outfit,
+  Public_Sans,
+  Red_Hat_Display,
+  Red_Hat_Mono,
+  Red_Hat_Text,
+  Schibsted_Grotesk,
+  Sora,
   Space_Grotesk,
 } from "next/font/google";
 
@@ -54,6 +68,22 @@ const dmMono = DM_Mono({
   preload: false,
 });
 
+// Second round of pairings.
+const interTight = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight", display: "swap", preload: false });
+const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted", display: "swap", preload: false });
+const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-public-sans", display: "swap", preload: false });
+const instrument = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument", display: "swap", preload: false });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap", preload: false });
+const redHatDisplay = Red_Hat_Display({ subsets: ["latin"], variable: "--font-redhat-display", display: "swap", preload: false });
+const redHatText = Red_Hat_Text({ subsets: ["latin"], variable: "--font-redhat-text", display: "swap", preload: false });
+const redHatMono = Red_Hat_Mono({ subsets: ["latin"], variable: "--font-redhat-mono", display: "swap", preload: false });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap", preload: false });
+const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", display: "swap", preload: false });
+const sora = Sora({ subsets: ["latin"], variable: "--font-sora", display: "swap", preload: false });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap", preload: false });
+const albert = Albert_Sans({ subsets: ["latin"], variable: "--font-albert", display: "swap", preload: false });
+const hanken = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-hanken", display: "swap", preload: false });
+
 export const fontVariables = [
   jost,
   inter,
@@ -64,6 +94,20 @@ export const fontVariables = [
   spaceGrotesk,
   dmSans,
   dmMono,
+  interTight,
+  schibsted,
+  publicSans,
+  instrument,
+  jetbrains,
+  redHatDisplay,
+  redHatText,
+  redHatMono,
+  manrope,
+  archivo,
+  sora,
+  outfit,
+  albert,
+  hanken,
 ]
   .map((font) => font.variable)
   .join(" ");

@@ -51,14 +51,19 @@ export default function FontSwitcher() {
       {open && (
         <div
           role="menu"
-          className="animate-suggestion-in absolute bottom-full right-0 mb-2 w-[19rem] rounded-lg border border-background-inverse/15 bg-background p-1.5 shadow-[0_20px_50px_-12px_rgb(0_0_0/0.25)]"
+          className="animate-suggestion-in absolute bottom-full right-0 mb-2 w-[20rem] max-h-[min(70vh,40rem)] overflow-y-auto rounded-lg border border-background-inverse/15 bg-background p-1.5 shadow-[0_20px_50px_-12px_rgb(0_0_0/0.25)]"
         >
           <p className="px-2.5 pt-1.5 pb-2 text-[0.6875rem] text-foreground-secondary">
             Font pairing (only you see this)
           </p>
-          {FONT_PAIRINGS.map((pairing) => (
+          {FONT_PAIRINGS.map((pairing, index) => (
+            <div key={pairing.id}>
+            {(index === 5 || pairing.id === "original") && (
+              <p className="mx-2.5 mt-2 border-t border-background-inverse/10 pt-3 pb-1 text-[0.6875rem] text-foreground-secondary">
+                {pairing.id === "original" ? "Baseline" : "Second round"}
+              </p>
+            )}
             <button
-              key={pairing.id}
               type="button"
               role="menuitemradio"
               aria-checked={current === pairing.id}
@@ -76,6 +81,7 @@ export default function FontSwitcher() {
                 {pairing.note}
               </span>
             </button>
+            </div>
           ))}
         </div>
       )}
