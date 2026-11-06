@@ -494,14 +494,24 @@ body:has([data-workspace]) [data-site-footer] {
    pieces they scale smoothly instead of fading between two sizes. */
 .vt-logo { view-transition-name: jp-logo; }
 .vt-pin { view-transition-name: jp-pin; }
-/* One element scaling, not two cross-fading: drop the old picture and show
-   the new one from the old size to its own. */
+/* One element moving and scaling, not two cross-fading: drop the old
+   picture and carry the new one from the old place and size to its own.
+   The tabs too, so they never fade out on the way to the panel. */
+/* These travel above the sliding panel and the chat, so nothing passes
+   over them on the way. */
+::view-transition-group(jp-logo),
+::view-transition-group(jp-pin),
+::view-transition-group(jp-controls) {
+  z-index: 10;
+}
 ::view-transition-old(jp-logo),
-::view-transition-old(jp-pin) {
+::view-transition-old(jp-pin),
+::view-transition-old(jp-controls) {
   display: none;
 }
 ::view-transition-new(jp-logo),
-::view-transition-new(jp-pin) {
+::view-transition-new(jp-pin),
+::view-transition-new(jp-controls) {
   animation: none;
   width: 100%;
   height: 100%;
