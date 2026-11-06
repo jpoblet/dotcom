@@ -14,6 +14,8 @@ thumbnail: ""
 accent: "#0F766E"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/veriff-workflows.svg"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/veriff-workflows-symbol.svg"
 brand_background: "#FFFFFF"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
