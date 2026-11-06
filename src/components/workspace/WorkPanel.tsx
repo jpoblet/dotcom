@@ -61,11 +61,11 @@ export function WorkOverview({
                   className="-translate-x-1 text-foreground opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
                 />
               </span>
-              <span className="flex h-28 items-center">
+              <span className="flex h-24 items-center">
                 <LogoMark
                   logo={project.logoMark}
                   name={project.name}
-                  className="h-12 w-1/2 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
+                  className="h-8 w-2/5 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
                 />
               </span>
               <span className="text-sm font-medium">{project.name}</span>
@@ -78,6 +78,10 @@ export function WorkOverview({
             </button>
           </li>
         ))}
+        {/* An odd count leaves a gap: fill it so the hairline grid stays even. */}
+        {caseStudies.length % 2 === 1 && (
+          <li aria-hidden="true" className="hidden bg-background sm:block" />
+        )}
       </ul>
 
       {websites.length > 0 && (
@@ -101,7 +105,7 @@ export function WorkOverview({
                     <LogoMark
                       logo={site.logoMark}
                       name={site.name}
-                      className="h-6 w-3/4 text-foreground/75 transition-colors duration-300 group-hover:text-foreground"
+                      className="h-5 w-3/5 text-foreground/75 transition-colors duration-300 group-hover:text-foreground"
                     />
                   </span>
                   <span className="truncate text-sm">{site.name}</span>
