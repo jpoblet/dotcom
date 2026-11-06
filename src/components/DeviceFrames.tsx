@@ -43,18 +43,20 @@ export function BrowserFrame({
 }
 
 /**
- * A screenshot in a phone outline (the same hairline as the browser) and a mobile browser's
- * wireframe address bar. The screen keeps the captures' exact proportions (390 x 844),
- * so nothing is cropped.
+ * A screenshot in a phone: the same hairline outline as the browser, the
+ * screen inset from the edges, a wireframe address bar on top and a
+ * wireframe toolbar (back, forward, share, bookmarks, tabs) at the bottom.
+ * The capture is shown at full width and trimmed slightly at the bottom by
+ * the toolbar.
  */
 export function PhoneFrame({
   src,
-  url,
   alt,
   sizes,
   className = "",
 }: {
   src: string;
+  /** The site's address (not shown: the bars are wireframes). */
   url?: string;
   alt: string;
   sizes: string;
@@ -64,15 +66,23 @@ export function PhoneFrame({
     <div
       className={`overflow-hidden rounded-[clamp(0.75rem,2.2vw,1.5rem)] border border-background-inverse/15 bg-background ${className}`}
     >
-      <div>
-        {url && (
-          <div className="flex items-center justify-center border-b border-background-inverse/10 px-[8%] pt-[7%] pb-[4%]">
-            <span aria-hidden="true" className="h-[clamp(0.35rem,0.75vw,0.6rem)] w-3/5 rounded-full bg-background-inverse/8" />
-          </div>
-        )}
-        <div className="relative aspect-[390/844]">
-          <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
-        </div>
+      {/* Percentages below resolve against this wrapper (the phone's own
+          width), even when the phone is absolutely positioned. */}
+      <div className="px-[5%]">
+      {/* Address bar */}
+      <div aria-hidden="true" className="flex items-center justify-center pt-[9%] pb-[5%]">
+        <span className="h-[clamp(0.35rem,0.75vw,0.6rem)] w-3/5 rounded-full bg-background-inverse/8" />
+      </div>
+      {/* Screen */}
+      <div className="relative aspect-[390/780] overflow-hidden rounded-[clamp(0.2rem,0.5vw,0.4rem)] border border-background-inverse/10">
+        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
+      </div>
+      {/* Toolbar */}
+      <div aria-hidden="true" className="flex items-center justify-between px-[6%] pt-[6%] pb-[9%]">
+        {Array.from({ length: 5 }, (_, i) => (
+          <span key={i} className="aspect-square w-[9%] rounded-[25%] bg-background-inverse/10" />
+        ))}
+      </div>
       </div>
     </div>
   );
