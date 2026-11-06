@@ -9,23 +9,19 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
 import ConfirmDialog from "./ConfirmDialog";
+import { Online } from "./ProfileCard";
 
 interface Props {
   name: string;
   title: string;
   email: string;
   links: { label: string; href: string }[];
-  /** "Lead Product Designer at Veriff", if there's a current role. */
-  now?: string;
-  /** Where Jordi is, for the card's local time, e.g. "Europe/Madrid". */
-  timeZone: string;
-  city: string;
   starterQuestions: string[];
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
   reset: () => void;
-  /** Whether the Work / AI Notes panel is open (the card folds away). */
+  /** Whether the Work / AI Notes panel is open (the name moves up here). */
   panelOpen: boolean;
   /** Buttons that open the Work and AI Notes panel (phones). */
   panelButtons?: React.ReactNode;
@@ -50,22 +46,6 @@ function useRandomPick(items: string[], count: number): string[] {
   return picked;
 }
 
-/** The time where Jordi is, ticking. Empty until mounted. */
-function useLocalTime(timeZone: string): string {
-  const [time, setTime] = useState("");
-  useEffect(() => {
-    const format = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone });
-    const tick = () => setTime(format.format(new Date()));
-    const first = setTimeout(tick);
-    const interval = setInterval(tick, 15_000);
-    return () => {
-      clearTimeout(first);
-      clearInterval(interval);
-    };
-  }, [timeZone]);
-  return time;
-}
-
 /**
  * The home page as a message thread that has already begun. On the left,
  * Jordi's card: who, what, now, and the time in Barcelona. On the right,
@@ -78,9 +58,6 @@ export default function ChatPane({
   title,
   email,
   links,
-  now,
-  timeZone,
-  city,
   starterQuestions,
   messages,
   isLoading,
@@ -96,8 +73,7 @@ export default function ChatPane({
   const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
   const starters = useRandomPick(starterQuestions, 4);
-  const localTime = useLocalTime(timeZone);
-  const [firstName, ...rest] = name.split(" ");
+  const firstName = name.split(" ")[0];
 
   // The latest exchange is at least a screen tall, so its question can sit
   // at the top of the view even while the reply is still short.
@@ -167,7 +143,7 @@ export default function ChatPane({
       {/* Header. On phones it stands in for the card: name and status. */}
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Logo className="h-6 fill-current shrink-0" />
+          <Logo className="h-6 fill-current shrink-0 lg:hidden" />
           {/* Phones: always here, standing in for the card. Desktop: arrives
               as the card folds away for the panel, a beat after it starts. */}
           <span
@@ -200,46 +176,6 @@ export default function ChatPane({
       </div>
 
       <div className="flex min-h-0 flex-1">
-        {/* Jordi's card, on the same ground as the chat: no fill, no rule.
-            Desktop only; folds away while the panel is open. */}
-        <aside
-          aria-label={`About ${name}`}
-          className={`hidden shrink-0 overflow-hidden transition-[width,opacity] duration-[520ms] lg:block ${EASE} ${
-            panelOpen ? "w-0 opacity-0" : "w-[clamp(20rem,38%,34rem)] opacity-100"
-          }`}
-        >
-          {/* Shrinks up towards the header as it goes, where the name reappears. */}
-          <div
-            className={`flex h-full w-[clamp(20rem,38vw,34rem)] origin-top-left flex-col gap-8 overflow-y-auto px-10 pt-[2.375rem] pb-8 transition-[scale,translate,filter] duration-[520ms] ${EASE} ${
-              panelOpen ? "-translate-y-6 scale-[0.85] blur-[2px]" : "translate-y-0 scale-100 blur-0"
-            }`}
-          >
-            <p className="flex items-center gap-2 text-sm">
-              <Online />
-              Online · answers instantly
-            </p>
-            <h1 className="text-6xl xl:text-7xl font-bold leading-[0.92] tracking-[-0.035em]">
-              {firstName}
-              {rest.length > 0 && (
-                <>
-                  <br />
-                  {rest.join(" ")}
-                </>
-              )}
-            </h1>
-            <dl className="space-y-4">
-              <Fact label="What I do">{title}</Fact>
-              {now && <Fact label="Now">{now}</Fact>}
-              <Fact label="Local time">
-                <span className="tabular-nums">{localTime || "--:--"}</span> in {city}
-              </Fact>
-            </dl>
-            <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-6 text-xs text-foreground-secondary">
-              {footerLinks}
-            </div>
-          </div>
-        </aside>
-
         {/* The thread */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
@@ -407,25 +343,6 @@ export default function ChatPane({
 }
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
-
-/** The green "online" dot. */
-function Online() {
-  return (
-    <span
-      aria-hidden="true"
-      className="size-2 shrink-0 rounded-full bg-[oklch(0.62_0.15_150)] shadow-[0_0_0_3px_oklch(0.62_0.15_150/0.18)]"
-    />
-  );
-}
-
-function Fact({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="font-label text-xs text-foreground-secondary">{label}</dt>
-      <dd className="mt-1 text-base">{children}</dd>
-    </div>
-  );
-}
 
 /**
  * The visitor's question, set as the headline of its exchange: a short

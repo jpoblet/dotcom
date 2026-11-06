@@ -5,8 +5,10 @@ import { ArrowLeft, X } from "lucide-react";
 import { track } from "@/lib/analytics";
 import type { Project } from "@/lib/content";
 import { useChatSession } from "@/lib/use-chat-session";
+import Logo from "@/components/Logo";
 import ChatPane from "./ChatPane";
 import NotesPanel from "./NotesPanel";
+import ProfileCard from "./ProfileCard";
 import { ProjectView, WorkOverview } from "./WorkPanel";
 import { WorkspaceContext } from "./WorkspaceContext";
 
@@ -99,9 +101,9 @@ export default function Workspace({
   const actions = useMemo(() => ({ openProject }), [openProject]);
 
   // Desktop: the tabs float over both headers and glide between them. With
-  // the panel closed they sit at the chat header's right (left of the "new
-  // conversation" button); open, at the start of the panel's header. The
-  // panel's widths here mirror its classes below.
+  // the panel closed they sit at the chat header's right (left of the "start
+  // over" button); open, they cross to the left column's header, beside the
+  // logo, above the panel they control.
   const navRef = useRef<HTMLDivElement>(null);
   const [navLeft, setNavLeft] = useState<number | null>(null);
   useEffect(() => {
@@ -109,12 +111,7 @@ export default function Workspace({
       const width = window.innerWidth;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       const navWidth = navRef.current?.offsetWidth ?? 0;
-      const panelWidth = width / 2;
-      setNavLeft(
-        panelOpen
-          ? width - panelWidth + 1.5 * rem
-          : width - 1 * rem - 2 * rem - 0.75 * rem - navWidth,
-      );
+      setNavLeft(panelOpen ? 4 * rem : width - 1 * rem - 2 * rem - 0.75 * rem - navWidth);
     };
     place();
     const observer = new ResizeObserver(place);
@@ -189,63 +186,61 @@ export default function Workspace({
         >
           {tabs}
         </div>
-        {/* Chat */}
-        <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-          <ChatPane
-            name={name}
-            title={title}
-            email={email}
-            links={links}
-            now={now}
-            timeZone={timeZone}
-            city={city}
-            starterQuestions={starterQuestions}
-            panelOpen={panelOpen}
-            messages={session.messages}
-            isLoading={session.isLoading}
-            send={session.send}
-            reset={() => {
-              session.reset();
-              closeProject();
-            }}
-            panelButtons={
-              <div className="flex items-center gap-1 lg:hidden">
-                {(["work", "notes"] as const).map((value) => {
-                  const active = panelOpen && tab === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => togglePanel(value)}
-                      aria-pressed={active}
-                      className={`rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
-                        active
-                          ? "bg-background-inverse/8 text-foreground"
-                          : "text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground"
-                      }`}
-                    >
-                      {value === "work" ? "Work" : "AI Notes"}
-                      {value === "notes" && topicCount > 0 && (
-                        <span className="ml-1.5 tabular-nums">{topicCount}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            }
-          />
-        </div>
-
-        {/* Work and notes. Desktop: half the screen beside the chat.
-            Phones: a sheet over the chat. */}
+        {/* The left column: who's answering, by default; Work or AI Notes
+            in the same place when asked for. The chat on the right never
+            moves. Phones: the column is only the panel's sheet. */}
         <div
-          className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate,width] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:relative lg:inset-auto lg:z-auto lg:shrink-0 lg:translate-x-0 lg:pt-0 lg:border-background-inverse/10 ${
-            panelOpen ? "translate-x-0 lg:border-l" : "translate-x-full lg:border-l-0"
-          } ${panelOpen ? "lg:w-1/2" : "lg:w-0"}`}
+          className={`contents lg:relative lg:flex lg:h-full lg:shrink-0 lg:flex-col lg:overflow-hidden lg:border-background-inverse/10 lg:transition-[width] lg:duration-[520ms] ${EASE} ${
+            panelOpen ? "lg:w-1/2 lg:border-r" : "lg:w-[clamp(20rem,38%,34rem)] lg:border-r-0"
+          }`}
         >
+          <div className="hidden h-12 shrink-0 items-center justify-between border-b border-background-inverse/10 px-4 lg:flex">
+            <Logo className="h-6 fill-current shrink-0" />
+            <button
+              type="button"
+              onClick={closePanel}
+              aria-label="Close panel"
+              title="Close"
+              tabIndex={panelOpen ? 0 : -1}
+              className={`-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
+                panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+            >
+              <X size={15} />
+            </button>
+          </div>
+          {/* The card steps back as the panel arrives. */}
+          <div
+            aria-hidden={panelOpen}
+            className={`relative hidden min-h-0 flex-1 origin-top-left transition-[opacity,scale,filter] duration-[520ms] lg:block ${EASE} ${
+              panelOpen ? "pointer-events-none scale-[0.96] opacity-0 blur-[2px]" : "scale-100 opacity-100 blur-0"
+            }`}
+          >
+            <div className="absolute inset-y-0 left-0 w-[clamp(20rem,38vw,34rem)]">
+              <ProfileCard
+                name={name}
+                title={title}
+                now={now}
+                timeZone={timeZone}
+                city={city}
+                email={email}
+                links={links}
+              />
+            </div>
+          </div>
+
+          {/* Work and notes. Desktop: takes the card's place, under the
+              column's header. Phones: a sheet over the chat. */}
+          <div
+            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate,opacity] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:absolute lg:inset-x-0 lg:top-12 lg:bottom-0 lg:z-auto lg:pt-0 ${
+              panelOpen
+                ? "translate-x-0 lg:opacity-100 lg:delay-100"
+                : "translate-x-full lg:pointer-events-none lg:-translate-x-6 lg:opacity-0"
+            }`}
+          >
           {/* Keeps the content from squeezing while the panel closes. */}
           <div className="flex h-full min-h-0 flex-col lg:min-w-[24rem]">
-          <div className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-background-inverse/10 px-6">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-background-inverse/10 px-6 lg:hidden">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -323,6 +318,52 @@ export default function Workspace({
           </div>
           </div>
         </div>
+        </div>
+
+        {/* Chat */}
+        <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+          <ChatPane
+            name={name}
+            title={title}
+            email={email}
+            links={links}
+            starterQuestions={starterQuestions}
+            panelOpen={panelOpen}
+            messages={session.messages}
+            isLoading={session.isLoading}
+            send={session.send}
+            reset={() => {
+              session.reset();
+              closeProject();
+            }}
+            panelButtons={
+              <div className="flex items-center gap-1 lg:hidden">
+                {(["work", "notes"] as const).map((value) => {
+                  const active = panelOpen && tab === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => togglePanel(value)}
+                      aria-pressed={active}
+                      className={`rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
+                        active
+                          ? "bg-background-inverse/8 text-foreground"
+                          : "text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground"
+                      }`}
+                    >
+                      {value === "work" ? "Work" : "AI Notes"}
+                      {value === "notes" && topicCount > 0 && (
+                        <span className="ml-1.5 tabular-nums">{topicCount}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            }
+          />
+        </div>
+
       </div>
     </WorkspaceContext.Provider>
   );
