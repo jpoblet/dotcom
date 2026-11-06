@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, Info } from "lucide-react";
+import { ArrowUp, ArrowUpRight, Info } from "lucide-react";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
@@ -200,13 +200,25 @@ export default function ChatPane({
 
   const footerLinks = (
     <>
-      <a href={`mailto:${email}`} className="font-mono hover:text-foreground truncate">
+      <a href={`mailto:${email}`} className="truncate hover:text-foreground">
         {email}
       </a>
       <div className="flex items-center gap-3">
         {links.map((link) => (
-          <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          <a
+            key={link.href}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/link inline-flex items-center hover:text-foreground"
+          >
             {link.label}
+            {/* "Opens elsewhere", shown on hover. */}
+            <ArrowUpRight
+              size={13}
+              aria-hidden="true"
+              className="-ml-0.5 w-0 opacity-0 transition-[width,opacity,margin,translate] duration-200 group-hover/link:ml-0.5 group-hover/link:w-[13px] group-hover/link:opacity-100 group-focus-visible/link:ml-0.5 group-focus-visible/link:w-[13px] group-focus-visible/link:opacity-100"
+            />
           </a>
         ))}
         <ThemeSwitcher />
@@ -364,7 +376,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
           <div
             ref={composerRef}
             style={raise ? { transform: `translateY(-${raise}px)` } : undefined}
-            className={`relative z-10 shrink-0 px-4 sm:px-8 pb-4 pt-2 ${
+            className={`relative z-10 shrink-0 px-4 sm:px-8 pb-10 pt-2 ${
               placed ? "transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""
             }`}
           >
@@ -374,28 +386,38 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
                 submit(input);
               }}
               onClick={() => inputRef.current?.focus()}
-              className="mx-auto flex max-w-[42rem] items-end gap-2 rounded-2xl border border-background-inverse/20 bg-background py-2 pl-4 pr-2 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
+              className="group/field mx-auto flex max-w-[42rem] items-end gap-2 rounded-2xl border border-background-inverse/20 bg-background py-2 pl-4 pr-2 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
             >
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onInput={(e) => {
-                  const el = e.currentTarget;
-                  el.style.height = "auto";
-                  el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                    e.preventDefault();
-                    submit(input);
-                  }
-                }}
-                rows={1}
-                aria-label="Ask me anything"
-                placeholder="Ask me anything…"
-                className="block min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-[1.5] placeholder:text-foreground-secondary focus:outline-none"
-              />
+              <div className="relative min-w-0 flex-1">
+                {/* A blinking cursor at the start of the placeholder, until the
+                    field is focused (then the real one blinks there). */}
+                {!input && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-0 h-[1.15em] w-px -translate-y-1/2 bg-foreground animate-[cursor-blink_1.1s_steps(1)_infinite] group-focus-within/field:hidden"
+                  />
+                )}
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onInput={(e) => {
+                    const el = e.currentTarget;
+                    el.style.height = "auto";
+                    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      submit(input);
+                    }
+                  }}
+                  rows={1}
+                  aria-label="Ask me anything"
+                  placeholder="Ask me anything…"
+                  className="block min-h-10 w-full resize-none bg-transparent py-2 pl-1.5 text-base leading-[1.5] placeholder:text-foreground-secondary focus:outline-none"
+                />
+              </div>
               {/* Privacy note, on hover or focus (a tap on phones). */}
               <span className="group/info relative shrink-0">
                 <button
