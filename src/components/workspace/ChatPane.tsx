@@ -141,7 +141,8 @@ export default function ChatPane({
               introVisible ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
             }`}
           >
-            {name}
+            {/* Name set like the intro's "Hi, I'm Jordi.": heading face, medium, ink. */}
+            <span className="font-heading font-medium text-foreground">{name}</span>
             {/* Same `title` as the intro: both come from content/profile.yaml. */}
             <span className="hidden sm:inline"> · {title}</span>
           </span>
