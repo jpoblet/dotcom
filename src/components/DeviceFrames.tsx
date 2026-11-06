@@ -39,24 +39,39 @@ export function BrowserFrame({
   );
 }
 
-/** A screenshot in a phone with a thin dark bezel. */
+/**
+ * A screenshot in a phone with a thin dark bezel and a mobile browser's
+ * address bar. The screen keeps the captures' exact proportions (390 x 844),
+ * so nothing is cropped.
+ */
 export function PhoneFrame({
   src,
+  url,
   alt,
   sizes,
   className = "",
 }: {
   src: string;
+  url?: string;
   alt: string;
   sizes: string;
   className?: string;
 }) {
   return (
     <div
-      className={`aspect-[9/19.5] overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground ${className}`}
+      className={`overflow-hidden rounded-[clamp(0.8rem,2.6vw,1.75rem)] border-[clamp(3px,0.6vw,6px)] border-foreground bg-foreground ${className}`}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-[clamp(0.6rem,2vw,1.35rem)]">
-        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
+      <div className="overflow-hidden rounded-[clamp(0.6rem,2vw,1.35rem)] bg-background">
+        {url && (
+          <div className="flex items-center justify-center border-b border-background-inverse/10 px-[8%] pt-[7%] pb-[4%]">
+            <span className="max-w-full truncate rounded-full bg-background-inverse/6 px-[0.9em] py-[0.2em] text-[clamp(0.375rem,0.8vw,0.625rem)] text-foreground-secondary">
+              {displayUrl(url)}
+            </span>
+          </div>
+        )}
+        <div className="relative aspect-[390/844]">
+          <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
+        </div>
       </div>
     </div>
   );

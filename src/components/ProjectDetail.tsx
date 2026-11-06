@@ -59,7 +59,7 @@ function mediaBlocks(project: Project): ReactNode[] {
       <figure>
         <div className="grid grid-cols-3 gap-[4%] px-[6%]">
           {project.mobileGallery.slice(0, 3).map((src) => (
-            <PhoneFrame key={src} src={src} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
+            <PhoneFrame key={src} src={src} url={url} alt={`${project.name} on a phone`} sizes="(min-width: 1008px) 260px, 28vw" />
           ))}
         </div>
         {caption("The same site on a phone.")}

@@ -170,7 +170,7 @@ export function ProjectView({
     media.push(
       <div className="grid grid-cols-3 gap-[5%] px-[8%]">
         {project.mobileGallery.slice(0, 3).map((src) => (
-          <PhoneFrame key={src} src={src} alt={`${project.name} on a phone`} sizes="200px" />
+          <PhoneFrame key={src} src={src} url={url} alt={`${project.name} on a phone`} sizes="200px" />
         ))}
       </div>,
     );

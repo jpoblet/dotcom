@@ -28,6 +28,7 @@ export default function DeviceShowcase({ name, url, desktopImage, mobileImage }:
       {mobileImage && (
         <PhoneFrame
           src={mobileImage}
+          url={url}
           alt={`${name} website on a phone`}
           sizes="(min-width: 1008px) 200px, 21vw"
           className="absolute bottom-0 right-0 w-[21%]"
