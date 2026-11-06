@@ -129,6 +129,40 @@ export default function ChatPane({
     container.scrollTo({ top: turn.offsetTop - clear, behavior });
   }, [lastQuestionId, viewportHeight]);
 
+  // Empty page: lift the input to just under the suggestions. Measured
+  // live (offsetTop ignores the transform), so it follows the layout as the
+  // window or the panel changes. No transition until it's first placed.
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
+  const [raise, setRaise] = useState(0);
+  const [placed, setPlaced] = useState(false);
+  const isEmpty = messages.length === 0;
+  useEffect(() => {
+    const composer = composerRef.current;
+    const pane = composer?.offsetParent as HTMLElement | null;
+    const place = () => {
+      const list = suggestionsRef.current;
+      if (!isEmpty || !composer || !pane || !list) {
+        setRaise(0);
+        return;
+      }
+      const naturalTop = pane.getBoundingClientRect().top + composer.offsetTop;
+      const target = list.getBoundingClientRect().bottom + 16;
+      setRaise(Math.max(0, Math.round(naturalTop - target)));
+    };
+    place();
+    const timeout = setTimeout(() => setPlaced(true), 80);
+    const observer = new ResizeObserver(place);
+    if (pane) observer.observe(pane);
+    if (suggestionsRef.current) observer.observe(suggestionsRef.current);
+    window.addEventListener("resize", place);
+    return () => {
+      clearTimeout(timeout);
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [isEmpty, starters.length]);
+
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
       if (!text.trim() || isLoading) return;
@@ -176,7 +210,7 @@ export default function ChatPane({
           to the top edge behind it. The controls move into the panel's
           header while it's open (desktop). */}
       <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4 @[72rem]:h-16 @[72rem]:px-6">
-        <Logo className="h-6 fill-current shrink-0 @[72rem]:h-8" />
+        <Logo className="vt-logo h-6 fill-current shrink-0 @[72rem]:h-8" />
         <div className="flex items-center gap-1">{headerControls}</div>
       </div>
 
@@ -195,7 +229,7 @@ export default function ChatPane({
       <div
         ref={pinnedRef}
         aria-hidden={!heroHidden}
-        className={`pointer-events-none absolute top-12 left-4 z-20 @[72rem]:top-16 @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`vt-pin pointer-events-none absolute top-12 left-4 z-20 @[72rem]:top-16 @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
           heroHidden ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
@@ -243,7 +277,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 @[72r
                 : anything, really.
               </p>
               {empty && starters.length > 0 && (
-                <div className="mt-6">
+                <div ref={suggestionsRef} className="mt-6">
                   <SuggestionList questions={starters} onPick={(q) => submit(q, "starter")} arrow="→" />
                 </div>
               )}
@@ -311,8 +345,15 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 @[72r
             </div>
           </div>
 
-          {/* Composer */}
-          <div className="shrink-0 px-4 sm:px-8 pb-4 pt-2">
+          {/* Composer. On the empty page it's lifted to sit just under the
+              suggestions; the first question sends it gliding down. */}
+          <div
+            ref={composerRef}
+            style={raise ? { transform: `translateY(-${raise}px)` } : undefined}
+            className={`relative z-10 shrink-0 px-4 sm:px-8 pb-4 pt-2 ${
+              placed ? "transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""
+            }`}
+          >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
