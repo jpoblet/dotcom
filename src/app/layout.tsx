@@ -70,7 +70,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
-      <body className="font-sans">
+      <body>
         {/* Next puts beforeInteractive scripts in the head, ahead of
             hydration, so React never renders a raw <script> itself. */}
         <Script id="theme" strategy="beforeInteractive">

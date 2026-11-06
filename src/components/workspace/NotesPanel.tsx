@@ -74,7 +74,7 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
       <div className="flex-1 px-6 py-8">
         <h2 className="text-xs font-medium text-foreground-secondary">Topics so far</h2>
         {topics.length === 0 ? (
-          <p className="mt-4 text-sm leading-[1.7] text-foreground-secondary">
+          <p className="font-body mt-4 text-sm leading-[1.7] text-foreground-secondary">
             Nothing yet. The topics we talk about will be listed here as we go.
           </p>
         ) : (

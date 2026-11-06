@@ -95,7 +95,6 @@ export default function ChatPane({
   const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
   const starters = useRandomPick(starterQuestions, 4);
-  const firstName = name.split(" ")[0];
   const picked = useRandomPick(ASIDES, 2);
   const asides = picked.length ? picked : null;
   // Whether the big name has scrolled up behind the header: the small one
@@ -283,7 +282,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
               </div>
 
               {/* The intro, in my voice; the last two items change each visit. */}
-              <p className="animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
+              <p className="font-body animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
                 I built this AI agent to answer as me. You can ask me about my work experience,
                 my most recent project, my career goals,{" "}
                 <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
@@ -393,8 +392,8 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
                   }
                 }}
                 rows={1}
-                aria-label={`Message ${firstName}`}
-                placeholder={`Message ${firstName}…`}
+                aria-label="Ask me anything"
+                placeholder="Ask me anything…"
                 className="block min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-[1.5] placeholder:text-foreground-secondary focus:outline-none"
               />
               {/* Privacy note, on hover or focus (a tap on phones). */}
@@ -410,7 +409,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
                 <span
                   id="privacy-note"
                   role="tooltip"
-                  className="pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+                  className="font-body pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
                 >
                   Questions and answers are saved so I can see what people ask and
                   improve the answers. Nothing that identifies you is kept: no name,

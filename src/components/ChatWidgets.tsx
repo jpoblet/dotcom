@@ -109,7 +109,7 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
                   )}
                 </span>
                 {project.summary && (
-                  <span className="mt-1 block truncate text-sm text-foreground-secondary">
+                  <span className="font-body mt-1 block truncate text-sm text-foreground-secondary">
                     {project.summary}
                   </span>
                 )}

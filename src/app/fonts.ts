@@ -1,8 +1,8 @@
 import { DM_Mono, DM_Sans } from "next/font/google";
 
 /*
- * The site's type: DM Sans for text and headings, and DM Mono for labels
- * (see globals.css).
+ * The site's type: DM Mono for everything (headings, labels, numbers, the
+ * interface) except body text, which is DM Sans (see globals.css).
  */
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -11,7 +11,7 @@ const dmSans = DM_Sans({
 });
 const dmMono = DM_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["300", "400", "500"],
   variable: "--font-dm-mono",
   display: "swap",
 });

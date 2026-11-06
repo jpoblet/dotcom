@@ -71,7 +71,7 @@ export function WorkOverview({
               <span className="text-sm font-bold">{project.name}</span>
               <span className="mt-1 text-xs text-foreground-secondary">{meta(project)}</span>
               {project.summary && (
-                <span className="mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
+                <span className="font-body mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
                   {project.summary}
                 </span>
               )}
@@ -205,7 +205,7 @@ export function ProjectView({
         <p className="text-xs text-foreground-secondary">{meta(project)}</p>
         <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">{project.name}</h1>
         {project.summary && (
-          <p className="mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
+          <p className="font-body mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
             {project.summary}
           </p>
         )}
