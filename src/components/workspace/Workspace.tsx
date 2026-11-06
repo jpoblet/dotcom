@@ -1,15 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { ArrowLeft, RotateCcw, X } from "lucide-react";
 import { track } from "@/lib/analytics";
 import type { Project } from "@/lib/content";
 import { useChatSession } from "@/lib/use-chat-session";
-import Logo from "@/components/Logo";
 import ChatPane from "./ChatPane";
 import ConfirmDialog from "./ConfirmDialog";
 import NotesPanel from "./NotesPanel";
-import ProfileCard, { Online } from "./ProfileCard";
 import { ProjectView, WorkOverview } from "./WorkPanel";
 import { WorkspaceContext } from "./WorkspaceContext";
 
@@ -26,18 +25,16 @@ interface Props {
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
-  /** "Lead Product Designer at Veriff", if there's a current role. */
-  now?: string;
-  timeZone: string;
-  city: string;
   caseStudies: Project[];
   websites: Project[];
 }
 
 /**
- * The home page. The chat starts on its own; "Work" and "AI Notes" open a
- * panel beside it, and the two then share the screen half and half. Each side scrolls on its own. On phones the panel
- * is a sheet that slides over the chat.
+ * The home page: the chat in the middle, opening with the name. "Work" and
+ * "AI Notes" open a panel from the right; as it arrives the chat moves
+ * over, the tabs cross into the panel's header and the name shrinks into
+ * the corner under the logo (a view transition morphs each one; browsers
+ * without them just switch). On phones the panel is a sheet.
  */
 export default function Workspace({
   name,
@@ -45,22 +42,42 @@ export default function Workspace({
   email,
   links,
   starterQuestions,
-  now,
-  timeZone,
-  city,
   caseStudies,
   websites,
 }: Props) {
   const session = useChatSession(email);
   const [tab, setTab] = useState<Tab>("work");
   // Whether the side panel is showing (a sheet over the chat on phones).
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelOpen, setPanelOpenState] = useState(false);
+  const panelOpenRef = useRef(false);
   // The project on screen, and whether its panel is slid in. The slug
   // outlives the panel by one transition, so it can slide out with content.
   const [slug, setSlug] = useState<string | null>(null);
   const [projectOpen, setProjectOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const projectScroll = useRef<HTMLDivElement>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  /**
+   * Opens or closes the panel. On desktop the change runs as a view
+   * transition: the panel slides in, the chat glides over, and the name,
+   * logo and tabs morph to their places in the new layout.
+   */
+  const setPanelOpen = useCallback((open: boolean, alongside?: () => void) => {
+    const apply = () => {
+      panelOpenRef.current = open;
+      setPanelOpenState(open);
+      alongside?.();
+    };
+    const doc = document as Document & { startViewTransition?: (update: () => void) => unknown };
+    const animate =
+      open !== panelOpenRef.current &&
+      typeof doc.startViewTransition === "function" &&
+      window.matchMedia("(min-width: 1024px)").matches &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (animate) doc.startViewTransition!(() => flushSync(apply));
+    else apply();
+  }, []);
 
   const project = useMemo(
     () => caseStudies.find((p) => p.slug === slug) ?? null,
@@ -72,14 +89,15 @@ export default function Workspace({
       if (!caseStudies.some((p) => p.slug === next)) return;
       clearTimeout(closeTimer.current);
       track("Project opened", { project: next });
-      setTab("work");
-      setPanelOpen(true);
-      setSlug(next);
+      setPanelOpen(true, () => {
+        setTab("work");
+        setSlug(next);
+      });
       projectScroll.current?.scrollTo({ top: 0 });
-      // Next frame, so a freshly mounted panel animates in from the side.
+      // Next frame, so a freshly mounted project slides in from the side.
       requestAnimationFrame(() => setProjectOpen(true));
     },
-    [caseStudies],
+    [caseStudies, setPanelOpen],
   );
 
   const closeProject = useCallback(() => {
@@ -88,51 +106,43 @@ export default function Workspace({
     closeTimer.current = setTimeout(() => setSlug(null), SLIDE_MS);
   }, []);
 
-  // Escape steps back: project, then the mobile sheet.
+  const closePanel = useCallback(() => {
+    setPanelOpen(false);
+    closeProject();
+  }, [setPanelOpen, closeProject]);
+
+  // Escape steps back: project, then the panel.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (projectOpen) closeProject();
-      else setPanelOpen(false);
+      else if (panelOpenRef.current) closePanel();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [projectOpen, closeProject]);
+  }, [projectOpen, closeProject, closePanel]);
 
   const actions = useMemo(() => ({ openProject }), [openProject]);
-
-  const [confirmReset, setConfirmReset] = useState(false);
   const topicCount = session.topics.length;
 
-  // The header buttons open the panel on a tab, or close it if that tab
-  // is already showing.
-  const togglePanel = (next: Tab) => {
-    if (panelOpen && tab === next) {
-      setPanelOpen(false);
-      closeProject();
+  // A tab opens the panel on it; on phones, tapping the open one closes it.
+  const selectTab = (next: Tab, toggle = false) => {
+    if (toggle && panelOpen && tab === next) {
+      closePanel();
       return;
     }
-    setTab(next);
-    setPanelOpen(true);
+    setPanelOpen(true, () => setTab(next));
   };
 
-  const closePanel = () => {
-    setPanelOpen(false);
-    closeProject();
-  };
-
-  // The one set of tabs. Closed panel: both are quiet links that open it.
-  // Open panel: the current tab is underlined.
+  // The tabs. Closed panel: quiet links that open it. Open: the current
+  // one is underlined.
   const tabs = (
     <div className="flex items-center gap-5">
       {(["work", "notes"] as const).map((value) => (
         <button
           key={value}
           type="button"
-          onClick={() => {
-            setTab(value);
-            setPanelOpen(true);
-          }}
+          onClick={() => selectTab(value)}
           aria-pressed={panelOpen && tab === value}
           className={`relative h-12 text-xs cursor-pointer transition-colors ${
             panelOpen && tab === value
@@ -154,124 +164,109 @@ export default function Workspace({
     </div>
   );
 
+  const startOver = (
+    <button
+      type="button"
+      onClick={() => setConfirmReset(true)}
+      disabled={session.messages.length === 0}
+      title="Start over"
+      aria-label="Start over"
+      className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
+    >
+      <RotateCcw size={14} />
+    </button>
+  );
+
+  // Desktop: one set of controls, in the chat header while the panel is
+  // closed and in the panel's header while it's open (the view transition
+  // carries it across). Phones: compact buttons in the chat header.
+  const desktopControls = (
+    <div className="vt-controls hidden items-center gap-4 lg:flex">
+      {tabs}
+      {startOver}
+    </div>
+  );
+  const phoneControls = (
+    <div className="flex items-center gap-1 lg:hidden">
+      {(["work", "notes"] as const).map((value) => {
+        const active = panelOpen && tab === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            onClick={() => selectTab(value, true)}
+            aria-pressed={active}
+            className={`rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
+              active
+                ? "bg-background-inverse/8 text-foreground"
+                : "text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground"
+            }`}
+          >
+            {value === "work" ? "Work" : "AI Notes"}
+            {value === "notes" && topicCount > 0 && <span className="ml-1.5 tabular-nums">{topicCount}</span>}
+          </button>
+        );
+      })}
+      {startOver}
+    </div>
+  );
+
   return (
     <WorkspaceContext.Provider value={actions}>
       <div data-workspace className="h-dvh w-full overflow-hidden lg:flex">
-        {/* The left column: who's answering, by default; Work or AI Notes
-            in the same place when asked for. One width either way, so
-            nothing on screen moves but the content. Phones: the column is
-            only the panel's sheet. */}
-        <div
-          className={`contents lg:relative lg:flex lg:h-full lg:w-[clamp(24rem,46%,44rem)] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:border-r lg:transition-[border-color] lg:duration-[520ms] ${EASE} ${
-            panelOpen ? "lg:border-background-inverse/10" : "lg:border-transparent"
+        {/* Chat */}
+        <main className="vt-chat h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+          <ChatPane
+            name={name}
+            title={title}
+            email={email}
+            links={links}
+            starterQuestions={starterQuestions}
+            messages={session.messages}
+            isLoading={session.isLoading}
+            send={session.send}
+            panelOpen={panelOpen}
+            headerControls={
+              <>
+                {!panelOpen && desktopControls}
+                {phoneControls}
+              </>
+            }
+          />
+        </main>
+        {/* Work and notes. Desktop: a column on the right, present only
+            while open. Phones: a sheet that slides in from the right. */}
+        <aside
+          className={`vt-panel fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:static lg:z-auto lg:h-full lg:w-[clamp(24rem,42%,40rem)] lg:shrink-0 lg:translate-x-0 lg:border-l lg:border-background-inverse/10 lg:pt-0 lg:transition-none ${
+            panelOpen ? "translate-x-0 lg:flex" : "translate-x-full lg:hidden"
           }`}
         >
-          {/* The controls stay put here, open or closed: the logo on the left;
-              the two tabs, "start over" and (when open) "close" on the right. */}
-          <div className="hidden h-12 shrink-0 items-center justify-between gap-6 px-4 lg:flex">
-            <div className="flex min-w-0 items-center gap-3">
-              <Logo className="h-6 fill-current shrink-0" />
-              {/* The card's name, carried up here while the panel covers it. */}
-              <span
-                aria-hidden={!panelOpen}
-                className={`flex min-w-0 items-center gap-2 transition-[opacity,translate,filter] duration-500 ${EASE} ${
-                  panelOpen
-                    ? "translate-y-0 opacity-100 blur-0 delay-200"
-                    : "pointer-events-none translate-y-3 opacity-0 blur-[3px]"
-                }`}
-              >
-                <span className="truncate text-sm">
-                  <span className="font-heading font-bold">{name}</span>
-                  <span className="text-foreground-secondary"> · {title}</span>
-                </span>
-                <Online />
-              </span>
-            </div>
-            {/* Right end of the column. "Close" always keeps its slot, so
-                nothing shifts when it appears. */}
-            <div className="flex items-center gap-5">
-              {tabs}
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setConfirmReset(true)}
-                  disabled={session.messages.length === 0}
-                  title="Start over"
-                  aria-label="Start over"
-                  className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
-                >
-                  <RotateCcw size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={closePanel}
-                  aria-label="Close panel"
-                  title="Close"
-                  tabIndex={panelOpen ? 0 : -1}
-                  aria-hidden={!panelOpen}
-                  className={`-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
-                    panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
-                  }`}
-                >
-                  <X size={15} />
-                </button>
-              </div>
-            </div>
-          </div>
-          {/* The card steps back as the panel arrives. */}
-          <div
-            aria-hidden={panelOpen}
-            className={`relative hidden min-h-0 flex-1 origin-top-left transition-[opacity,scale,filter] duration-[520ms] lg:block ${EASE} ${
-              panelOpen ? "pointer-events-none scale-[0.96] opacity-0 blur-[2px]" : "scale-100 opacity-100 blur-0"
-            }`}
-          >
-            <div className="absolute inset-0">
-              <ProfileCard
-                name={name}
-                title={title}
-                now={now}
-                timeZone={timeZone}
-                city={city}
-                email={email}
-                links={links}
-              />
-            </div>
-          </div>
-
-          {/* Work and notes. Desktop: takes the card's place, under the
-              column's header. Phones: a sheet over the chat. */}
-          <div
-            className={`fixed inset-0 z-50 flex flex-col overflow-hidden bg-background transition-[translate,opacity] duration-[520ms] ${EASE} pt-[env(safe-area-inset-top)] lg:absolute lg:inset-x-0 lg:top-12 lg:bottom-0 lg:z-auto lg:pt-0 ${
-              panelOpen
-                ? "translate-x-0 lg:opacity-100 lg:delay-100"
-                : "translate-x-full lg:pointer-events-none lg:-translate-x-6 lg:opacity-0"
-            }`}
-          >
-          {/* Keeps the content from squeezing while the panel closes. */}
-          <div className="flex h-full min-h-0 flex-col lg:min-w-[24rem]">
-          <div className="flex h-12 shrink-0 items-center justify-between gap-4 px-6 lg:hidden">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-4 px-4">
             <div className="flex items-center gap-4">
               <button
                 type="button"
                 onClick={closePanel}
                 aria-label="Back to the chat"
-                className="-ml-2 flex size-8 items-center justify-center rounded-md hover:bg-background-inverse/6 cursor-pointer lg:hidden"
+                className="-ml-1 flex size-8 items-center justify-center rounded-md hover:bg-background-inverse/6 cursor-pointer lg:hidden"
               >
                 <ArrowLeft size={16} />
               </button>
               <div className="lg:hidden">{tabs}</div>
+              {/* Desktop: the controls, carried over from the chat header. */}
+              {panelOpen && desktopControls}
             </div>
-            <button
-              type="button"
-              onClick={closePanel}
-              aria-label="Close panel"
-              title="Close"
-              className="-mr-2 hidden size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer lg:flex"
-            >
-              <X size={15} />
-            </button>
+            <div className="hidden items-center gap-1 lg:flex">
+              <button
+                type="button"
+                onClick={closePanel}
+                aria-label="Close panel"
+                title="Close"
+                className="-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer"
+              >
+                <X size={15} />
+              </button>
+            </div>
           </div>
-
           {/* Tabs slide side by side. */}
           <div className="relative min-h-0 flex-1 overflow-hidden">
             <div
@@ -325,48 +320,7 @@ export default function Workspace({
               />
             </div>
           </div>
-          </div>
-        </div>
-        </div>
-
-        {/* Chat */}
-        <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-          <ChatPane
-            name={name}
-            email={email}
-            links={links}
-            starterQuestions={starterQuestions}
-            messages={session.messages}
-            isLoading={session.isLoading}
-            send={session.send}
-            onStartOver={() => setConfirmReset(true)}
-            panelButtons={
-              <div className="flex items-center gap-1 lg:hidden">
-                {(["work", "notes"] as const).map((value) => {
-                  const active = panelOpen && tab === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => togglePanel(value)}
-                      aria-pressed={active}
-                      className={`rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
-                        active
-                          ? "bg-background-inverse/8 text-foreground"
-                          : "text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground"
-                      }`}
-                    >
-                      {value === "work" ? "Work" : "AI Notes"}
-                      {value === "notes" && topicCount > 0 && (
-                        <span className="ml-1.5 tabular-nums">{topicCount}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            }
-          />
-        </div>
+        </aside>
 
       </div>
       <ConfirmDialog

@@ -132,7 +132,10 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
               {workspace && project.href ? (
                 <button
                   type="button"
-                  onClick={() => workspace.openProject(project.slug)}
+                  onClick={() => {
+                    setHovered(null);
+                    workspace.openProject(project.slug);
+                  }}
                   className={`${className} cursor-pointer`}
                   {...handlers}
                 >

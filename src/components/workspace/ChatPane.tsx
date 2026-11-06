@@ -1,27 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, Info, RotateCcw } from "lucide-react";
+import { ArrowUp, Info } from "lucide-react";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
-import { Online } from "./ProfileCard";
 
 interface Props {
   name: string;
+  title: string;
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
-  /** Asks to start over (the confirmation lives in the workspace). */
-  onStartOver: () => void;
-  /** Buttons that open the Work and AI Notes panel (phones). */
-  panelButtons?: React.ReactNode;
+  /** Whether the Work / AI Notes panel is open (desktop: the name and the
+      logo have moved into it). */
+  panelOpen: boolean;
+  /** Work, AI Notes and "start over", at the header's right. */
+  headerControls: React.ReactNode;
 }
 
 
@@ -57,8 +58,9 @@ export default function ChatPane({
   messages,
   isLoading,
   send,
-  onStartOver,
-  panelButtons,
+  title,
+  panelOpen,
+  headerControls,
 }: Props) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -133,39 +135,40 @@ export default function ChatPane({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      {/* Header, on the page's own ground. On phones it stands in for the
-          card: name and status. */}
+      {/* Header, on the page's own ground: the logo and the controls (which
+          move into the panel's header while it's open, on desktop). */}
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Logo className="h-6 fill-current shrink-0 lg:hidden" />
-          {/* Phones: the card's stand-in. Desktop shows the name in the left
-              column instead. */}
-          <span className="flex min-w-0 items-center gap-2 lg:hidden">
-            <span className="truncate font-heading text-sm font-bold">{name}</span>
-            <Online />
-          </span>
-        </div>
-        {/* Phones only: on desktop these live in the left column's header. */}
-        <div className="flex items-center gap-1 lg:hidden">
-          {panelButtons}
-          <button
-            type="button"
-            onClick={onStartOver}
-            disabled={empty}
-            title="Start over"
-            aria-label="Start over"
-            className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
-          >
-            <RotateCcw size={15} />
-          </button>
-        </div>
+        <Logo className="h-6 fill-current shrink-0" />
+        <div className="flex items-center gap-1">{headerControls}</div>
       </div>
 
       <div className="flex min-h-0 flex-1">
         {/* The thread */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
+          <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
+            {/* Desktop, panel open: the name, shrunk into the corner under
+                the logo. It scrolls away with the conversation. */}
+            {panelOpen && (
+              <div className="absolute top-1 left-4 hidden lg:block">
+                <p className="vt-name w-fit font-heading text-base font-bold leading-tight">{name}</p>
+                <p className="vt-title mt-0.5 w-fit text-xs text-foreground-secondary">{title}</p>
+              </div>
+            )}
             <div className="mx-auto max-w-[42rem]">
+              {/* The name opens the page. While the panel is open it has shrunk
+                  into the panel's corner; its space stays, so nothing here
+                  jumps as it goes. */}
+              <div className={`mb-10 ${panelOpen ? "lg:invisible" : ""}`}>
+                <h1
+                  className={`w-fit font-heading text-5xl sm:text-6xl font-bold leading-[1] tracking-[-0.03em] ${panelOpen ? "" : "vt-name"}`}
+                >
+                  {name}
+                </h1>
+                <p className={`mt-3 w-fit text-base text-foreground-secondary ${panelOpen ? "" : "vt-title"}`}>
+                  {title}
+                </p>
+              </div>
+
               {/* The agent's hello opens the conversation and stays at the top. */}
               <div className="animate-suggestion-in space-y-2 text-sm leading-[1.75]">
                 <p>Hi, I&apos;m an AI that answers as {firstName}, from his own notes, projects and CV.</p>
@@ -303,8 +306,8 @@ export default function ChatPane({
             </form>
           </div>
 
-          {/* Phones: the card's links live under the input. */}
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pb-3 text-xs text-foreground-secondary lg:hidden">
+          {/* Footer: email, profiles and the theme. */}
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pb-3 text-xs text-foreground-secondary">
             {footerLinks}
           </div>
         </div>

@@ -15,8 +15,6 @@ export interface Profile {
   name: string;
   title: string;
   location: string;
-  /** IANA time zone, for the local time on the home page. */
-  timezone?: string;
   email: string;
   links: { label: string; href: string }[];
   languages: { language: string; level: string }[];
