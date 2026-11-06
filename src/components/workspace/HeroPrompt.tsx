@@ -64,6 +64,14 @@ export default function HeroPrompt({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const current = order[index % order.length];
 
+  // Desktop: the field is ready to type into, caret blinking. Not on
+  // touch screens, where focusing would throw up the keyboard.
+  useEffect(() => {
+    if (window.matchMedia("(pointer: fine) and (min-width: 640px)").matches) {
+      inputRef.current?.focus({ preventScroll: true });
+    }
+  }, []);
+
   // Shuffle after mount, so the server and the first client render agree.
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -123,19 +131,23 @@ export default function HeroPrompt({
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.05]">
           <label htmlFor="hero-input">Ask me about</label>
         </h1>
-        {/* The blank: the input itself, at the heading's size. The suggestion
-            is drawn behind it, underlined with a wave like a line on a form. */}
-        <div className="mt-1">
-          <div className="grid min-h-[2.3em] text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.15]">
+
+        {/* A plain, obvious text field. The suggestion types itself in as
+            placeholder text; anything typed replaces it. */}
+        <div
+          onClick={() => inputRef.current?.focus()}
+          className="group/field mt-8 flex cursor-text items-center gap-3 rounded-2xl border border-background-inverse/20 bg-background py-2.5 pl-5 pr-2.5 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.12)] transition-[border-color,box-shadow] duration-200 focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
+        >
+          <div className="grid min-h-[3.1em] flex-1 items-center text-lg sm:min-h-0 sm:text-2xl leading-[1.4]">
             {!input && (
               <p
                 aria-hidden="true"
-                className="pointer-events-none col-start-1 row-start-1 text-foreground-secondary/70"
+                className="pointer-events-none col-start-1 row-start-1 text-foreground-secondary"
               >
-                <span className="underline decoration-wavy decoration-foreground-secondary/35 underline-offset-[0.22em] [text-decoration-thickness:0.035em]">
-                  {shown}
-                </span>
-                <span className="ml-1 inline-block h-[0.8em] w-[3px] translate-y-[0.1em] bg-foreground-secondary/70 animate-[cursor-blink_1s_steps(1)_infinite]" />
+                {shown}
+                {/* A fake caret while the field isn't focused; focused, the
+                    real one blinks at the start. */}
+                <span className="ml-0.5 inline-block h-[1.1em] w-[2px] translate-y-[0.2em] bg-foreground-secondary animate-[cursor-blink_1s_steps(1)_infinite] group-focus-within/field:hidden" />
               </p>
             )}
             <textarea
@@ -157,49 +169,55 @@ export default function HeroPrompt({
                 }
               }}
               aria-describedby="hero-hint"
-              className="col-start-1 row-start-1 block w-full resize-none overflow-hidden bg-transparent text-foreground caret-foreground focus:outline-none"
+              className="col-start-1 row-start-1 block w-full resize-none overflow-hidden bg-transparent py-1.5 text-foreground caret-foreground focus:outline-none"
             />
           </div>
+          <button
+            type="submit"
+            disabled={disabled}
+            className="group/ask flex h-12 shrink-0 items-center gap-2 rounded-xl bg-background-inverse px-5 text-base font-bold text-background transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-40"
+          >
+            Ask
+            <ArrowRight size={18} className="transition-transform duration-300 group-hover/ask:translate-x-0.5" />
+          </button>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-4">
+        <div className="mt-3 flex items-center justify-between gap-4 pl-1">
           <p id="hero-hint" className="text-sm text-foreground-secondary">
-            {/* Phones have no Enter key to speak of: the arrow does it. */}
-            <span className="hidden sm:inline">
-              <kbd className="font-label text-xs">Enter</kbd> to ask{input ? "" : " this, or type your own"}
-            </span>
-            <span className="sm:hidden">{input ? "Tap the arrow to ask" : "Tap the arrow, or type your own"}</span>
+            {input ? (
+              <>
+                <span className="hidden sm:inline">Press Enter to ask.</span>
+                <span className="sm:hidden">Tap Ask to send it.</span>
+              </>
+            ) : (
+              <>
+                Type any question, or{" "}
+                <span className="hidden sm:inline">press Enter to ask this one.</span>
+                <span className="sm:hidden">tap Ask for this one.</span>
+              </>
+            )}
           </p>
-          <div className="flex items-center gap-1">
-            {/* Privacy note, on hover or focus (a tap on phones). */}
-            <span className="group/info relative">
-              <button
-                type="button"
-                aria-label="About your questions"
-                aria-describedby="hero-privacy"
-                className="flex size-10 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
-              >
-                <Info size={16} />
-              </button>
-              <span
-                id="hero-privacy"
-                role="tooltip"
-                className="pointer-events-none absolute right-0 top-full z-10 mt-2 w-72 -translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
-              >
-                Questions and answers are saved so I can see what people ask and
-                improve the answers. Nothing that identifies you is kept: no name,
-                no IP address, only a rough location (country and city).
-              </span>
-            </span>
+          {/* Privacy note, on hover or focus (a tap on phones). */}
+          <span className="group/info relative">
             <button
-              type="submit"
-              disabled={disabled}
-              aria-label="Ask"
-              className="group flex size-12 items-center justify-center rounded-full bg-background-inverse text-background transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-105 cursor-pointer disabled:opacity-40"
+              type="button"
+              aria-label="About your questions"
+              aria-describedby="hero-privacy"
+              className="flex items-center gap-1.5 text-xs text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
             >
-              <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+              <Info size={14} />
+              <span className="hidden sm:inline">Privacy</span>
             </button>
-          </div>
+            <span
+              id="hero-privacy"
+              role="tooltip"
+              className="pointer-events-none absolute right-0 top-full z-10 mt-2 w-72 -translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+            >
+              Questions and answers are saved so I can see what people ask and
+              improve the answers. Nothing that identifies you is kept: no name,
+              no IP address, only a rough location (country and city).
+            </span>
+          </span>
         </div>
       </form>
 
