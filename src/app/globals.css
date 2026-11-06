@@ -358,3 +358,47 @@ body {
   font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
   line-height: 1.55;
 }
+
+/* The split workspace has its own footer in the chat column. */
+body:has([data-workspace]) [data-site-footer] {
+  display: none;
+}
+
+/* "Thinking…": a light sweeping across the text. */
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.shimmer-text {
+  background: linear-gradient(
+      90deg,
+      var(--color-foreground-secondary) 30%,
+      var(--color-foreground) 50%,
+      var(--color-foreground-secondary) 70%
+    )
+    0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Headings in AI-written text (e.g. the conversation summary). */
+.chat-message :is(h1, h2, h3) {
+  font-weight: 500;
+  line-height: 1.35;
+}
+.chat-message h1 {
+  font-size: 1rem;
+}
+.chat-message :is(h2, h3) {
+  margin-top: 1.5rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-foreground-secondary);
+}

@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import ProjectLogoTile from "@/components/ProjectLogoTile";
+import { useWorkspace } from "@/components/workspace/WorkspaceContext";
 import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
 /** Horizontal card: brand tile on the left, details on the right. */
 function ProjectCard({ project }: { project: ProjectCardData }) {
+  const workspace = useWorkspace();
   const body = (
     <>
       <ProjectLogoTile
@@ -41,6 +45,19 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
 
   const className =
     "group flex w-full sm:w-[28rem] overflow-hidden rounded-sm border border-background-inverse/10 bg-background text-foreground transition-colors duration-200";
+
+  // In the split workspace, cards open the project beside the chat.
+  if (workspace && project.href) {
+    return (
+      <button
+        type="button"
+        onClick={() => workspace.openProject(project.slug)}
+        className={`${className} text-left cursor-pointer hover:bg-background-secondary`}
+      >
+        {body}
+      </button>
+    );
+  }
 
   return project.href ? (
     <Link

@@ -1,9 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, after } from "next/server";
 import {
-  SUGGEST_FOLLOW_UPS,
+  type Topic,
+  WRAP_UP,
   buildTools,
   parseFollowUps,
+  parseTopics,
   runTool,
 } from "@/lib/chat-tools";
 import {
@@ -58,6 +60,7 @@ export type ChatStreamEvent =
   | { type: "text"; text: string }
   | { type: "widget"; widget: Widget }
   | { type: "suggestions"; questions: string[] }
+  | { type: "topics"; topics: Topic[] }
   | { type: "done" }
   | { type: "refusal"; message: string }
   | { type: "error"; message: string };
@@ -78,7 +81,7 @@ How to answer:
 - Stop when the answer is complete. Don't close with offers or sign-offs such as "feel free to ask" or "email me if you have more questions". Mention the email address only when the visitor asks how to get in touch.
 - Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
 - You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply: a short note that complements what's shown instead of repeating it or describing the card.
-- After your written reply, call suggest_follow_ups with two or three questions the visitor might want to ask next. It's always the last call of a reply.
+- After your written reply, call wrap_up with two or three questions the visitor might want to ask next and the topics your reply covered. It's always the last call of a reply.
 - Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
 - If a visitor asks whether they're talking to the real ${first}, be upfront: you're an AI that answers as ${first}, not ${first} typing live.
 - Stay on topic: ${first}, his work, design, and the things he would happily chat about. Politely steer unrelated requests (coding help, homework, general assistant tasks) back to ${first}.
@@ -324,24 +327,26 @@ export async function POST(request: NextRequest) {
           if (final.stop_reason !== "tool_use") break;
 
           const toolCalls = final.content.filter((b) => b.type === "tool_use");
-          const followUpCall = toolCalls.find((b) => b.name === SUGGEST_FOLLOW_UPS);
+          const followUpCall = toolCalls.find((b) => b.name === WRAP_UP);
           if (followUpCall) {
             const questions = parseFollowUps(followUpCall.input);
             if (questions.length) send({ type: "suggestions", questions });
+            const topics = parseTopics(followUpCall.input);
+            if (topics.length) send({ type: "topics", topics });
           }
           // Follow-ups come last: once they're in and the reply is written,
           // the turn is over, with no extra model call.
-          if (sentText && toolCalls.every((b) => b.name === SUGGEST_FOLLOW_UPS)) {
+          if (sentText && toolCalls.every((b) => b.name === WRAP_UP)) {
             break;
           }
 
           const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
           for (const block of toolCalls) {
-            if (block.name === SUGGEST_FOLLOW_UPS) {
+            if (block.name === WRAP_UP) {
               results.push({
                 type: "tool_result",
                 tool_use_id: block.id,
-                content: "Suggestions noted. Now write your reply to the visitor; don't suggest follow-ups again.",
+                content: "Noted. Now write your reply to the visitor; don't call wrap_up again.",
               });
               continue;
             }
