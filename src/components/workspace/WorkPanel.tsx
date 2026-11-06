@@ -68,7 +68,7 @@ export function WorkOverview({
                   className="h-8 w-2/5 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
                 />
               </span>
-              <span className="text-sm font-medium">{project.name}</span>
+              <span className="text-sm font-bold">{project.name}</span>
               <span className="mt-1 text-xs text-foreground-secondary">{meta(project)}</span>
               {project.summary && (
                 <span className="mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
@@ -203,7 +203,7 @@ export function ProjectView({
 
       <article className="mx-auto max-w-[52rem] px-6 sm:px-10 py-10">
         <p className="text-xs text-foreground-secondary">{meta(project)}</p>
-        <h1 className="mt-2 text-2xl sm:text-3xl font-medium tracking-tight">{project.name}</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">{project.name}</h1>
         {project.summary && (
           <p className="mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
             {project.summary}
@@ -273,10 +273,10 @@ export function ProjectView({
             className="group mt-16 flex w-full items-center justify-between gap-4 border-t border-background-inverse/10 pt-6 text-left cursor-pointer"
           >
             <span>
-              <span className="block text-xs font-medium text-foreground-secondary">
+              <span className="font-label block text-xs text-foreground-secondary">
                 Next
               </span>
-              <span className="mt-1 block text-base font-medium">{next.name}</span>
+              <span className="mt-1 block text-base font-bold">{next.name}</span>
             </span>
             <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
           </button>

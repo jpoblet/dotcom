@@ -5,8 +5,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-sans: var(--font-dm-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-atkinson);
+  --font-heading: var(--font-atkinson);
+  --font-label: var(--font-atkinson-mono);
 
   --polar: oklch(100% 0 0);
   /* Light theme: pure white, with a cool light grey for hover states and
@@ -403,7 +404,7 @@ body:has([data-workspace]) [data-site-footer] {
 
 /* Headings in AI-written text (e.g. the conversation summary). */
 .chat-message :is(h1, h2, h3) {
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.35;
 }
 .chat-message h1 {
@@ -431,189 +432,11 @@ body:has([data-workspace]) [data-site-footer] {
   margin-top: 0.4rem;
 }
 
-/* Font pairings (see lib/font-pairings.ts): a heading face and a body face. */
-html[data-fonts="bauhaus"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-jost);
-}
-html[data-fonts="engineered"] {
-  --font-sans: var(--font-plex-sans);
-  --font-heading: var(--font-plex-sans);
-}
-html[data-fonts="engineered"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-plex-mono);
-}
-html[data-fonts="swiss"] {
-  --font-sans: var(--font-geist);
-  --font-heading: var(--font-geist);
-}
-html[data-fonts="swiss"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-geist-mono);
-}
-html[data-fonts="grotesk"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-space-grotesk);
-}
-html[data-fonts="dm"] {
-  --font-sans: var(--font-dm-sans);
-  --font-heading: var(--font-dm-sans);
-}
-html[data-fonts="dm"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-dm-mono);
-}
-html[data-fonts="original"] {
-  --font-sans: var(--font-dm-mono);
-  --font-heading: var(--font-dm-mono);
-}
-/* Font pairings, second round. */
-html[data-fonts="neo-grotesk"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter-tight);
-}
-html[data-fonts="newspaper"] {
-  --font-sans: var(--font-public-sans);
-  --font-heading: var(--font-schibsted);
-}
-html[data-fonts="instrument"] {
-  --font-sans: var(--font-instrument);
-  --font-heading: var(--font-instrument);
-}
-html[data-fonts="systematic"] {
-  --font-sans: var(--font-redhat-text);
-  --font-heading: var(--font-redhat-display);
-}
-html[data-fonts="modernist"] {
-  --font-sans: var(--font-manrope);
-  --font-heading: var(--font-manrope);
-}
-html[data-fonts="grotesque-revival"] {
-  --font-sans: var(--font-archivo);
-  --font-heading: var(--font-archivo);
-}
-html[data-fonts="geometric"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-sora);
-}
-html[data-fonts="bauhaus-2"] {
-  --font-sans: var(--font-public-sans);
-  --font-heading: var(--font-outfit);
-}
-html[data-fonts="scandinavian"] {
-  --font-sans: var(--font-albert);
-  --font-heading: var(--font-albert);
-}
-html[data-fonts="utility"] {
-  --font-sans: var(--font-hanken);
-  --font-heading: var(--font-hanken);
-}
-html:is([data-fonts="instrument"], [data-fonts="utility"]) :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-jetbrains);
-}
-html[data-fonts="systematic"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-redhat-mono);
-}
-html[data-fonts="modernist"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-plex-mono);
-}
-/* Font pairings, third round. */
-html[data-fonts="omnibus"] {
-  --font-sans: var(--font-chivo);
-  --font-heading: var(--font-chivo);
-}
-html[data-fonts="funnel"] {
-  --font-sans: var(--font-funnel-sans);
-  --font-heading: var(--font-funnel-display);
-}
-html[data-fonts="host"] {
-  --font-sans: var(--font-host);
-  --font-heading: var(--font-host);
-}
-html[data-fonts="product-ui"] {
-  --font-sans: var(--font-wix-text);
-  --font-heading: var(--font-wix-display);
-}
-html[data-fonts="swedish"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-familjen);
-}
-html[data-fonts="industrial"] {
-  --font-sans: var(--font-mona);
-  --font-heading: var(--font-hubot);
-}
-html[data-fonts="urban-geometric"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-urbanist);
-}
-html[data-fonts="american-gothic"] {
-  --font-sans: var(--font-franklin);
-  --font-heading: var(--font-franklin);
-}
-html[data-fonts="low-contrast"] {
-  --font-sans: var(--font-gantari);
-  --font-heading: var(--font-gantari);
-}
-html[data-fonts="editorial-modern"] {
-  --font-sans: var(--font-public-sans);
-  --font-heading: var(--font-epilogue);
-}
-html[data-fonts="omnibus"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-chivo-mono);
-}
-html[data-fonts="low-contrast"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-martian);
-}
-/* Font pairings, fourth round. */
-html[data-fonts="din"] {
-  --font-sans: var(--font-barlow);
-  --font-heading: var(--font-barlow);
-}
-html[data-fonts="highway"] {
-  --font-sans: var(--font-overpass);
-  --font-heading: var(--font-overpass);
-}
-html[data-fonts="highway"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-overpass-mono);
-}
-html[data-fonts="hyperlegible"] {
-  --font-sans: var(--font-atkinson);
-  --font-heading: var(--font-atkinson);
-}
-html[data-fonts="hyperlegible"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-atkinson-mono);
-}
-html[data-fonts="spline"] {
-  --font-sans: var(--font-spline);
-  --font-heading: var(--font-spline);
-}
-html[data-fonts="spline"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-spline-mono);
-}
-html[data-fonts="rethink"] {
-  --font-sans: var(--font-rethink);
-  --font-heading: var(--font-rethink);
-}
-html[data-fonts="onest"] {
-  --font-sans: var(--font-onest);
-  --font-heading: var(--font-onest);
-}
-html[data-fonts="geologica"] {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-geologica);
-}
-html[data-fonts="jakarta"] {
-  --font-sans: var(--font-jakarta);
-  --font-heading: var(--font-jakarta);
-}
-html[data-fonts="figtree"] {
-  --font-sans: var(--font-figtree);
-  --font-heading: var(--font-figtree);
-}
-html[data-fonts="kumbh"] {
-  --font-sans: var(--font-kumbh);
-  --font-heading: var(--font-kumbh);
-}
-html[data-fonts="kumbh"] :is(.font-label, [data-workspace] h2) {
-  font-family: var(--font-fragment-mono);
+/* Labels: the mono face, all caps, lightly tracked. */
+:is(.font-label, [data-workspace] h2) {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 :is(h1, h3, .font-heading) {
   font-family: var(--font-heading);

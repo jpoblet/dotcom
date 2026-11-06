@@ -34,15 +34,15 @@ const FONT_DIR = path.join(process.cwd(), "src/assets/fonts");
 export function brandFonts() {
   return [
     {
-      name: "DM Mono",
-      data: fs.readFileSync(path.join(FONT_DIR, "DMMono-Regular.ttf")),
+      name: "Atkinson Hyperlegible Next",
+      data: fs.readFileSync(path.join(FONT_DIR, "AtkinsonHyperlegibleNext-400.woff")),
       weight: 400 as const,
       style: "normal" as const,
     },
     {
-      name: "DM Mono",
-      data: fs.readFileSync(path.join(FONT_DIR, "DMMono-Medium.ttf")),
-      weight: 500 as const,
+      name: "Atkinson Hyperlegible Next",
+      data: fs.readFileSync(path.join(FONT_DIR, "AtkinsonHyperlegibleNext-700.woff")),
+      weight: 700 as const,
       style: "normal" as const,
     },
   ];

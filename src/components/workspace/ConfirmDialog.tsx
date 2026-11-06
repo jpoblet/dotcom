@@ -75,9 +75,9 @@ export default function ConfirmDialog({ open, title, children, confirmLabel, onC
           closing ? "scale-[0.98] translate-y-1" : "animate-dialog-in"
         }`}
       >
-        <h2 id="confirm-title" className="text-[0.9375rem] font-medium">
+        <h3 id="confirm-title" className="text-[0.9375rem] font-bold">
           {title}
-        </h2>
+        </h3>
         <div id="confirm-body" className="mt-2 text-sm leading-[1.75] text-foreground-secondary">
           {children}
         </div>

@@ -142,7 +142,7 @@ export default function ChatPane({
             }`}
           >
             {/* Name set like the intro's "Hi, I'm Jordi.": heading face, medium, ink. */}
-            <span className="font-heading font-medium text-foreground">{name}</span>
+            <span className="font-heading font-bold text-foreground">{name}</span>
             {/* Same `title` as the intro: both come from content/profile.yaml. */}
             <span className="hidden sm:inline"> · {title}</span>
           </span>
@@ -170,7 +170,7 @@ export default function ChatPane({
         <div className="mx-auto w-full max-w-[42rem]">
         {/* The intro opens the conversation and stays at the top of it. */}
         <div ref={introRef} className={`animate-suggestion-in ${empty ? "pt-[8vh] lg:pt-[14vh]" : "pt-6"}`}>
-            <h1 className="text-3xl sm:text-4xl font-medium tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight leading-[1.15]">
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
             <p className="mt-2 text-lg sm:text-xl tracking-tight text-foreground-secondary">{title}.</p>
@@ -350,7 +350,7 @@ function Question({ message }: { message: Message }) {
         </time>
       </p>
       <p
-        className={`font-heading mt-3 font-medium tracking-tight whitespace-pre-wrap text-foreground ${
+        className={`font-heading mt-3 font-bold tracking-tight whitespace-pre-wrap text-foreground ${
           long ? "text-lg leading-[1.45]" : "text-xl sm:text-2xl leading-[1.3]"
         }`}
       >

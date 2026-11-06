@@ -22,7 +22,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
             {project.meta}
           </p>
         )}
-        <p className="text-sm font-medium">{project.name}</p>
+        <p className="text-sm font-bold">{project.name}</p>
         {project.summary && (
           <p className="text-xs leading-relaxed text-foreground-secondary line-clamp-2">
             {project.summary}
@@ -89,7 +89,7 @@ function Timeline({ roles }: { roles: TimelineEntry[] }) {
             <span
               className={`absolute left-0 top-1.5 size-2 rounded-full border border-foreground ${current ? "bg-foreground" : "bg-background"}`}
             />
-            <p className="text-sm font-medium">{role.role}</p>
+            <p className="text-sm font-bold">{role.role}</p>
             <p className="text-xs text-foreground-secondary">
               {role.company} · {role.start} – {role.end}
             </p>

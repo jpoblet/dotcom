@@ -1,9 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import FontSwitcher from "@/components/FontSwitcher";
 import SiteFooter from "@/components/SiteFooter";
-import { DEFAULT_PAIRING, FONT_PAIRINGS, FONT_STORAGE_KEY } from "@/lib/font-pairings";
 import { fontVariables } from "./fonts";
 import { getProfile } from "@/lib/content";
 
@@ -56,8 +54,6 @@ export const viewport: Viewport = {
 // a light flash. Must stay in sync with components/ThemeSwitcher.tsx.
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
-// Applies the chosen font pairing before paint too (see FontSwitcher).
-const fontScript = `(function(){try{var f=localStorage.getItem(${JSON.stringify(FONT_STORAGE_KEY)});if(${JSON.stringify(FONT_PAIRINGS.map((p) => p.id))}.indexOf(f)>-1)document.documentElement.dataset.fonts=f}catch(e){}})()`;
 
 // Umami analytics (cookieless). The website id is public by design. Events
 // are only recorded on the live domains, so local runs and previews don't
@@ -73,15 +69,13 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={fontVariables} data-fonts={DEFAULT_PAIRING} suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <script dangerouslySetInnerHTML={{ __html: fontScript }} />
       </head>
       <body className="font-sans">
         {children}
         <SiteFooter email={profile.email} links={profile.links} />
-        <FontSwitcher />
         {modal}
         <Script
           src="https://cloud.umami.is/script.js"
