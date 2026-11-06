@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
+import RotatingSuggestion from "@/components/RotatingSuggestion";
 import ConfirmDialog from "./ConfirmDialog";
 import DotGrille from "./DotGrille";
 
@@ -26,22 +27,6 @@ interface Props {
   panelButtons?: React.ReactNode;
 }
 
-/** Up to `count` random items (picked after mount, so hydration agrees). */
-function useRandomPick(items: string[], count: number): string[] {
-  const [picked, setPicked] = useState<string[]>([]);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const pool = [...items];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      setPicked(pool.slice(0, count));
-    });
-    return () => clearTimeout(timeout);
-  }, [items, count]);
-  return picked;
-}
 
 /**
  * The chat column, in the spirit of an editor's assistant panel: plain
@@ -68,7 +53,6 @@ export default function ChatPane({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const starters = useRandomPick(starterQuestions, 4);
   const composerRef = useRef<HTMLDivElement>(null);
   // How far the input is lifted from its place at the bottom (empty chat).
   const [raise, setRaise] = useState(0);
@@ -124,12 +108,14 @@ export default function ChatPane({
       const pane = composer?.parentElement;
       if (!intro || !composer || !pane) return;
       let next = 0;
-      if (isEmpty) {
+      // Phones: the chips wrap onto several lines, so the input stays at the
+      // bottom and the chips sit in the intro.
+      if (isEmpty && window.innerWidth >= 640) {
         // offsetTop ignores transforms, so this is the resting position even
         // mid-animation.
         const naturalTop = pane.getBoundingClientRect().top + composer.offsetTop;
         const target = intro.getBoundingClientRect().bottom + 40;
-        const suggestionsRoom = 4 * 40 + 24;
+        const suggestionsRoom = 2 * 44 + 24; // a row or two of chips
         const room = pane.getBoundingClientRect().bottom - (target + composer.offsetHeight + suggestionsRoom);
         next = room >= 0 ? Math.max(0, naturalTop - target) : 0;
       }
@@ -240,20 +226,9 @@ export default function ChatPane({
 
             {/* No room to lift the input (small screens): suggestions here. */}
             {empty && placed && !raise && (
-              <ul className="mt-8 space-y-1.5">
-                {starters.map((question, index) => (
-                  <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-                    <button
-                      type="button"
-                      onClick={() => submit(question, "starter")}
-                      className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-                    >
-                      <span className="text-foreground-secondary group-hover:text-foreground">→</span>
-                      {question}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-8">
+                <RotatingSuggestion questions={starterQuestions} onPick={(q) => submit(q, "starter")} />
+              </div>
             )}
           </div>
         </div>
@@ -366,26 +341,16 @@ export default function ChatPane({
         </p>
         {/* Suggestions below the lifted box (empty chat). When there's no
             room to lift it, they sit in the intro instead. */}
-        <ul
+        <div
           aria-hidden={!(empty && raise)}
-          className={`absolute inset-x-4 top-full mt-6 space-y-1.5 transition-opacity duration-300 ${
+          className={`absolute inset-x-4 top-full mt-6 transition-opacity duration-300 ${
             empty && raise ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          {starters.map((question, index) => (
-            <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${index * 60}ms` }}>
-              <button
-                type="button"
-                tabIndex={empty && raise ? 0 : -1}
-                onClick={() => submit(question, "starter")}
-                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-sm text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-              >
-                <span className="text-foreground-secondary group-hover:text-foreground">→</span>
-                {question}
-              </button>
-            </li>
-          ))}
-        </ul>
+          {empty && raise > 0 && (
+            <RotatingSuggestion questions={starterQuestions} onPick={(q) => submit(q, "starter")} />
+          )}
+        </div>
       </div>
 
       {/* Footer: the full width of the chat column. */}

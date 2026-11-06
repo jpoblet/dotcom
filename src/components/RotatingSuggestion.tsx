@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /** How often one of the chips is swapped for another question. */
-const SWAP_EVERY_MS = 2500;
+const SWAP_EVERY_MS = 2000;
 const LEAVE_MS = 300;
 
 interface Props {
@@ -81,7 +81,7 @@ export default function RotatingSuggestion({
 
   return (
     <div
-      className="flex gap-2"
+      className="flex flex-wrap gap-2"
       onPointerEnter={() => (paused.current = true)}
       onPointerLeave={() => (paused.current = false)}
       onFocus={() => (paused.current = true)}
