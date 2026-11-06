@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, SquarePen } from "lucide-react";
+import { ArrowUp, RotateCcw } from "lucide-react";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
 import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface Props {
   name: string;
@@ -58,6 +59,7 @@ export default function ChatPane({
   panelButtons,
 }: Props) {
   const [input, setInput] = useState("");
+  const [confirmReset, setConfirmReset] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const stickToBottom = useRef(true);
@@ -98,15 +100,13 @@ export default function ChatPane({
           {panelButtons}
           <button
             type="button"
-            onClick={() => {
-              reset();
-              inputRef.current?.focus();
-            }}
-            title="New conversation"
-            aria-label="New conversation"
-            className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors"
+            onClick={() => setConfirmReset(true)}
+            disabled={messages.length === 0}
+            title="Start over"
+            aria-label="Start over"
+            className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
           >
-            <SquarePen size={15} />
+            <RotateCcw size={15} />
           </button>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function ChatPane({
                     onClick={() => submit(question, "starter")}
                     className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
                   >
-                    <span className="text-foreground-secondary/60 group-hover:text-foreground">→</span>
+                    <span className="text-foreground-secondary group-hover:text-foreground">→</span>
                     {question}
                   </button>
                 </li>
@@ -183,7 +183,7 @@ export default function ChatPane({
                       onClick={() => submit(question, "follow_up")}
                       className="group flex w-full items-center gap-2 rounded-md px-2 py-1 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
                     >
-                      <span className="text-foreground-secondary/60 group-hover:text-foreground">↳</span>
+                      <span className="text-foreground-secondary group-hover:text-foreground">↳</span>
                       {question}
                     </button>
                   </li>
@@ -253,6 +253,20 @@ export default function ChatPane({
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmReset}
+        title="Start over?"
+        confirmLabel="Start over"
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          setConfirmReset(false);
+          reset();
+          inputRef.current?.focus();
+        }}
+      >
+        This clears our whole conversation and your AI Notes, and there&apos;s no way to get
+        them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
+      </ConfirmDialog>
     </div>
   );
 }

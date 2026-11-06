@@ -43,7 +43,7 @@ export default function SectionNav({ sections }: Props) {
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               className={`flex gap-3 transition-colors duration-300 ${
-                active === section.id ? "text-foreground" : "text-foreground-secondary/60 hover:text-foreground-secondary"
+                active === section.id ? "text-foreground" : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               <span className="tabular-nums">{String(index + 1).padStart(2, "0")}</span>

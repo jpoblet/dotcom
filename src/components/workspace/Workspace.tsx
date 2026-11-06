@@ -216,7 +216,7 @@ export default function Workspace({
                     >
                       {value === "work" ? "Work" : "AI Notes"}
                       {value === "notes" && topicCount > 0 && (
-                        <span className="ml-1.5 tabular-nums opacity-60">{topicCount}</span>
+                        <span className="ml-1.5 tabular-nums">{topicCount}</span>
                       )}
                     </button>
                   );
