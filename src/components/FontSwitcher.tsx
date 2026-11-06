@@ -47,7 +47,7 @@ export default function FontSwitcher() {
   };
 
   return (
-    <div ref={ref} className="fixed right-3 top-[calc(3.75rem+env(safe-area-inset-top))] lg:top-auto lg:bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[70]">
+    <div ref={ref} className="fixed right-3 top-[calc(3.75rem+env(safe-area-inset-top))] lg:top-auto lg:bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-[70]">
       {open && (
         <div
           role="menu"

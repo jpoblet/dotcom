@@ -224,7 +224,7 @@ export default function ChatPane({
       </div>
 
       {/* Input */}
-      <div className="mx-auto w-full max-w-[calc(42rem+2rem)] shrink-0 px-4 pb-3">
+      <div className="mx-auto w-full max-w-[calc(42rem+2rem)] shrink-0 px-4">
         {/* One clean field: hairline border, the send button inline. */}
         <form
           onSubmit={(e) => {
@@ -266,8 +266,11 @@ export default function ChatPane({
         <p className="mt-2 px-1 text-xs text-foreground-secondary">
           Questions are stored anonymously.
         </p>
+      </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-foreground-secondary">
+      {/* Footer: the full width of the chat column. */}
+      <div className="shrink-0 px-4 pt-3 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-foreground-secondary">
           <a href={`mailto:${email}`} className="hover:text-foreground truncate">
             {email}
           </a>
