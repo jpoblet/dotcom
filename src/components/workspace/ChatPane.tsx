@@ -93,7 +93,7 @@ export default function ChatPane({
   const [confirmReset, setConfirmReset] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const lastTurnRef = useRef<HTMLDivElement>(null);
+  const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
   const starters = useRandomPick(starterQuestions, 4);
   const localTime = useLocalTime(timeZone);
@@ -138,7 +138,7 @@ export default function ChatPane({
   const followUps =
     !isLoading && last && !last.isUser && !last.isError ? (last.suggestions ?? []) : [];
   const empty = messages.length === 0;
-  const waiting = isLoading && (!last || last.isUser || (!last.text && !last.widgets?.length));
+  const waiting = isLoading && !last?.text;
   // Exchanges: each starts with a question and holds the reply after it.
   const turns: Message[][] = [];
   for (const message of messages) {
@@ -226,80 +226,76 @@ export default function ChatPane({
         {/* The thread */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
-            <div className="mx-auto max-w-[46rem] space-y-2.5">
-              {/* The agent opens the conversation, and its hello stays at the top. */}
-              <Bubble from="them" className="animate-suggestion-in">
-                Hi, I&apos;m an AI that answers as {firstName}, from his own notes, projects and CV.
-              </Bubble>
-              <Bubble from="them" className="animate-suggestion-in [animation-delay:250ms]">
-                Most people start with his work. Pick one below, or ask anything.
-              </Bubble>
+            <div className="mx-auto max-w-[42rem]">
+              {/* The agent's hello opens the conversation and stays at the top. */}
+              <div className="animate-suggestion-in space-y-2 text-sm leading-[1.75]">
+                <p>Hi, I&apos;m an AI that answers as {firstName}, from his own notes, projects and CV.</p>
+                <p className="text-foreground-secondary">
+                  Most people start with his work. Pick one below, or ask anything.
+                </p>
+              </div>
               {empty && starters.length > 0 && (
-                <QuickReplies questions={starters} onPick={(q) => submit(q, "starter")} delay={500} />
+                <div className="mt-6">
+                  <SuggestionList questions={starters} onPick={(q) => submit(q, "starter")} arrow="→" />
+                </div>
               )}
 
               {!empty && (
-                <p className="py-6 text-center font-label text-xs text-foreground-secondary">
-                  Today · {timeFormat.format(new Date(messages[0].timestamp))}
-                </p>
-              )}
-
-              {turns.map((turn, index) => {
-                const isLast = index === turns.length - 1;
-                return (
-                  <div
-                    key={turn[0].id}
-                    ref={isLast ? lastTurnRef : undefined}
-                    style={isLast && viewportHeight ? { minHeight: viewportHeight - 64 } : undefined}
-                    className={`flex flex-col gap-2.5 ${index > 0 ? "pt-6" : ""}`}
-                  >
-                    {turn.map((message) =>
-                      message.isUser ? (
-                        <div key={message.id} className="flex flex-col items-end animate-suggestion-in">
-                          <Bubble from="me">{message.text}</Bubble>
-                          <time
-                            dateTime={new Date(message.timestamp).toISOString()}
-                            className="mt-1 mr-1 text-xs text-foreground-secondary"
-                          >
-                            {timeFormat.format(new Date(message.timestamp))}
-                          </time>
-                        </div>
-                      ) : !message.text && !message.widgets?.length ? null : (
-                        <div key={message.id} className="flex flex-col items-start gap-2.5">
-                          {message.text && (
-                            <Bubble from="them" muted={message.isError}>
-                              <div className="chat-message">
-                                <ChatMarkdown text={message.text} />
-                              </div>
-                            </Bubble>
-                          )}
-                          {message.widgets?.length ? (
-                            <div className="w-full max-w-[85%]">
-                              <ChatWidgets widgets={message.widgets} />
-                            </div>
-                          ) : null}
-                        </div>
-                      ),
-                    )}
-                    {isLast && waiting && (
-                      <Bubble from="them" className="animate-suggestion-in">
-                        <span className="flex h-6 items-center gap-1" role="status" aria-label="Typing">
-                          {[0, 150, 300].map((delay) => (
-                            <span
-                              key={delay}
-                              className="size-1.5 rounded-full bg-foreground-secondary animate-[typing-dot_1s_ease-in-out_infinite]"
-                              style={{ animationDelay: `${delay}ms` }}
-                            />
-                          ))}
-                        </span>
-                      </Bubble>
-                    )}
-                    {isLast && followUps.length > 0 && (
-                      <QuickReplies questions={followUps} onPick={(q) => submit(q, "follow_up")} />
-                    )}
+                <>
+                  {/* Where the conversation begins: a title and a gentle wavy rule. */}
+                  <div className="mt-14" aria-hidden="true">
+                    <p className="animate-suggestion-in font-label text-xs text-foreground-secondary">
+                      Conversation started here
+                    </p>
+                    <div className="wiggle-rule mt-3 h-1 text-background-inverse/20" />
                   </div>
-                );
-              })}
+                  <div className="mt-12 space-y-16">
+                    {turns.map((turn, index) => {
+                      const isLast = index === turns.length - 1;
+                      return (
+                        <section
+                          key={turn[0].id}
+                          ref={isLast ? lastTurnRef : undefined}
+                          style={isLast && viewportHeight ? { minHeight: viewportHeight - 48 } : undefined}
+                          className="space-y-6"
+                        >
+                          {turn.map((message) =>
+                            message.isUser ? (
+                              <Question key={message.id} message={message} />
+                            ) : !message.text && !message.widgets?.length ? null : (
+                              <div key={message.id} className="space-y-4">
+                                {message.text && (
+                                  <div
+                                    className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
+                                  >
+                                    <ChatMarkdown text={message.text} />
+                                  </div>
+                                )}
+                                {message.widgets?.length ? <ChatWidgets widgets={message.widgets} /> : null}
+                              </div>
+                            ),
+                          )}
+                          {isLast && waiting && (
+                            <p className="shimmer-text text-xs" aria-label="Thinking">
+                              Thinking…
+                            </p>
+                          )}
+                          {isLast && followUps.length > 0 && (
+                            <div className="pt-2">
+                              <SuggestionList
+                                questions={followUps}
+                                onPick={(q) => submit(q, "follow_up")}
+                                arrow="↳"
+                                small
+                              />
+                            </div>
+                          )}
+                        </section>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -311,7 +307,7 @@ export default function ChatPane({
                 submit(input);
               }}
               onClick={() => inputRef.current?.focus()}
-              className="mx-auto flex max-w-[46rem] items-end gap-2 rounded-2xl border border-background-inverse/20 bg-background py-2 pl-4 pr-2 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
+              className="mx-auto flex max-w-[42rem] items-end gap-2 rounded-2xl border border-background-inverse/20 bg-background py-2 pl-4 pr-2 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
             >
               <textarea
                 ref={inputRef}
@@ -410,50 +406,57 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
   );
 }
 
-/** A message bubble: the agent's on the left, the visitor's on the right. */
-function Bubble({
-  from,
-  muted,
-  className = "",
-  children,
-}: {
-  from: "them" | "me";
-  muted?: boolean;
-  className?: string;
-  children: React.ReactNode;
-}) {
+/**
+ * The visitor's question, set as the headline of its exchange: a short
+ * rule and the time, then the question in the heading face. Long questions
+ * step down a size.
+ */
+function Question({ message }: { message: Message }) {
+  const long = message.text.length > 120;
   return (
-    <div
-      className={`w-fit max-w-[85%] sm:max-w-[78%] rounded-[1.25rem] px-4 py-3 text-sm leading-[1.6] ${
-        from === "me"
-          ? "ml-auto rounded-br-md bg-background-inverse text-background whitespace-pre-wrap"
-          : `rounded-bl-md bg-background-secondary ${muted ? "text-foreground-secondary" : "text-foreground"}`
-      } ${className}`}
-    >
-      {children}
+    <div className="animate-suggestion-in">
+      <p className="flex items-center gap-2.5 text-xs text-foreground-secondary">
+        <span aria-hidden="true" className="h-px w-5 bg-foreground" />
+        <span className="sr-only">You asked at</span>
+        <time dateTime={new Date(message.timestamp).toISOString()}>
+          {timeFormat.format(new Date(message.timestamp))}
+        </time>
+      </p>
+      <p
+        className={`font-heading mt-3 font-bold tracking-tight whitespace-pre-wrap text-foreground ${
+          long ? "text-lg leading-[1.45]" : "text-xl sm:text-2xl leading-[1.3]"
+        }`}
+      >
+        {message.text}
+      </p>
     </div>
   );
 }
 
-/** Tappable replies under the agent's last message. */
-function QuickReplies({
+/** Suggested questions as a plain list of links, each with a small arrow. */
+function SuggestionList({
   questions,
   onPick,
-  delay = 0,
+  arrow,
+  small,
 }: {
   questions: string[];
   onPick: (question: string) => void;
-  delay?: number;
+  arrow: string;
+  small?: boolean;
 }) {
   return (
-    <ul className="flex flex-wrap gap-2 pt-1.5" aria-label="Suggested questions">
+    <ul className={small ? "space-y-0.5" : "space-y-1.5"} aria-label="Suggested questions">
       {questions.map((question, i) => (
-        <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${delay + i * 60}ms` }}>
+        <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${i * 60}ms` }}>
           <button
             type="button"
             onClick={() => onPick(question)}
-            className="rounded-full border border-background-inverse/15 bg-background px-3.5 py-2 text-left text-sm transition-colors hover:border-background-inverse/60 cursor-pointer"
+            className={`group -mx-2 flex w-full items-center gap-2 rounded-md px-2 text-left text-foreground-secondary transition-colors hover:bg-background-inverse/5 hover:text-foreground cursor-pointer ${
+              small ? "py-1 text-xs" : "py-1.5 text-sm"
+            }`}
           >
+            <span className="group-hover:text-foreground">{arrow}</span>
             {question}
           </button>
         </li>
