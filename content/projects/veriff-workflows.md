@@ -1,5 +1,5 @@
 ---
-name: Veriff - Workflows
+name: "Workflows"
 # work: a case study from a job. personal: something I made myself. client: a site made for a client.
 type: work
 # One sentence shown on project cards and given to the AI.

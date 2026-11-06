@@ -1,11 +1,11 @@
 ---
-name: Glovo - Delivery Flow
+name: "Delivery Flow"
 # work: a case study from a job. personal: something I made myself. client: a site made for a client.
 type: work
 # One sentence shown on project cards and given to the AI.
 summary: "A redesign of the delivery flow in Glovo's courier app, the screens couriers rely on during every order, built around one idea: take the courier from point A to point B."
 company: "Glovo"
-role: "Project lead"
+role: "Product Designer"
 year: "2020 - 2021"
 tags: [Mobile app, User research, UX, UI, iOS and Android]
 # Path under /public, e.g. /images/projects/glovo-delivery-flow.jpg

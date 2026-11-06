@@ -5,7 +5,7 @@ type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "A Chrome extension that spots shirt numbers on any website and, on hover, shows the sporting legends who wore them."
 company: ""
-role: "Design and development"
+role: "Founder, design and development"
 year: "2026"
 tags: [Chrome extension, Sport, Data curation, Privacy first]
 # Path under /public, e.g. /images/projects/legend-numbers.jpg

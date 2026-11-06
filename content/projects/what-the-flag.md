@@ -5,7 +5,7 @@ type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "A native iOS game about flags: every flag starts blank and you colour it in, one section at a time, with five lives to get it right."
 company: ""
-role: "Design and development"
+role: "Founder, design and development"
 year: "2026"
 tags: [iOS app, SwiftUI, Game design, Privacy first]
 # Path under /public, e.g. /images/projects/what-the-flag.jpg
