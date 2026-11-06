@@ -23,8 +23,23 @@ interface Props {
 }
 
 
-/** Where a new question lands: below the header and the pinned name. */
-const QUESTION_TOP = 112;
+/**
+ * The intro ends with two of these, picked at random on each visit. All true,
+ * all things the agent can talk about.
+ */
+const ASIDES = [
+  "the music I listen to",
+  "the time I herded cattle in Namibia",
+  "why the dung beetle is my favourite animal",
+  "five months crossing Africa overland",
+  "surfing every day in Lanzarote",
+  "rescuing kangaroos in Melbourne",
+  "playing roller hockey for Australia",
+  "being an Espanyol fan in Barcelona",
+  "my love of Test cricket",
+  "playing guitar at my own wedding",
+  "my first triathlon at Elwood Beach",
+];
 
 /** Up to `count` random items (picked after mount, so hydration agrees). */
 function useRandomPick(items: string[], count: number): string[] {
@@ -68,9 +83,12 @@ export default function ChatPane({
   const [viewportHeight, setViewportHeight] = useState(0);
   const starters = useRandomPick(starterQuestions, 4);
   const firstName = name.split(" ")[0];
+  const picked = useRandomPick(ASIDES, 2);
+  const asides = picked.length ? picked : null;
   // Whether the big name has scrolled up behind the header: the small one
   // then takes its place in the corner under the logo.
   const heroRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef<HTMLDivElement>(null);
   const [heroHidden, setHeroHidden] = useState(false);
   useEffect(() => {
     const hero = heroRef.current;
@@ -105,7 +123,10 @@ export default function ChatPane({
     // Restored history jumps there; a question just sent glides.
     const behavior = scrolledFor.current === undefined ? "instant" : "smooth";
     scrolledFor.current = lastQuestionId;
-    container.scrollTo({ top: turn.offsetTop - QUESTION_TOP, behavior });
+    // Just under the pinned name, whatever size it is at this width.
+    const pinned = pinnedRef.current;
+    const clear = pinned ? pinned.offsetTop + pinned.offsetHeight + 20 : 112;
+    container.scrollTo({ top: turn.offsetTop - clear, behavior });
   }, [lastQuestionId, viewportHeight]);
 
   const submit = useCallback(
@@ -148,26 +169,39 @@ export default function ChatPane({
   );
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col">
+    // A size container: the logo and the pinned name grow with the room the
+    // chat has (wide with the panel closed, narrow with it open or on phones).
+    <div className="@container relative flex h-full min-h-0 flex-col">
       {/* Header: transparent, floating over the chat, which scrolls right up
           to the top edge behind it. The controls move into the panel's
           header while it's open (desktop). */}
-      <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4">
-        <Logo className="h-6 fill-current shrink-0" />
+      <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4 @[72rem]:h-16 @[72rem]:px-6">
+        <Logo className="h-6 fill-current shrink-0 @[72rem]:h-8" />
         <div className="flex items-center gap-1">{headerControls}</div>
       </div>
+
+      {/* Where the chat is narrow, its text would run under the pinned name:
+          a soft band of page colour sits behind the header while the name
+          is pinned. Wide, the two never meet, so there is none. */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-background from-65% to-transparent transition-opacity duration-[900ms] @[72rem]:hidden ${
+          heroHidden ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
       {/* The name, small, in the corner under the logo, once the big one
           has scrolled away. It fades up in, and back out the same way. */}
       <div
+        ref={pinnedRef}
         aria-hidden={!heroHidden}
-        className={`pointer-events-none absolute top-12 left-4 z-20 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`pointer-events-none absolute top-12 left-4 z-20 @[72rem]:top-16 @[72rem]:left-6 transition-[opacity,translate] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
           heroHidden ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
-        <p className="w-fit font-heading text-base font-bold leading-tight">{name}</p>
+        <p className="w-fit font-heading text-base font-bold leading-tight @[56rem]:text-lg @[72rem]:text-2xl">{name}</p>
         {/* Two lines, broken after the "&". */}
-        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary">
+        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-sm">
           {title.includes("& ") ? (
             <>
               {title.slice(0, title.indexOf("& ") + 1)}
@@ -185,7 +219,7 @@ export default function ChatPane({
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={scrollRef}
-className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
+className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 @[72rem]:pt-24"
           >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. */}
@@ -200,13 +234,14 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
                 </p>
               </div>
 
-              {/* The agent's hello opens the conversation and stays at the top. */}
-              <div className="animate-suggestion-in space-y-2 text-sm leading-[1.75]">
-                <p>Hi, I&apos;m an AI that answers as {firstName}, from his own notes, projects and CV.</p>
-                <p className="text-foreground-secondary">
-                  Most people start with his work. Pick one below, or ask anything.
-                </p>
-              </div>
+              {/* The intro, in my voice; the last two items change each visit. */}
+              <p className="animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
+                I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
+                <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
+                  {(asides ?? ASIDES.slice(0, 2)).join(", ")}
+                </span>
+                : anything, really.
+              </p>
               {empty && starters.length > 0 && (
                 <div className="mt-6">
                   <SuggestionList questions={starters} onPick={(q) => submit(q, "starter")} arrow="→" />
@@ -229,7 +264,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
                         <section
                           key={turn[0].id}
                           ref={isLast ? lastTurnRef : undefined}
-                          style={isLast && viewportHeight ? { minHeight: viewportHeight - QUESTION_TOP - 24 } : undefined}
+                          style={isLast && viewportHeight ? { minHeight: viewportHeight - 140 } : undefined}
                           className="space-y-6"
                         >
                           {turn.map((message) =>
