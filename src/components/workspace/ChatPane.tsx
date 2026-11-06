@@ -8,58 +8,96 @@ import Logo from "@/components/Logo";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
-import type { HeroPrompt as HeroPromptItem, Project } from "@/lib/content";
 import ConfirmDialog from "./ConfirmDialog";
-import DotGrille from "./DotGrille";
-import HeroPrompt from "./HeroPrompt";
 
 interface Props {
   name: string;
   title: string;
   email: string;
   links: { label: string; href: string }[];
-  tagline: string;
-  heroPrompts: HeroPromptItem[];
-  /** Case studies, shown as logos on the empty page. */
-  work: Pick<Project, "slug" | "name" | "logoMark">[];
-  onOpenProject: (slug: string) => void;
+  /** "Lead Product Designer at Veriff", if there's a current role. */
+  now?: string;
+  /** Where Jordi is, for the card's local time, e.g. "Europe/Madrid". */
+  timeZone: string;
+  city: string;
+  starterQuestions: string[];
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
   reset: () => void;
-  /** Buttons that open the Work and AI Notes panel. */
+  /** Whether the Work / AI Notes panel is open (the card folds away). */
+  panelOpen: boolean;
+  /** Buttons that open the Work and AI Notes panel (phones). */
   panelButtons?: React.ReactNode;
 }
 
+const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
+
+/** Up to `count` random items (picked after mount, so hydration agrees). */
+function useRandomPick(items: string[], count: number): string[] {
+  const [picked, setPicked] = useState<string[]>([]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const pool = [...items];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      setPicked(pool.slice(0, count));
+    });
+    return () => clearTimeout(timeout);
+  }, [items, count]);
+  return picked;
+}
+
+/** The time where Jordi is, ticking. Empty until mounted. */
+function useLocalTime(timeZone: string): string {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const format = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone });
+    const tick = () => setTime(format.format(new Date()));
+    const first = setTimeout(tick);
+    const interval = setInterval(tick, 15_000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(interval);
+    };
+  }, [timeZone]);
+  return time;
+}
+
 /**
- * The chat column, in the spirit of an editor's assistant panel: plain
- * replies, the visitor's questions in quiet bordered blocks, and a compact
- * input at the bottom.
+ * The home page as a message thread that has already begun. On the left,
+ * Jordi's card: who, what, now, and the time in Barcelona. On the right,
+ * the agent says hello and offers a few work questions to tap; replies come
+ * in as bubbles. The card folds away while the side panel is open, and on
+ * phones it's the header.
  */
 export default function ChatPane({
   name,
   title,
   email,
   links,
-  tagline,
-  heroPrompts,
-  work,
-  onOpenProject,
+  now,
+  timeZone,
+  city,
+  starterQuestions,
   messages,
   isLoading,
   send,
   reset,
+  panelOpen,
   panelButtons,
 }: Props) {
   const [input, setInput] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
-  const introRef = useRef<HTMLDivElement>(null);
-  const [introVisible, setIntroVisible] = useState(true);
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const lastTurnRef = useRef<HTMLElement>(null);
+  const lastTurnRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const starters = useRandomPick(starterQuestions, 4);
+  const localTime = useLocalTime(timeZone);
+  const [firstName, ...rest] = name.split(" ");
 
   // The latest exchange is at least a screen tall, so its question can sit
   // at the top of the view even while the reply is still short.
@@ -85,19 +123,6 @@ export default function ChatPane({
     container.scrollTo({ top: turn.offsetTop - 24, behavior });
   }, [lastQuestionId, viewportHeight]);
 
-  // Watch the intro within the conversation's own scroll area.
-  useEffect(() => {
-    const intro = introRef.current;
-    const root = scrollRef.current;
-    if (!intro || !root) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntroVisible(entry.isIntersecting),
-      { root, threshold: 0.15 },
-    );
-    observer.observe(intro);
-    return () => observer.disconnect();
-  }, []);
-
   const submit = useCallback(
     (text: string, source: QuestionSource = "typed") => {
       if (!text.trim() || isLoading) return;
@@ -113,6 +138,7 @@ export default function ChatPane({
   const followUps =
     !isLoading && last && !last.isUser && !last.isError ? (last.suggestions ?? []) : [];
   const empty = messages.length === 0;
+  const waiting = isLoading && (!last || last.isUser || (!last.text && !last.widgets?.length));
   // Exchanges: each starts with a question and holds the reply after it.
   const turns: Message[][] = [];
   for (const message of messages) {
@@ -120,23 +146,31 @@ export default function ChatPane({
     else turns[turns.length - 1].push(message);
   }
 
+  const footerLinks = (
+    <>
+      <a href={`mailto:${email}`} className="hover:text-foreground truncate">
+        {email}
+      </a>
+      <div className="flex items-center gap-3">
+        {links.map((link) => (
+          <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+            {link.label}
+          </a>
+        ))}
+        <ThemeSwitcher />
+      </div>
+    </>
+  );
+
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      {/* Header */}
+      {/* Header. On phones it stands in for the card: name and status. */}
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-background-inverse/10 px-4">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           <Logo className="h-6 fill-current shrink-0" />
-          {/* Shown once the intro (which says the same) scrolls out of view. */}
-          <span
-            aria-hidden={introVisible}
-            className={`truncate text-xs text-foreground-secondary transition-[opacity,translate] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-              introVisible ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
-            }`}
-          >
-            {/* Name set like the intro's "Hi, I'm Jordi.": heading face, medium, ink. */}
-            <span className="font-heading font-bold text-foreground">{name}</span>
-            {/* Same `title` as the tagline: both come from content/profile.yaml. */}
-            <span className="hidden sm:inline"> · {title}</span>
+          <span className="flex min-w-0 items-center gap-2 lg:hidden">
+            <span className="truncate font-heading text-sm font-bold">{name}</span>
+            <Online />
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -144,7 +178,7 @@ export default function ChatPane({
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
-            disabled={messages.length === 0}
+            disabled={empty}
             title="Start over"
             aria-label="Start over"
             className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
@@ -154,185 +188,189 @@ export default function ChatPane({
         </div>
       </div>
 
-      {/* Conversation */}
-      <div
-        ref={scrollRef}
-        className="relative min-h-0 flex-1 overflow-y-auto px-4 py-6"
-      >
-        {/* Braun-grille dots, anchored to the right edge of the chat area
-            and fading in towards the text. Scrolls away with the intro. */}
-        <DotGrille className="absolute top-0 right-0 h-[min(85vh,52rem)] w-[min(50%,40rem)] [mask-image:radial-gradient(ellipse_at_100%_40%,black_15%,transparent_72%)]" />
-        <div className="w-full">
-        {empty ? (
-          /* The empty page is one sentence: "Ask me about ___". */
-          <div
-            ref={introRef}
-            className="relative mx-auto flex min-h-full max-w-[60rem] flex-col pt-[4vh] lg:pt-[10vh] animate-suggestion-in"
-          >
-            <HeroPrompt
-              name={name}
-              tagline={tagline}
-              prompts={heroPrompts}
-              work={work}
-              onAsk={(text, source) => submit(text, source)}
-              onOpenProject={onOpenProject}
-              disabled={isLoading}
-            />
-          </div>
-        ) : (
-          /* Once talking: who's answering, at the top of the history. */
-          <div ref={introRef} className="relative mx-auto max-w-[60rem] pt-6">
-            <p className="font-heading text-3xl sm:text-4xl font-bold tracking-[-0.02em]">{name}</p>
-            <p className="mt-3 max-w-xl text-sm leading-[1.7] text-foreground-secondary">{tagline}</p>
-          </div>
-        )}
-        {!empty && (
-          <>
-          {/* Where the conversation begins: a title and a gentle wavy rule
-              as wide as the intro. */}
-          <div className="mx-auto mt-16 max-w-[60rem]" aria-hidden="true">
-            <p className="animate-suggestion-in font-label text-xs text-foreground-secondary">
-              Conversation started here
-            </p>
-            <div className="wiggle-rule mt-3 h-1 text-background-inverse/20" />
-          </div>
-          <div className="mx-auto mt-12 max-w-[42rem] space-y-16">
-            {turns.map((turn, index) => {
-              const isLast = index === turns.length - 1;
-              return (
-                <section
-                  key={turn[0].id}
-                  ref={isLast ? lastTurnRef : undefined}
-                  style={isLast && viewportHeight ? { minHeight: viewportHeight - 48 } : undefined}
-                  className="space-y-6"
-                >
-                  {turn.map((message) =>
-                    message.isUser ? (
-                      <Question key={message.id} message={message} />
-                    ) : !message.text && !message.widgets?.length ? null : (
-                      <div key={message.id} className="space-y-4">
-                        {message.text && (
-                          <div
-                            className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
-                          >
-                            <ChatMarkdown text={message.text} />
-                          </div>
-                        )}
-                        {message.widgets?.length ? <ChatWidgets widgets={message.widgets} /> : null}
-                      </div>
-                    ),
-                  )}
-                  {isLast && isLoading && !last?.text && (
-                    <p className="shimmer-text text-xs" aria-label="Thinking">
-                      Thinking…
-                    </p>
-                  )}
-                  {isLast && followUps.length > 0 && (
-                    <ul className="space-y-0.5 pt-2">
-                      {followUps.map((question, i) => (
-                        <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${i * 60}ms` }}>
-                          <button
-                            type="button"
-                            onClick={() => submit(question, "follow_up")}
-                            className="group flex w-full items-center gap-2 rounded-md px-2 py-1 -mx-2 text-left text-xs text-foreground-secondary hover:bg-background-inverse/5 hover:text-foreground cursor-pointer transition-colors"
-                          >
-                            <span className="text-foreground-secondary group-hover:text-foreground">↳</span>
-                            {question}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-          </>
-        )}
-        </div>
-      </div>
-
-      {/* Input, once the conversation has started (the empty page asks in
-          its own big field). */}
-      {!empty && (
-      <div className="relative z-10 mx-auto w-full max-w-[calc(60rem+2rem)] shrink-0 px-4 animate-suggestion-in">
-        {/* One clean field: hairline border, the send button inline. */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit(input);
-          }}
-          onClick={() => inputRef.current?.focus()}
-          className="flex items-end gap-3 rounded-xl border border-background-inverse/15 bg-background py-2.5 pl-4 pr-2.5 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/45 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_6%,transparent)]"
+      <div className="flex min-h-0 flex-1">
+        {/* Jordi's card. Desktop only; folds away while the panel is open. */}
+        <aside
+          aria-label={`About ${name}`}
+          className={`hidden shrink-0 overflow-hidden border-background-inverse/10 bg-background-secondary/60 transition-[width,opacity] duration-[520ms] lg:block ${EASE} ${
+            panelOpen ? "w-0 border-r-0 opacity-0" : "w-[clamp(20rem,38%,34rem)] border-r opacity-100"
+          }`}
         >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onInput={(e) => {
-              const el = e.currentTarget;
-              el.style.height = "auto";
-              el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+          <div className="flex h-full w-[clamp(20rem,38vw,34rem)] flex-col gap-8 overflow-y-auto px-10 py-12">
+            <p className="flex items-center gap-2 text-sm">
+              <Online />
+              Online · answers instantly
+            </p>
+            <h1 className="text-6xl xl:text-7xl font-bold leading-[0.92] tracking-[-0.035em]">
+              {firstName}
+              {rest.length > 0 && (
+                <>
+                  <br />
+                  {rest.join(" ")}
+                </>
+              )}
+            </h1>
+            <dl className="space-y-4">
+              <Fact label="What I do">{title}</Fact>
+              {now && <Fact label="Now">{now}</Fact>}
+              <Fact label="Local time">
+                <span className="tabular-nums">{localTime || "--:--"}</span> in {city}
+              </Fact>
+            </dl>
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-6 text-xs text-foreground-secondary">
+              {footerLinks}
+            </div>
+          </div>
+        </aside>
+
+        {/* The thread */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 py-8">
+            <div className="mx-auto max-w-[46rem] space-y-2.5">
+              {/* The agent opens the conversation, and its hello stays at the top. */}
+              <Bubble from="them" className="animate-suggestion-in">
+                Hi, I&apos;m an AI that answers as {firstName}, from his own notes, projects and CV.
+              </Bubble>
+              <Bubble from="them" className="animate-suggestion-in [animation-delay:250ms]">
+                Most people start with his work. Pick one below, or ask anything.
+              </Bubble>
+              {empty && starters.length > 0 && (
+                <QuickReplies questions={starters} onPick={(q) => submit(q, "starter")} delay={500} />
+              )}
+
+              {!empty && (
+                <p className="py-6 text-center font-label text-xs text-foreground-secondary">
+                  Today · {timeFormat.format(new Date(messages[0].timestamp))}
+                </p>
+              )}
+
+              {turns.map((turn, index) => {
+                const isLast = index === turns.length - 1;
+                return (
+                  <div
+                    key={turn[0].id}
+                    ref={isLast ? lastTurnRef : undefined}
+                    style={isLast && viewportHeight ? { minHeight: viewportHeight - 64 } : undefined}
+                    className={`flex flex-col gap-2.5 ${index > 0 ? "pt-6" : ""}`}
+                  >
+                    {turn.map((message) =>
+                      message.isUser ? (
+                        <div key={message.id} className="flex flex-col items-end animate-suggestion-in">
+                          <Bubble from="me">{message.text}</Bubble>
+                          <time
+                            dateTime={new Date(message.timestamp).toISOString()}
+                            className="mt-1 mr-1 text-xs text-foreground-secondary"
+                          >
+                            {timeFormat.format(new Date(message.timestamp))}
+                          </time>
+                        </div>
+                      ) : !message.text && !message.widgets?.length ? null : (
+                        <div key={message.id} className="flex flex-col items-start gap-2.5">
+                          {message.text && (
+                            <Bubble from="them" muted={message.isError}>
+                              <div className="chat-message">
+                                <ChatMarkdown text={message.text} />
+                              </div>
+                            </Bubble>
+                          )}
+                          {message.widgets?.length ? (
+                            <div className="w-full max-w-[85%]">
+                              <ChatWidgets widgets={message.widgets} />
+                            </div>
+                          ) : null}
+                        </div>
+                      ),
+                    )}
+                    {isLast && waiting && (
+                      <Bubble from="them" className="animate-suggestion-in">
+                        <span className="flex h-6 items-center gap-1" role="status" aria-label="Typing">
+                          {[0, 150, 300].map((delay) => (
+                            <span
+                              key={delay}
+                              className="size-1.5 rounded-full bg-foreground-secondary animate-[typing-dot_1s_ease-in-out_infinite]"
+                              style={{ animationDelay: `${delay}ms` }}
+                            />
+                          ))}
+                        </span>
+                      </Bubble>
+                    )}
+                    {isLast && followUps.length > 0 && (
+                      <QuickReplies questions={followUps} onPick={(q) => submit(q, "follow_up")} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Composer */}
+          <div className="shrink-0 px-4 sm:px-8 pb-4 pt-2">
+            <form
+              onSubmit={(e) => {
                 e.preventDefault();
                 submit(input);
-              }
-            }}
-            rows={1}
-            aria-label="Ask me anything"
-            placeholder="Ask me anything…"
-            className="block min-h-8 flex-1 resize-none bg-transparent py-1 text-base sm:text-sm leading-[1.6] placeholder:text-foreground-secondary focus:outline-none"
-          />
-          {/* Privacy note, on hover or focus (a tap on phones). */}
-          <span className="group/info relative shrink-0">
-            <button
-              type="button"
-              aria-label="About your questions"
-              aria-describedby="privacy-note"
-              className="flex size-8 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:text-foreground focus-visible:text-foreground cursor-pointer"
+              }}
+              onClick={() => inputRef.current?.focus()}
+              className="mx-auto flex max-w-[46rem] items-end gap-2 rounded-2xl border border-background-inverse/20 bg-background py-2 pl-4 pr-2 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/60 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_7%,transparent)]"
             >
-              <Info size={15} />
-            </button>
-            <span
-              id="privacy-note"
-              role="tooltip"
-              className="pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
-            >
-              Questions and answers are saved so I can see what people ask and
-              improve the answers. Nothing that identifies you is kept: no name,
-              no IP address, only a rough location (country and city).
-            </span>
-          </span>
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            aria-label="Send"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-background-inverse text-background transition-colors cursor-pointer disabled:cursor-default disabled:bg-background-inverse/10 disabled:text-foreground-secondary"
-          >
-            <ArrowUp size={16} strokeWidth={2.25} />
-          </button>
-        </form>
-      </div>
-      )}
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onInput={(e) => {
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                    e.preventDefault();
+                    submit(input);
+                  }
+                }}
+                rows={1}
+                aria-label={`Message ${firstName}`}
+                placeholder={`Message ${firstName}…`}
+                className="block min-h-10 flex-1 resize-none bg-transparent py-2 text-base leading-[1.5] placeholder:text-foreground-secondary focus:outline-none"
+              />
+              {/* Privacy note, on hover or focus (a tap on phones). */}
+              <span className="group/info relative shrink-0">
+                <button
+                  type="button"
+                  aria-label="About your questions"
+                  aria-describedby="privacy-note"
+                  className="flex size-10 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:text-foreground focus-visible:text-foreground cursor-pointer"
+                >
+                  <Info size={16} />
+                </button>
+                <span
+                  id="privacy-note"
+                  role="tooltip"
+                  className="pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+                >
+                  Questions and answers are saved so I can see what people ask and
+                  improve the answers. Nothing that identifies you is kept: no name,
+                  no IP address, only a rough location (country and city).
+                </span>
+              </span>
+              <button
+                type="submit"
+                disabled={!input.trim() || isLoading}
+                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-background-inverse px-4 text-sm font-bold text-background transition-opacity hover:opacity-90 cursor-pointer disabled:cursor-default disabled:opacity-30"
+              >
+                Send
+                <ArrowUp size={15} strokeWidth={2.25} />
+              </button>
+            </form>
+          </div>
 
-      {/* Footer: the full width of the chat column. */}
-      <div className="shrink-0 px-4 pt-3 pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-foreground-secondary">
-          <a href={`mailto:${email}`} className="hover:text-foreground truncate">
-            {email}
-          </a>
-          <div className="flex items-center gap-3">
-            {links.map((link) => (
-              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-                {link.label}
-              </a>
-            ))}
-            <ThemeSwitcher />
+          {/* Phones: the card's links live under the input. */}
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pb-3 text-xs text-foreground-secondary lg:hidden">
+            {footerLinks}
           </div>
         </div>
       </div>
+
       <ConfirmDialog
         open={confirmReset}
         title="Start over?"
@@ -353,29 +391,73 @@ export default function ChatPane({
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
 
-/**
- * The visitor's question, set as the headline of its exchange: a short
- * rule, "You" and the time, then the question in the heading face. Long
- * questions step down a size.
- */
-function Question({ message }: { message: Message }) {
-  const long = message.text.length > 120;
+/** The green "online" dot. */
+function Online() {
   return (
-    <div className="animate-suggestion-in">
-      <p className="flex items-center gap-2.5 text-xs text-foreground-secondary">
-        <span aria-hidden="true" className="h-px w-5 bg-foreground" />
-        <span className="sr-only">You asked at</span>
-        <time dateTime={new Date(message.timestamp).toISOString()}>
-          {timeFormat.format(new Date(message.timestamp))}
-        </time>
-      </p>
-      <p
-        className={`font-heading mt-3 font-bold tracking-tight whitespace-pre-wrap text-foreground ${
-          long ? "text-lg leading-[1.45]" : "text-xl sm:text-2xl leading-[1.3]"
-        }`}
-      >
-        {message.text}
-      </p>
+    <span
+      aria-hidden="true"
+      className="size-2 shrink-0 rounded-full bg-[oklch(0.62_0.15_150)] shadow-[0_0_0_3px_oklch(0.62_0.15_150/0.18)]"
+    />
+  );
+}
+
+function Fact({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="font-label text-xs text-foreground-secondary">{label}</dt>
+      <dd className="mt-1 text-base">{children}</dd>
     </div>
+  );
+}
+
+/** A message bubble: the agent's on the left, the visitor's on the right. */
+function Bubble({
+  from,
+  muted,
+  className = "",
+  children,
+}: {
+  from: "them" | "me";
+  muted?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`w-fit max-w-[85%] sm:max-w-[78%] rounded-[1.25rem] px-4 py-3 text-sm leading-[1.6] ${
+        from === "me"
+          ? "ml-auto rounded-br-md bg-background-inverse text-background whitespace-pre-wrap"
+          : `rounded-bl-md bg-background-secondary ${muted ? "text-foreground-secondary" : "text-foreground"}`
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Tappable replies under the agent's last message. */
+function QuickReplies({
+  questions,
+  onPick,
+  delay = 0,
+}: {
+  questions: string[];
+  onPick: (question: string) => void;
+  delay?: number;
+}) {
+  return (
+    <ul className="flex flex-wrap gap-2 pt-1.5" aria-label="Suggested questions">
+      {questions.map((question, i) => (
+        <li key={question} className="animate-suggestion-in" style={{ animationDelay: `${delay + i * 60}ms` }}>
+          <button
+            type="button"
+            onClick={() => onPick(question)}
+            className="rounded-full border border-background-inverse/15 bg-background px-3.5 py-2 text-left text-sm transition-colors hover:border-background-inverse/60 cursor-pointer"
+          >
+            {question}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }

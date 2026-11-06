@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, X } from "lucide-react";
 import { track } from "@/lib/analytics";
-import type { HeroPrompt, Project } from "@/lib/content";
+import type { Project } from "@/lib/content";
 import { useChatSession } from "@/lib/use-chat-session";
 import ChatPane from "./ChatPane";
 import NotesPanel from "./NotesPanel";
@@ -22,9 +22,11 @@ interface Props {
   title: string;
   email: string;
   links: { label: string; href: string }[];
-  heroPrompts: HeroPrompt[];
-  /** One line beside the name: what I do, where, and what now. */
-  tagline: string;
+  starterQuestions: string[];
+  /** "Lead Product Designer at Veriff", if there's a current role. */
+  now?: string;
+  timeZone: string;
+  city: string;
   caseStudies: Project[];
   websites: Project[];
 }
@@ -39,8 +41,10 @@ export default function Workspace({
   title,
   email,
   links,
-  heroPrompts,
-  tagline,
+  starterQuestions,
+  now,
+  timeZone,
+  city,
   caseStudies,
   websites,
 }: Props) {
@@ -192,10 +196,11 @@ export default function Workspace({
             title={title}
             email={email}
             links={links}
-            heroPrompts={heroPrompts}
-            work={caseStudies}
-            onOpenProject={openProject}
-            tagline={tagline}
+            now={now}
+            timeZone={timeZone}
+            city={city}
+            starterQuestions={starterQuestions}
+            panelOpen={panelOpen}
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}

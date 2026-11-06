@@ -457,18 +457,11 @@ body:has([data-workspace]) [data-site-footer] {
   animation: dialog-in 0.2s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-/* "Conversation started here": a wavy rule in the current colour, drawn in
-   from the left. */
-.wiggle-rule {
-  background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='4' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 C 5 0.5, 5 0.5, 10 2 S 15 3.5, 20 2' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") repeat-x left center / 20px 4px;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='4' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 C 5 0.5, 5 0.5, 10 2 S 15 3.5, 20 2' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") repeat-x left center / 20px 4px;
-  animation: wiggle-draw 1.2s cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-@keyframes wiggle-draw {
-  from { clip-path: inset(0 100% 0 0); }
-  to { clip-path: inset(0 0 0 0); }
+/* The agent's "typing" dots. */
+@keyframes typing-dot {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .wiggle-rule { animation: none; }
+  [class*="typing-dot"] { animation: none !important; opacity: 0.6; }
 }
