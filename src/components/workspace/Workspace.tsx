@@ -334,7 +334,10 @@ export default function Workspace({
               }`}
               aria-hidden={tab !== "notes"}
             >
+              {/* Starts fresh with each conversation: starting over clears the
+                  summary along with the talking points. */}
               <NotesPanel
+                key={session.messages.length === 0 ? "empty" : "conversation"}
                 topics={session.topics}
                 messages={session.messages}
                 name={name}

@@ -97,7 +97,8 @@ export default function ChatPane({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastTurnRef = useRef<HTMLElement>(null);
   const [viewportHeight, setViewportHeight] = useState(0);
-  const starters = useRandomPick(starterQuestions, 4);
+  // All the starters, shuffled; shown one at a time.
+  const starters = useRandomPick(starterQuestions, starterQuestions.length);
   const picked = useRandomPick(ASIDES, 2);
   const asides = picked.length ? picked : null;
 
@@ -249,7 +250,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt
               </p>
               {empty && starters.length > 0 && (
                 <div ref={suggestionsRef} className="mt-6">
-                  <SuggestionList questions={starters} onPick={(q) => submit(q, "starter")} arrow="→" />
+                  <RotatingStarter questions={starters} onPick={(q) => submit(q, "starter")} />
                 </div>
               )}
 
@@ -444,6 +445,56 @@ function Question({ message }: { message: Message }) {
       >
         {message.text}
       </p>
+    </div>
+  );
+}
+
+const STARTER_EVERY_MS = 3000;
+
+/**
+ * One suggested question at a time, under "You can start by asking:", the
+ * next one fading up every few seconds. Paused while it's hovered or
+ * focused, so it doesn't change under the pointer. Two lines are kept for
+ * it, so a longer question never moves the input below.
+ */
+function RotatingStarter({
+  questions,
+  onPick,
+}: {
+  questions: string[];
+  onPick: (question: string) => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const paused = useRef(false);
+  useEffect(() => {
+    if (questions.length < 2) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const interval = setInterval(() => {
+      if (!paused.current) setIndex((i) => (i + 1) % questions.length);
+    }, reduce ? STARTER_EVERY_MS * 2 : STARTER_EVERY_MS);
+    return () => clearInterval(interval);
+  }, [questions.length]);
+  const question = questions[index % questions.length];
+  return (
+    <div>
+      <p className="text-xs text-foreground-secondary">You can start by asking:</p>
+      <div className="mt-1.5 min-h-[3.4rem]">
+        <button
+          key={question}
+          type="button"
+          onClick={() => onPick(question)}
+          onPointerEnter={() => (paused.current = true)}
+          onPointerLeave={() => (paused.current = false)}
+          onFocus={() => (paused.current = true)}
+          onBlur={() => (paused.current = false)}
+          className="animate-suggestion-in group -mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-background-inverse/5 cursor-pointer"
+        >
+          <span className="text-foreground-secondary transition-transform group-hover:translate-x-0.5 group-hover:text-foreground">
+            →
+          </span>
+          {question}
+        </button>
+      </div>
     </div>
   );
 }
