@@ -12,7 +12,6 @@ import { Online } from "./ProfileCard";
 
 interface Props {
   name: string;
-  title: string;
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
@@ -21,13 +20,10 @@ interface Props {
   send: (text: string, source?: QuestionSource) => void;
   /** Asks to start over (the confirmation lives in the workspace). */
   onStartOver: () => void;
-  /** Whether the Work / AI Notes panel is open (the name moves up here). */
-  panelOpen: boolean;
   /** Buttons that open the Work and AI Notes panel (phones). */
   panelButtons?: React.ReactNode;
 }
 
-const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
 /** Up to `count` random items (picked after mount, so hydration agrees). */
 function useRandomPick(items: string[], count: number): string[] {
@@ -55,7 +51,6 @@ function useRandomPick(items: string[], count: number): string[] {
  */
 export default function ChatPane({
   name,
-  title,
   email,
   links,
   starterQuestions,
@@ -63,7 +58,6 @@ export default function ChatPane({
   isLoading,
   send,
   onStartOver,
-  panelOpen,
   panelButtons,
 }: Props) {
   const [input, setInput] = useState("");
@@ -144,19 +138,10 @@ export default function ChatPane({
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Logo className="h-6 fill-current shrink-0 lg:hidden" />
-          {/* Phones: always here, standing in for the card. Desktop: arrives
-              as the card folds away for the panel, a beat after it starts. */}
-          <span
-            className={`flex min-w-0 items-center gap-2 lg:transition-[opacity,translate,filter] lg:duration-500 ${EASE} ${
-              panelOpen
-                ? "lg:translate-y-0 lg:opacity-100 lg:blur-0 lg:delay-200"
-                : "lg:pointer-events-none lg:translate-y-3 lg:opacity-0 lg:blur-[3px] lg:delay-0"
-            }`}
-          >
-            <span className="truncate text-sm">
-              <span className="font-heading font-bold">{name}</span>
-              <span className="hidden text-foreground-secondary lg:inline"> · {title}</span>
-            </span>
+          {/* Phones: the card's stand-in. Desktop shows the name in the left
+              column instead. */}
+          <span className="flex min-w-0 items-center gap-2 lg:hidden">
+            <span className="truncate font-heading text-sm font-bold">{name}</span>
             <Online />
           </span>
         </div>

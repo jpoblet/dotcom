@@ -9,7 +9,7 @@ import Logo from "@/components/Logo";
 import ChatPane from "./ChatPane";
 import ConfirmDialog from "./ConfirmDialog";
 import NotesPanel from "./NotesPanel";
-import ProfileCard from "./ProfileCard";
+import ProfileCard, { Online } from "./ProfileCard";
 import { ProjectView, WorkOverview } from "./WorkPanel";
 import { WorkspaceContext } from "./WorkspaceContext";
 
@@ -158,40 +158,65 @@ export default function Workspace({
     <WorkspaceContext.Provider value={actions}>
       <div data-workspace className="h-dvh w-full overflow-hidden lg:flex">
         {/* The left column: who's answering, by default; Work or AI Notes
-            in the same place when asked for. The chat on the right never
-            moves. Phones: the column is only the panel's sheet. */}
+            in the same place when asked for. One width either way, so
+            nothing on screen moves but the content. Phones: the column is
+            only the panel's sheet. */}
         <div
-          className={`contents lg:relative lg:flex lg:h-full lg:shrink-0 lg:flex-col lg:overflow-hidden lg:border-background-inverse/10 lg:transition-[width] lg:duration-[520ms] ${EASE} ${
-            panelOpen ? "lg:w-1/2 lg:border-r" : "lg:w-[clamp(20rem,38%,34rem)] lg:border-r-0"
+          className={`contents lg:relative lg:flex lg:h-full lg:w-[clamp(24rem,46%,44rem)] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:border-r lg:transition-[border-color] lg:duration-[520ms] ${EASE} ${
+            panelOpen ? "lg:border-background-inverse/10" : "lg:border-transparent"
           }`}
         >
-          {/* The controls stay put here, open or closed: the logo, the two
-              tabs and "start over", with "close" at the far end when open. */}
-          <div className="hidden h-12 shrink-0 items-center gap-6 px-4 lg:flex">
-            <Logo className="h-6 fill-current shrink-0" />
-            {tabs}
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              disabled={session.messages.length === 0}
-              title="Start over"
-              aria-label="Start over"
-              className="-ml-2 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
-            >
-              <RotateCcw size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={closePanel}
-              aria-label="Close panel"
-              title="Close"
-              tabIndex={panelOpen ? 0 : -1}
-              className={`-mr-1 ml-auto flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
-                panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
-            >
-              <X size={15} />
-            </button>
+          {/* The controls stay put here, open or closed: the logo on the left;
+              the two tabs, "start over" and (when open) "close" on the right. */}
+          <div className="hidden h-12 shrink-0 items-center justify-between gap-6 px-4 lg:flex">
+            <div className="flex min-w-0 items-center gap-3">
+              <Logo className="h-6 fill-current shrink-0" />
+              {/* The card's name, carried up here while the panel covers it. */}
+              <span
+                aria-hidden={!panelOpen}
+                className={`flex min-w-0 items-center gap-2 transition-[opacity,translate,filter] duration-500 ${EASE} ${
+                  panelOpen
+                    ? "translate-y-0 opacity-100 blur-0 delay-200"
+                    : "pointer-events-none translate-y-3 opacity-0 blur-[3px]"
+                }`}
+              >
+                <span className="truncate text-sm">
+                  <span className="font-heading font-bold">{name}</span>
+                  <span className="text-foreground-secondary"> · {title}</span>
+                </span>
+                <Online />
+              </span>
+            </div>
+            {/* Right end of the column. "Close" always keeps its slot, so
+                nothing shifts when it appears. */}
+            <div className="flex items-center gap-5">
+              {tabs}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setConfirmReset(true)}
+                  disabled={session.messages.length === 0}
+                  title="Start over"
+                  aria-label="Start over"
+                  className="flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
+                >
+                  <RotateCcw size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={closePanel}
+                  aria-label="Close panel"
+                  title="Close"
+                  tabIndex={panelOpen ? 0 : -1}
+                  aria-hidden={!panelOpen}
+                  className={`-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer transition-opacity duration-300 ${
+                    panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
+                  }`}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
           </div>
           {/* The card steps back as the panel arrives. */}
           <div
@@ -200,7 +225,7 @@ export default function Workspace({
               panelOpen ? "pointer-events-none scale-[0.96] opacity-0 blur-[2px]" : "scale-100 opacity-100 blur-0"
             }`}
           >
-            <div className="absolute inset-y-0 left-0 w-[clamp(20rem,38vw,34rem)]">
+            <div className="absolute inset-0">
               <ProfileCard
                 name={name}
                 title={title}
@@ -308,11 +333,9 @@ export default function Workspace({
         <div className="h-full min-h-0 min-w-0 lg:flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <ChatPane
             name={name}
-            title={title}
             email={email}
             links={links}
             starterQuestions={starterQuestions}
-            panelOpen={panelOpen}
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}

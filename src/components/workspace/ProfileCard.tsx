@@ -50,13 +50,13 @@ interface Props {
 }
 
 /**
- * Who's answering: status, the name set large, what I do and the job
+ * Who's answering: status, a big hello with the first name, what I do and the job
  * right now in one line, and the time in Barcelona, with the links at the
  * foot. Sits on the same ground as the chat, with no fill or rule of its own.
  */
 export default function ProfileCard({ name, title, now, timeZone, city, email, links }: Props) {
   const localTime = useLocalTime(timeZone);
-  const [firstName, ...rest] = name.split(" ");
+  const firstName = name.split(" ")[0];
   return (
     <div className="flex h-full flex-col gap-8 overflow-y-auto px-10 pt-[2.375rem] pb-8">
       <p className="flex items-center gap-2 text-sm">
@@ -64,19 +64,15 @@ export default function ProfileCard({ name, title, now, timeZone, city, email, l
         Online · answers instantly
       </p>
       <h1 className="text-6xl xl:text-7xl font-bold leading-[0.92] tracking-[-0.035em]">
-        {firstName}
-        {rest.length > 0 && (
-          <>
-            <br />
-            {rest.join(" ")}
-          </>
-        )}
+        Hi, I&apos;m
+        <br />
+        {firstName}.
       </h1>
+      {/* One line, no label: the kind of work, then the job right now. */}
+      <p className="-mt-2 max-w-[28rem] text-base leading-[1.6]">
+        {now ? `${title}, currently ${now}.` : title}
+      </p>
       <dl className="space-y-4">
-        {/* One line: the kind of work, then the job right now. */}
-        <Fact label="What I do">
-          {now ? `${title}, currently ${now}.` : title}
-        </Fact>
         <Fact label="Local time">
           <span className="tabular-nums">{localTime || "--:--"}</span> in {city}
         </Fact>
