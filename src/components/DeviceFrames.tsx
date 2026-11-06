@@ -4,17 +4,17 @@ import Image from "next/image";
 export const displayUrl = (url: string) =>
   url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
-/** A screenshot in a minimal browser window (dots and an address bar). */
+/** A screenshot in a minimal browser window (dots and a wireframe address bar). */
 export function BrowserFrame({
   src,
-  url,
   alt,
   sizes,
   priority,
   className = "",
 }: {
   src: string;
-  url: string;
+  /** The site's address (not shown: the bar is a wireframe). */
+  url?: string;
   alt: string;
   sizes: string;
   priority?: boolean;
@@ -28,9 +28,8 @@ export function BrowserFrame({
         <span className="size-[0.7em] rounded-full bg-background-inverse/15" />
         <span className="size-[0.7em] rounded-full bg-background-inverse/15" />
         <span className="size-[0.7em] rounded-full bg-background-inverse/15" />
-        <span className="mx-auto max-w-[60%] truncate rounded-full bg-background-inverse/6 px-[1.2em] py-[0.15em] text-foreground-secondary">
-          {displayUrl(url)}
-        </span>
+        {/* Address bar as a wireframe: a blank field, no text. */}
+        <span aria-hidden="true" className="mx-auto h-[0.95em] w-1/3 rounded-full bg-background-inverse/8" />
       </div>
       <div className="relative aspect-[16/10]">
         <Image src={src} alt={alt} fill priority={priority} sizes={sizes} className="object-cover object-top" />
@@ -41,7 +40,7 @@ export function BrowserFrame({
 
 /**
  * A screenshot in a phone with a thin dark bezel and a mobile browser's
- * address bar. The screen keeps the captures' exact proportions (390 x 844),
+ * wireframe address bar. The screen keeps the captures' exact proportions (390 x 844),
  * so nothing is cropped.
  */
 export function PhoneFrame({
@@ -64,9 +63,7 @@ export function PhoneFrame({
       <div className="overflow-hidden rounded-[clamp(0.6rem,2vw,1.35rem)] bg-background">
         {url && (
           <div className="flex items-center justify-center border-b border-background-inverse/10 px-[8%] pt-[7%] pb-[4%]">
-            <span className="max-w-full truncate rounded-full bg-background-inverse/6 px-[0.9em] py-[0.2em] text-[clamp(0.375rem,0.8vw,0.625rem)] text-foreground-secondary">
-              {displayUrl(url)}
-            </span>
+            <span aria-hidden="true" className="h-[clamp(0.35rem,0.75vw,0.6rem)] w-3/5 rounded-full bg-background-inverse/8" />
           </div>
         )}
         <div className="relative aspect-[390/844]">
