@@ -68,10 +68,10 @@ export function WorkOverview({
                   className="h-8 w-2/5 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
                 />
               </span>
-              <span className="text-sm font-bold">{project.name}</span>
-              <span className="mt-1 text-xs text-foreground-secondary">{meta(project)}</span>
+              <span className="font-mono text-sm font-bold">{project.name}</span>
+              <span className="mt-1 font-mono text-xs text-foreground-secondary">{meta(project)}</span>
               {project.summary && (
-                <span className="font-body mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
+                <span className="mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
                   {project.summary}
                 </span>
               )}
@@ -108,8 +108,8 @@ export function WorkOverview({
                       className="h-5 w-3/5 text-foreground/75 transition-colors duration-300 group-hover:text-foreground"
                     />
                   </span>
-                  <span className="truncate text-sm">{site.name}</span>
-                  <span className="mt-0.5 text-xs text-foreground-secondary">{site.year}</span>
+                  <span className="truncate font-mono text-sm">{site.name}</span>
+                  <span className="mt-0.5 font-mono text-xs text-foreground-secondary">{site.year}</span>
                 </>
               );
               const className =
@@ -202,10 +202,10 @@ export function ProjectView({
       </div>
 
       <article className="mx-auto max-w-[52rem] px-6 sm:px-10 py-10">
-        <p className="text-xs text-foreground-secondary">{meta(project)}</p>
-        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">{project.name}</h1>
+        <p className="font-mono text-xs text-foreground-secondary">{meta(project)}</p>
+        <h1 className="mt-2 font-mono text-2xl sm:text-3xl font-bold tracking-tight">{project.name}</h1>
         {project.summary && (
-          <p className="font-body mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
+          <p className="mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
             {project.summary}
           </p>
         )}
@@ -238,7 +238,7 @@ export function ProjectView({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-auto inline-flex items-center gap-1 text-xs underline underline-offset-2 hover:opacity-70"
+                className="ml-auto inline-flex items-center gap-1 font-mono text-xs underline underline-offset-2 hover:opacity-70"
               >
                 {displayUrl(url)}
                 <ArrowUpRight size={12} />
@@ -277,7 +277,7 @@ export function ProjectView({
               <span className="font-label block text-xs text-foreground-secondary">
                 Next
               </span>
-              <span className="mt-1 block text-base font-bold">{next.name}</span>
+              <span className="mt-1 block font-mono text-base font-bold">{next.name}</span>
             </span>
             <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
           </button>

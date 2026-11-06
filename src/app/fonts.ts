@@ -1,8 +1,8 @@
 import { DM_Mono, DM_Sans } from "next/font/google";
 
 /*
- * The site's type: DM Mono for everything (headings, labels, numbers, the
- * interface) except body text, which is DM Sans (see globals.css).
+ * The site's type: DM Sans throughout, and DM Mono for the name, project
+ * names and roles, numbers, dates and addresses (see globals.css).
  */
 const dmSans = DM_Sans({
   subsets: ["latin"],

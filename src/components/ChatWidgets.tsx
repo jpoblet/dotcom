@@ -103,13 +103,13 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                  <span className="font-heading text-base font-bold">{project.name}</span>
+                  <span className="font-mono text-base font-bold">{project.name}</span>
                   {project.meta && (
-                    <span className="text-xs text-foreground-secondary">{project.meta}</span>
+                    <span className="font-mono text-xs text-foreground-secondary">{project.meta}</span>
                   )}
                 </span>
                 {project.summary && (
-                  <span className="font-body mt-1 block truncate text-sm text-foreground-secondary">
+                  <span className="mt-1 block truncate text-sm text-foreground-secondary">
                     {project.summary}
                   </span>
                 )}
@@ -169,7 +169,7 @@ function Timeline({ roles }: { roles: TimelineEntry[] }) {
           className="animate-suggestion-in grid grid-cols-[7.5rem_1fr] gap-4 text-sm"
           style={{ animationDelay: `${index * 60}ms` }}
         >
-          <span className="font-label text-xs leading-[1.6rem] tabular-nums text-foreground-secondary">
+          <span className="font-mono text-xs leading-[1.6rem] tabular-nums text-foreground-secondary">
             {role.start} – {role.end === "Present" ? "Now" : role.end}
           </span>
           <span className="leading-[1.6rem]">
@@ -188,7 +188,7 @@ function Contact({ email, links }: { email: string; links: { label: string; href
     <div className="animate-suggestion-in space-y-3">
       <a
         href={`mailto:${email}`}
-        className="group inline-flex items-center gap-2 font-heading text-xl sm:text-2xl font-bold tracking-tight underline decoration-background-inverse/20 decoration-1 underline-offset-[0.2em] transition-[text-decoration-color] hover:decoration-foreground"
+        className="group inline-flex items-center gap-2 font-mono text-xl sm:text-2xl font-bold tracking-tight underline decoration-background-inverse/20 decoration-1 underline-offset-[0.2em] transition-[text-decoration-color] hover:decoration-foreground"
       >
         {email}
         <ArrowUpRight size={20} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

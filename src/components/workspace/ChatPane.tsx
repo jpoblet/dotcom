@@ -200,7 +200,7 @@ export default function ChatPane({
 
   const footerLinks = (
     <>
-      <a href={`mailto:${email}`} className="hover:text-foreground truncate">
+      <a href={`mailto:${email}`} className="font-mono hover:text-foreground truncate">
         {email}
       </a>
       <div className="flex items-center gap-3">
@@ -246,9 +246,9 @@ export default function ChatPane({
         }`}
       >
         {/* Two sizes, keeping the same ratio: 24/16 with room, 18/14 without. */}
-        <p className="w-fit font-heading text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
+        <p className="w-fit font-mono text-lg font-bold leading-tight @[72rem]:text-2xl">{name}</p>
         {/* Two lines, broken after the "&". */}
-        <p className="mt-0.5 w-fit text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-base">
+        <p className="mt-0.5 w-fit font-mono text-xs leading-snug text-foreground-secondary @[72rem]:mt-1 @[72rem]:text-base">
           {title.includes("& ") ? (
             <>
               {title.slice(0, title.indexOf("& ") + 1)}
@@ -272,17 +272,17 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
               {/* The name opens the page. */}
               <div ref={heroRef} className="mb-10">
                 <h1
-                  className="font-heading text-5xl sm:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-balance"
+                  className="font-mono text-5xl sm:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-balance"
                 >
                   Hi, I am {name}
                 </h1>
-                <p className="mt-3 w-fit text-base text-foreground-secondary">
+                <p className="mt-3 w-fit font-mono text-base text-foreground-secondary">
                   {title}
                 </p>
               </div>
 
               {/* The intro, in my voice; the last two items change each visit. */}
-              <p className="font-body animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
+              <p className="animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
                 I built this AI agent to answer as me. You can ask me about my work experience,
                 my most recent project, my career goals,{" "}
                 <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
@@ -409,7 +409,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
                 <span
                   id="privacy-note"
                   role="tooltip"
-                  className="font-body pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+                  className="pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
                 >
                   Questions and answers are saved so I can see what people ask and
                   improve the answers. Nothing that identifies you is kept: no name,
@@ -461,7 +461,7 @@ function Question({ message }: { message: Message }) {
   const long = message.text.length > 120;
   return (
     <div className="animate-suggestion-in">
-      <p className="flex items-center gap-2.5 text-xs text-foreground-secondary">
+      <p className="flex items-center gap-2.5 font-mono text-xs text-foreground-secondary">
         <span aria-hidden="true" className="h-px w-5 bg-foreground" />
         <span className="sr-only">You asked at</span>
         <time dateTime={new Date(message.timestamp).toISOString()}>

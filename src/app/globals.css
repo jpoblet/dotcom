@@ -6,8 +6,8 @@
 
 :root {
   --font-sans: var(--font-dm-sans);
-  --font-heading: var(--font-dm-mono);
-  --font-label: var(--font-dm-mono);
+  --font-heading: var(--font-dm-sans);
+  --font-label: var(--font-dm-sans);
 
   --polar: oklch(100% 0 0);
   /* Light theme: pure white, with a cool light grey for hover states and
@@ -48,6 +48,9 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
+  /* DM Mono, for names and titles, roles, numbers, dates and addresses. */
+  --font-mono: var(--font-dm-mono);
+
   /* Type scale: nothing below 14px; body text at 15-16px. */
   --text-xs: 0.875rem;
   --text-xs--line-height: 1.55;
@@ -82,21 +85,21 @@ html.dark {
   color-scheme: dark;
 }
 
-/* DM Mono is the default face; body text (replies, case studies, the
-   intro and other running prose) is DM Sans, marked with .font-body.
-   DM Mono has no bold: bold text takes its medium weight rather than a
-   faked bold. */
+/* DM Sans is the main face. DM Mono (.font-mono) is kept for the name and
+   its subtitle, project names and roles, numbers, dates and addresses;
+   figures set in columns (.tabular-nums) take it too. DM Mono has no bold:
+   bold mono text takes its medium weight rather than a faked bold. */
 html {
   font-synthesis-weight: none;
 }
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-label);
+  font-family: var(--font-sans);
   font-weight: 300;
 }
-:is(.font-body, .chat-message, .case-study) {
-  font-family: var(--font-sans);
+.tabular-nums {
+  font-family: var(--font-mono);
 }
 
 @keyframes fade-in {
@@ -447,9 +450,6 @@ body:has([data-workspace]) [data-site-footer] {
   font-family: var(--font-label);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-:is(h1, h3, .font-heading) {
-  font-family: var(--font-heading);
 }
 
 /* Dialogs settle in: a slight lift and scale. */
