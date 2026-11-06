@@ -118,7 +118,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
       <header className="relative px-6 sm:px-10 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:pb-16">
         <div className="relative mx-auto max-w-[90rem]">
           <div className="flex items-center justify-between gap-6">
-            <p className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
+            <p className="text-xs font-medium text-foreground-secondary">
               {position >= 0 && (
                 <>
                   Case study {String(position + 1).padStart(2, "0")} /{" "}
@@ -152,7 +152,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
             <dl className="grid grid-cols-3 gap-4 text-xs">
               {facts.map((fact) => (
                 <div key={fact.label}>
-                  <dt className="uppercase tracking-[0.14em] text-foreground-secondary">{fact.label}</dt>
+                  <dt className="font-medium text-foreground-secondary">{fact.label}</dt>
                   <dd className="mt-1.5 leading-snug">{fact.value}</dd>
                 </div>
               ))}
@@ -208,7 +208,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
               {sections.map((section, index) => (
                 <div key={section.id} className="space-y-16 sm:space-y-24">
                   <section id={section.id} className="scroll-mt-24">
-                    <h2 className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
+                    <h2 className="text-xs font-medium text-foreground-secondary">
                       <span className="tabular-nums mr-3">{String(index + 1).padStart(2, "0")}</span>
                       {section.title}
                     </h2>
@@ -274,7 +274,7 @@ export default function ProjectDetail({ project, linkMode }: Props) {
           style={{ background: next.brandBackground, color: readableOn(next.brandBackground) }}
         >
           <span className="mx-auto flex max-w-[90rem] flex-col gap-4 px-6 sm:px-10 py-16 sm:py-24">
-            <span className="text-xs uppercase tracking-[0.14em] text-foreground-secondary">
+            <span className="text-xs font-medium text-foreground-secondary">
               Next case study
             </span>
             <span className="flex items-end justify-between gap-6">

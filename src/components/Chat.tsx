@@ -568,7 +568,7 @@ export default function Chat({
                     ) : null}
                   </div>
                 </div>
-                <p className="px-1 text-[0.6875rem] leading-none text-foreground-secondary">
+                <p className="px-1 text-xs leading-none text-foreground-secondary">
                   Questions are stored anonymously.
                 </p>
               </div>

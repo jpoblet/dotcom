@@ -18,7 +18,7 @@ function ProjectCard({ project }: { project: ProjectCardData }) {
       />
       <div className="min-w-0 flex-1 p-4 space-y-1">
         {project.meta && (
-          <p className="text-[0.6875rem] text-foreground-secondary truncate">
+          <p className="text-xs text-foreground-secondary truncate">
             {project.meta}
           </p>
         )}

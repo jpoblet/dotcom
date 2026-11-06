@@ -76,7 +76,7 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
       </p>
 
       {topics.length === 0 ? (
-        <p className="mt-10 text-[0.8125rem] leading-[1.85] text-foreground-secondary">
+        <p className="mt-10 text-sm leading-[1.75] text-foreground-secondary">
           Nothing yet. Ask me something and the topics we cover will appear here, like
           notes taken during a conversation.
         </p>
@@ -87,7 +87,7 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
               key={topic.label}
               className="animate-suggestion-in grid grid-cols-[2rem_1fr] gap-x-3 border-b border-background-inverse/10 py-4"
             >
-              <span className="pt-0.5 text-[0.6875rem] tabular-nums text-foreground-secondary">
+              <span className="pt-0.5 text-xs tabular-nums text-foreground-secondary">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div>
@@ -106,7 +106,7 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
                 </div>
                 <ul className="mt-1.5 space-y-1">
                   {topic.notes.map((note) => (
-                    <li key={note} className="text-xs leading-[1.8] text-foreground-secondary">
+                    <li key={note} className="text-xs leading-[1.7] text-foreground-secondary">
                       {note}
                     </li>
                   ))}
@@ -118,12 +118,12 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
       )}
 
       <section className="mt-14">
-        <h2 className="text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+        <h2 className="text-xs font-medium text-foreground-secondary">
           Conversation summary
         </h2>
         {!summary && (
           <>
-            <p className="mt-3 text-[0.8125rem] leading-[1.85] text-foreground-secondary">
+            <p className="mt-3 text-sm leading-[1.75] text-foreground-secondary">
               A short write-up of our conversation, with links to everything we covered, to keep
               or send to yourself.
             </p>
@@ -145,7 +145,7 @@ export default function NotesPanel({ topics, messages, name, onOpenProject }: Pr
 
         {summary && (
           <div className="animate-suggestion-in mt-5">
-            <div className="chat-message rounded-sm border border-background-inverse/10 bg-background p-6 text-[0.8125rem] leading-[1.85]">
+            <div className="chat-message rounded-sm border border-background-inverse/10 bg-background p-6 text-sm leading-[1.75]">
               <ChatMarkdown text={summary} />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">

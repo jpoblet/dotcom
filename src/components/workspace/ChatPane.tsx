@@ -153,7 +153,7 @@ export default function ChatPane({
               Hi, I&apos;m {name.split(" ")[0]}.
             </h1>
             <p className="mt-2 text-lg sm:text-xl tracking-tight text-foreground-secondary">{title}.</p>
-            <p className="mt-8 max-w-md text-[0.8125rem] leading-[1.85] text-foreground-secondary">
+            <p className="mt-8 max-w-md text-sm leading-[1.75] text-foreground-secondary">
               I built this AI agent to answer as me. Ask me anything about my work experience,
               career goals, hobbies, recent projects, the music I listen to… anything, really.
             </p>
@@ -175,12 +175,12 @@ export default function ChatPane({
             )}
         </div>
         {!empty && (
-          <div className="mt-12 space-y-5 border-t border-background-inverse/10 pt-8">
+          <div className="mt-12 space-y-10 border-t border-background-inverse/10 pt-10">
             {messages.map((message) =>
               message.isUser ? (
                 <div
                   key={message.id}
-                  className="rounded-md border border-background-inverse/12 bg-background-inverse/[0.03] px-3 py-2 text-[0.8125rem] leading-[1.85] whitespace-pre-wrap"
+                  className="rounded-lg bg-background-secondary px-4 py-3 text-sm leading-[1.7] whitespace-pre-wrap"
                 >
                   {message.text}
                 </div>
@@ -188,7 +188,7 @@ export default function ChatPane({
                 <div key={message.id} className="space-y-3">
                   {message.text && (
                     <div
-                      className={`chat-message text-[0.8125rem] leading-[1.85] ${message.isError ? "text-foreground-secondary" : ""}`}
+                      className={`chat-message text-sm leading-[1.75] ${message.isError ? "text-foreground-secondary" : ""}`}
                     >
                       <ChatMarkdown text={message.text} />
                     </div>
@@ -225,12 +225,14 @@ export default function ChatPane({
 
       {/* Input */}
       <div className="mx-auto w-full max-w-[calc(42rem+2rem)] shrink-0 px-4 pb-3">
+        {/* One clean field: hairline border, the send button inline. */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             submit(input);
           }}
-          className="rounded-lg border border-background-inverse/15 bg-background focus-within:border-background-inverse/40 transition-colors"
+          onClick={() => inputRef.current?.focus()}
+          className="flex items-end gap-3 rounded-xl border border-background-inverse/15 bg-background py-2.5 pl-4 pr-2.5 transition-[border-color,box-shadow] duration-200 cursor-text focus-within:border-background-inverse/45 focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--color-background-inverse)_6%,transparent)]"
         >
           <textarea
             ref={inputRef}
@@ -247,27 +249,25 @@ export default function ChatPane({
                 submit(input);
               }
             }}
-            rows={2}
+            rows={1}
             aria-label="Ask me anything"
             placeholder="Ask me anything…"
-            className="block w-full resize-none bg-transparent px-3 pt-2.5 text-base sm:text-[0.8125rem] sm:leading-[1.7] placeholder:text-foreground-secondary focus:outline-none"
+            className="block min-h-8 flex-1 resize-none bg-transparent py-1 text-base sm:text-sm leading-[1.6] placeholder:text-foreground-secondary focus:outline-none"
           />
-          <div className="flex items-center justify-between gap-3 px-3 pb-2">
-            <span className="text-[0.6875rem] text-foreground-secondary">
-              Questions are stored anonymously.
-            </span>
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              aria-label="Send"
-              className="flex size-7 items-center justify-center rounded-md bg-background-inverse text-background disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed transition-opacity"
-            >
-              <ArrowUp size={14} />
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={!input.trim() || isLoading}
+            aria-label="Send"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-background-inverse text-background transition-colors cursor-pointer disabled:cursor-default disabled:bg-background-inverse/10 disabled:text-foreground-secondary"
+          >
+            <ArrowUp size={16} strokeWidth={2.25} />
+          </button>
         </form>
+        <p className="mt-2 px-1 text-xs text-foreground-secondary">
+          Questions are stored anonymously.
+        </p>
 
-        <div className="mt-3 flex items-center justify-between gap-3 text-[0.6875rem] text-foreground-secondary">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-foreground-secondary">
           <a href={`mailto:${email}`} className="hover:text-foreground truncate">
             {email}
           </a>

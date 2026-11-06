@@ -78,7 +78,7 @@ export default function ConfirmDialog({ open, title, children, confirmLabel, onC
         <h2 id="confirm-title" className="text-[0.9375rem] font-medium">
           {title}
         </h2>
-        <div id="confirm-body" className="mt-2 text-[0.8125rem] leading-[1.75] text-foreground-secondary">
+        <div id="confirm-body" className="mt-2 text-sm leading-[1.75] text-foreground-secondary">
           {children}
         </div>
         <div className="mt-6 flex justify-end gap-2">

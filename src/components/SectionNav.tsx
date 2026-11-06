@@ -31,7 +31,7 @@ export default function SectionNav({ sections }: Props) {
 
   return (
     <nav aria-label="Sections" className="sticky top-24 hidden sm:block">
-      <ol className="space-y-2 text-xs uppercase tracking-[0.12em]">
+      <ol className="space-y-2 text-xs font-medium ">
         {sections.map((section, index) => (
           <li key={section.id}>
             <a

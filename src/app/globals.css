@@ -47,6 +47,14 @@
 /* Semantic tokens. Utilities reference these variables, so the .dark
    override below swaps every colour at once. */
 @theme {
+  /* Type scale: nothing below 14px; body text at 15-16px. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.55;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.65;
+  --text-base: 1rem;
+  --text-base--line-height: 1.7;
+
   --color-background: var(--paper);
   --color-background-secondary: var(--paper-200);
   --color-background-inverse: var(--boulder-950);
@@ -403,20 +411,21 @@ body:has([data-workspace]) [data-site-footer] {
 }
 .chat-message :is(h2, h3) {
   margin-top: 1.5rem;
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 0.875rem;
   color: var(--color-foreground-secondary);
 }
 
 /* Workspace type: smaller body text with generous line spacing. */
-[data-workspace] .chat-message,
+[data-workspace] .chat-message {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
 [data-workspace] .case-study {
-  font-size: 0.8125rem;
-  line-height: 1.85;
+  font-size: 1rem;
+  line-height: 1.75;
 }
 [data-workspace] :is(.chat-message, .case-study) > * + * {
-  margin-top: 1rem;
+  margin-top: 1.1em;
 }
 [data-workspace] :is(.chat-message, .case-study) li + li {
   margin-top: 0.4rem;

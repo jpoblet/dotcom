@@ -47,19 +47,19 @@ export default function FontSwitcher() {
   };
 
   return (
-    <div ref={ref} className="fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[70]">
+    <div ref={ref} className="fixed right-3 top-[calc(3.75rem+env(safe-area-inset-top))] lg:top-auto lg:bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[70]">
       {open && (
         <div
           role="menu"
-          className="animate-suggestion-in absolute bottom-full right-0 mb-2 w-[20rem] max-h-[min(70vh,40rem)] overflow-y-auto rounded-lg border border-background-inverse/15 bg-background p-1.5 shadow-[0_20px_50px_-12px_rgb(0_0_0/0.25)]"
+          className="animate-suggestion-in absolute top-full mt-2 lg:top-auto lg:bottom-full lg:mt-0 lg:mb-2 right-0 w-[20rem] max-h-[min(70vh,40rem)] overflow-y-auto rounded-lg border border-background-inverse/15 bg-background p-1.5 shadow-[0_20px_50px_-12px_rgb(0_0_0/0.25)]"
         >
-          <p className="px-2.5 pt-1.5 pb-2 text-[0.6875rem] text-foreground-secondary">
+          <p className="px-2.5 pt-1.5 pb-2 text-xs text-foreground-secondary">
             Font pairing (only you see this)
           </p>
           {FONT_PAIRINGS.map((pairing, index) => (
             <div key={pairing.id}>
             {(index === 5 || index === 15 || index === 25 || pairing.id === "original") && (
-              <p className="mx-2.5 mt-2 border-t border-background-inverse/10 pt-3 pb-1 text-[0.6875rem] text-foreground-secondary">
+              <p className="mx-2.5 mt-2 border-t border-background-inverse/10 pt-3 pb-1 text-xs text-foreground-secondary">
                 {pairing.id === "original"
                   ? "Baseline"
                   : { 5: "Second round", 15: "Third round", 25: "Fourth round" }[index]}
@@ -76,10 +76,10 @@ export default function FontSwitcher() {
               }`}
             >
               <span className="flex items-baseline justify-between gap-2">
-                <span className="text-[0.8125rem] font-medium">{pairing.name}</span>
-                <span className="text-[0.6875rem] text-foreground-secondary">{pairing.faces}</span>
+                <span className="text-sm font-medium">{pairing.name}</span>
+                <span className="text-xs text-foreground-secondary">{pairing.faces}</span>
               </span>
-              <span className="mt-0.5 block text-[0.6875rem] leading-[1.6] text-foreground-secondary">
+              <span className="mt-0.5 block text-xs leading-[1.6] text-foreground-secondary">
                 {pairing.note}
               </span>
             </button>

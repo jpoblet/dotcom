@@ -32,7 +32,7 @@ export function WorkOverview({
 }) {
   return (
     <div className="px-6 py-8">
-      <h2 className="text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+      <h2 className="text-xs font-medium text-foreground-secondary">
         Case studies
       </h2>
       <ul className="mt-2">
@@ -49,8 +49,8 @@ export function WorkOverview({
                 className="h-6 w-full text-foreground/70 transition-colors group-hover:text-foreground"
               />
               <span className="min-w-0">
-                <span className="block truncate text-[0.8125rem] font-medium">{project.name}</span>
-                <span className="mt-0.5 block truncate text-[0.6875rem] text-foreground-secondary">
+                <span className="block truncate text-sm font-medium">{project.name}</span>
+                <span className="mt-0.5 block truncate text-xs text-foreground-secondary">
                   {meta(project)}
                 </span>
               </span>
@@ -65,7 +65,7 @@ export function WorkOverview({
 
       {websites.length > 0 && (
         <>
-          <h2 className="mt-10 text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+          <h2 className="mt-10 text-xs font-medium text-foreground-secondary">
             Websites
           </h2>
           <ul className="mt-2">
@@ -78,8 +78,8 @@ export function WorkOverview({
                     className="h-5 w-full text-foreground/60 transition-colors group-hover:text-foreground"
                   />
                   <span className="min-w-0">
-                    <span className="block truncate text-[0.8125rem]">{site.name}</span>
-                    <span className="mt-0.5 block truncate text-[0.6875rem] text-foreground-secondary">
+                    <span className="block truncate text-sm">{site.name}</span>
+                    <span className="mt-0.5 block truncate text-xs text-foreground-secondary">
                       {site.year}
                     </span>
                   </span>
@@ -175,7 +175,7 @@ export function ProjectView({
         <p className="text-xs text-foreground-secondary">{meta(project)}</p>
         <h1 className="mt-2 text-2xl sm:text-3xl font-medium tracking-tight">{project.name}</h1>
         {project.summary && (
-          <p className="mt-4 max-w-2xl text-[0.8125rem] leading-[1.85] text-foreground-secondary">
+          <p className="mt-4 max-w-2xl text-sm leading-[1.75] text-foreground-secondary">
             {project.summary}
           </p>
         )}
@@ -198,7 +198,7 @@ export function ProjectView({
         {(project.tags.length > 0 || url) && (
           <div className="mt-8 flex flex-wrap items-center gap-1.5">
             {project.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-background-inverse/6 px-3 py-1.5 text-[0.6875rem]">
+              <span key={tag} className="rounded-full bg-background-inverse/6 px-3 py-1.5 text-xs">
                 {tag}
               </span>
             ))}
@@ -221,7 +221,7 @@ export function ProjectView({
             <div key={part.title || i} className="space-y-12">
               <section>
                 {part.title && (
-                  <h2 className="text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+                  <h2 className="text-xs font-medium text-foreground-secondary">
                     {part.title}
                   </h2>
                 )}
@@ -243,7 +243,7 @@ export function ProjectView({
             className="group mt-16 flex w-full items-center justify-between gap-4 border-t border-background-inverse/10 pt-6 text-left cursor-pointer"
           >
             <span>
-              <span className="block text-[0.6875rem] uppercase tracking-[0.14em] text-foreground-secondary">
+              <span className="block text-xs font-medium text-foreground-secondary">
                 Next
               </span>
               <span className="mt-1 block text-base font-medium">{next.name}</span>
