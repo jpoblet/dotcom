@@ -77,9 +77,9 @@ function Peek({ project, anchor }: { project: ProjectCardData | null; anchor: HT
 }
 
 /**
- * Projects as a plain list, like a contents page: the mark, the name, what
- * I did and when, one line on what it is. Nothing boxed. Resting on a row
- * floats its screenshot beside the pointer.
+ * Projects as a list, like a contents page: the mark, the name, what I
+ * did and when, one line on what it is. Each row sits on a faint grey
+ * ground that darkens on hover, and floats its screenshot by the pointer.
  */
 function ProjectList({ projects }: { projects: ProjectCardData[] }) {
   const workspace = useWorkspace();
@@ -93,7 +93,7 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
 
   return (
     <>
-      <ul ref={setList} className="w-full">
+      <ul ref={setList} className="w-full space-y-1.5">
         {projects.map((project, index) => {
           const row = (
             <>
@@ -118,7 +118,8 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
               </span>
             </>
           );
-          const className = `group relative flex w-full items-start gap-4 py-3.5 text-left transition-[translate] duration-500 ${EASE} hover:translate-x-1`;
+          // The whole row is the link: a faint grey ground that darkens on hover.
+          const className = "group relative flex w-full items-start gap-4 rounded-md bg-background-inverse/[0.04] px-4 py-3.5 text-left transition-colors duration-300 hover:bg-background-inverse/[0.09]";
           const handlers = {
             onPointerEnter: () => canHover && setHovered(project),
             onPointerLeave: () => setHovered(null),

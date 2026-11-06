@@ -153,9 +153,9 @@ export default function ChatPane({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      {/* Header: no background of its own. It floats over the chat, which
-          scrolls up behind it and fades out under it. The controls move
-          into the panel's header while it's open (desktop). */}
+      {/* Header: transparent, floating over the chat, which scrolls right up
+          to the top edge behind it. The controls move into the panel's
+          header while it's open (desktop). */}
       <div className="absolute inset-x-0 top-0 z-20 flex h-12 items-center justify-between gap-3 px-4">
         <Logo className="h-6 fill-current shrink-0" />
         <div className="flex items-center gap-1">{headerControls}</div>
@@ -169,7 +169,18 @@ export default function ChatPane({
         } ${heroHidden && !panelOpen ? "animate-name-pin" : ""}`}
       >
         <p className="vt-name w-fit font-heading text-base font-bold leading-tight">{name}</p>
-        <p className="vt-title mt-0.5 w-fit text-xs text-foreground-secondary">{title}</p>
+        {/* Two lines, broken after the "&". */}
+        <p className="vt-title mt-0.5 w-fit text-xs leading-snug text-foreground-secondary">
+          {title.includes("& ") ? (
+            <>
+              {title.slice(0, title.indexOf("& ") + 1)}
+              <br />
+              {title.slice(title.indexOf("& ") + 2)}
+            </>
+          ) : (
+            title
+          )}
+        </p>
       </div>
 
       <div className="flex min-h-0 flex-1">
@@ -177,14 +188,7 @@ export default function ChatPane({
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={scrollRef}
-            // Content fades out under the header, and fully clears the
-            // pinned name when it's showing.
-            style={
-              (heroHidden || panelOpen
-                ? { "--clear": "5.75rem", "--fade": "7rem" }
-                : { "--clear": "2.5rem", "--fade": "3.75rem" }) as React.CSSProperties
-            }
-            className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 [mask-image:linear-gradient(to_bottom,transparent_0,transparent_var(--clear),black_var(--fade))]"
+className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8"
           >
             <div className="mx-auto max-w-[42rem]">
               {/* The name opens the page. While the panel is open it has shrunk

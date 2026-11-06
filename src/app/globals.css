@@ -499,14 +499,14 @@ body:has([data-workspace]) [data-site-footer] {
 /* The panel waits just past the right edge while closed, so its own
    morph slides it in and out. */
 
-/* The small name arriving in the corner as the big one scrolls away: it
-   shrinks into place from a larger size. */
+/* The small name arriving in the corner as the big one scrolls away: a
+   slow fade, drifting up into place. */
 @keyframes name-pin {
-  from { opacity: 0; transform: translateY(10px) scale(1.6); filter: blur(3px); }
-  to { opacity: 1; transform: none; filter: none; }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 .animate-name-pin {
-  animation: name-pin 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: name-pin 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-name-pin { animation: none; }
