@@ -42,7 +42,7 @@ const ASIDES = [
   "running workshops with the Maasai",
   "a summer at a camp in Hawai'i",
   "kayaking with wild dolphins",
-  "van trips with Chiara, Teo and Ringo",
+  "van trips with my family and our dog",
   "winning the Spanish championships at 13",
   "playing Aussie rules for Spain",
   "why I support the Carlton Blues",
@@ -283,11 +283,12 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
 
               {/* The intro, in my voice; the last two items change each visit. */}
               <p className="animate-suggestion-in max-w-[36rem] text-sm leading-[1.75] text-foreground-secondary">
-                I built this AI agent to answer as me. My work, my projects, my career goals,{" "}
+                I built this AI agent to answer as me. You can ask me about my work experience,
+                my most recent project, my career goals,{" "}
                 <span className={`transition-opacity duration-500 ${asides ? "opacity-100" : "opacity-0"}`}>
                   {(asides ?? ASIDES.slice(0, 2)).join(", ")}
-                </span>
-                : anything, really.
+                </span>{" "}
+                – anything, really.
               </p>
               {empty && starters.length > 0 && (
                 <div ref={suggestionsRef} className="mt-6">
