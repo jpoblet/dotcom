@@ -352,3 +352,9 @@ body {
   padding-left: 1rem;
   color: var(--color-foreground-secondary);
 }
+
+/* Case studies: each section opens with a larger lead paragraph. */
+.case-study-lead > p:first-child {
+  font-size: clamp(1.0625rem, 1.6vw, 1.3125rem);
+  line-height: 1.55;
+}
