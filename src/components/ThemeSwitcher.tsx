@@ -14,7 +14,8 @@ const OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 /**
  * Light / dark / system switcher. The inline script in layout.tsx applies
  * the saved theme before first paint; this keeps it in sync afterwards.
- * The menu opens upwards, since the switcher lives in the footer.
+ * The menu opens upwards (the switcher lives in the footer), aligned to the
+ * button's right edge so it stays on screen, and above the chat input.
  */
 export default function ThemeSwitcher() {
   const [theme, setTheme] = useState<Theme | null>(null);
@@ -86,7 +87,7 @@ export default function ThemeSwitcher() {
       {isOpen && (
         <div
           role="menu"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
+          className="absolute bottom-full right-0 z-50 mb-3 bg-background border border-background-inverse/10 rounded-lg shadow-lg py-2 min-w-[140px] animate-fade-in"
         >
           {OPTIONS.map(({ value, label, icon: Icon }) => (
             <button

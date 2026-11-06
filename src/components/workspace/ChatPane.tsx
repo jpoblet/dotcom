@@ -213,12 +213,8 @@ export default function ChatPane({
             className="group/link inline-flex items-center hover:text-foreground"
           >
             {link.label}
-            {/* "Opens elsewhere", shown on hover. */}
-            <ArrowUpRight
-              size={13}
-              aria-hidden="true"
-              className="-ml-0.5 w-0 opacity-0 transition-[width,opacity,margin,translate] duration-200 group-hover/link:ml-0.5 group-hover/link:w-[13px] group-hover/link:opacity-100 group-focus-visible/link:ml-0.5 group-focus-visible/link:w-[13px] group-focus-visible/link:opacity-100"
-            />
+            {/* Opens elsewhere. */}
+            <ArrowUpRight size={13} aria-hidden="true" className="ml-0.5 transition-transform duration-200 group-hover/link:-translate-y-px group-hover/link:translate-x-px" />
           </a>
         ))}
         <ThemeSwitcher />
