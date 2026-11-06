@@ -17,7 +17,7 @@ interface Props {
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
-  facts: { label: string; value: string }[];
+  tagline: string;
   messages: Message[];
   isLoading: boolean;
   send: (text: string, source?: QuestionSource) => void;
@@ -72,7 +72,7 @@ export default function ChatPane({
   email,
   links,
   starterQuestions,
-  facts,
+  tagline,
   messages,
   isLoading,
   send,
@@ -209,7 +209,7 @@ export default function ChatPane({
           >
             {/* Name set like the intro's "Hi, I'm Jordi.": heading face, medium, ink. */}
             <span className="font-heading font-bold text-foreground">{name}</span>
-            {/* Same `title` as the intro: both come from content/profile.yaml. */}
+            {/* Same `title` as the tagline: both come from content/profile.yaml. */}
             <span className="hidden sm:inline"> · {title}</span>
           </span>
         </div>
@@ -240,7 +240,7 @@ export default function ChatPane({
         {/* The intro opens the conversation and stays at the top of it. */}
         <div ref={introRef} className={`relative mx-auto max-w-[60rem] animate-suggestion-in ${empty ? "pt-[5vh] lg:pt-[8vh]" : "pt-6"}`}>
           <div className="relative">
-            {/* The name on the left, the facts stacked beside it on the right. */}
+            {/* The name on the left, the tagline beside it on the right. */}
             <div className="grid gap-8 sm:grid-cols-[1fr_auto] sm:items-start sm:gap-16">
               <div>
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.02]">
@@ -255,14 +255,9 @@ export default function ChatPane({
                 </p>
               </div>
               {/* Secondary to the name: small, muted, top-aligned with it. */}
-              <dl className="space-y-3 sm:pt-2 sm:min-w-[13rem]">
-                {[{ label: "What I do", value: title }, ...facts].map((fact) => (
-                  <div key={fact.label}>
-                    <dt className="font-label text-xs text-foreground-secondary">{fact.label}</dt>
-                    <dd className="mt-0.5 text-sm leading-snug text-foreground-secondary">{fact.value}</dd>
-                  </div>
-                ))}
-              </dl>
+              <p className="text-sm leading-[1.6] text-foreground-secondary sm:max-w-[16rem] sm:pt-2">
+                {tagline}
+              </p>
             </div>
 
             {/* No room to lift the input (small screens): suggestions here. */}
@@ -356,9 +351,8 @@ export default function ChatPane({
       <div
         ref={composerRef}
         style={{ transform: raise ? `translateY(-${raise}px)` : undefined }}
-        className={`relative z-10 mx-auto w-full shrink-0 px-4 ${
-          empty ? "max-w-[calc(60rem+2rem)]" : "max-w-[calc(42rem+2rem)]"
-        } ${placed ? "transition-[transform,max-width] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
+        className={`relative z-10 mx-auto w-full max-w-[calc(60rem+2rem)] shrink-0 px-4 ${
+          placed ? "transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
       >
         {/* One clean field: hairline border, the send button inline. */}
         <form
@@ -402,9 +396,11 @@ export default function ChatPane({
             <span
               id="privacy-note"
               role="tooltip"
-              className="pointer-events-none absolute right-0 bottom-full mb-2 translate-y-1 whitespace-nowrap rounded-md bg-background-inverse px-2.5 py-1.5 text-xs text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
+              className="pointer-events-none absolute right-0 bottom-full mb-2 w-72 translate-y-1 rounded-md bg-background-inverse px-3 py-2.5 text-xs leading-[1.6] text-background opacity-0 transition-[opacity,translate] duration-200 group-hover/info:translate-y-0 group-hover/info:opacity-100 group-focus-within/info:translate-y-0 group-focus-within/info:opacity-100"
             >
-              Questions are stored anonymously.
+              Questions and answers are saved so I can see what people ask and
+              improve the answers. Nothing that identifies you is kept: no name,
+              no IP address, only a rough location (country and city).
             </span>
           </span>
           <button
@@ -488,8 +484,7 @@ function Question({ message }: { message: Message }) {
     <div className="animate-suggestion-in">
       <p className="flex items-center gap-2.5 text-xs text-foreground-secondary">
         <span aria-hidden="true" className="h-px w-5 bg-foreground" />
-        You
-        <span aria-hidden="true">·</span>
+        <span className="sr-only">You asked at</span>
         <time dateTime={new Date(message.timestamp).toISOString()}>
           {timeFormat.format(new Date(message.timestamp))}
         </time>

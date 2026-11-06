@@ -23,8 +23,8 @@ interface Props {
   email: string;
   links: { label: string; href: string }[];
   starterQuestions: string[];
-  /** Short facts shown under the intro ("Based in", "Now", "Building"). */
-  facts: { label: string; value: string }[];
+  /** One line beside the name: what I do, where, and what now. */
+  tagline: string;
   caseStudies: Project[];
   websites: Project[];
 }
@@ -40,7 +40,7 @@ export default function Workspace({
   email,
   links,
   starterQuestions,
-  facts,
+  tagline,
   caseStudies,
   websites,
 }: Props) {
@@ -193,7 +193,7 @@ export default function Workspace({
             email={email}
             links={links}
             starterQuestions={starterQuestions}
-            facts={facts}
+            tagline={tagline}
             messages={session.messages}
             isLoading={session.isLoading}
             send={session.send}

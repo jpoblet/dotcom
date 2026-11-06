@@ -10,6 +10,6 @@ This wasn't just a personal adventure — it also shaped my professional journey
 
 Beyond Africa, I've been fortunate to explore a wide range of cultures and terrains: Lanzarote in the Canary Islands, Vietnam, Cambodia, South Korea, Bali, New Zealand, Eastern Australia, Tasmania, Mexico, India, and the Maldives.
 
-More recently, together with my wife and our Weimaraner, Ringo, we've been traveling in our camper van. It's become our little weekend escape — taking us across Spain, Italy, France, Portugal, Slovenia, Croatia, and all the way to Sardinia and Sicily. It's how we recharge and reconnect with nature, people, and each other.
+More recently, together with my wife Chiara and our Weimaraner, Ringo, we've been traveling in our camper van. Since April 2026 our son Teo comes along too: we all travel together. It's become our little weekend escape — taking us across Spain, Italy, France, Portugal, Slovenia, Croatia, and all the way to Sardinia and Sicily. It's how we recharge and reconnect with nature, people, and each other.
 
 The list of future destinations continues to grow. At the top: Iceland, Patagonia, the Altiplano of Bolivia and Peru — and hopefully, another chapter in Africa, this time exploring its western regions.
