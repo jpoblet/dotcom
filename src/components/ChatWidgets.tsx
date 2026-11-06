@@ -218,7 +218,8 @@ export default function ChatWidgets({ widgets }: { widgets: Widget[] }) {
   const projects = widgets.flatMap((w) => (w.kind === "project" ? [w.project] : []));
   const others = widgets.filter((w) => w.kind !== "project");
   return (
-    <div className="mt-2 space-y-6">
+    // Room above and below, so the list stands apart from the text around it.
+    <div className="py-5 space-y-6">
       {projects.length > 0 && <ProjectList projects={projects} />}
       {others.map((widget, index) => {
         switch (widget.kind) {

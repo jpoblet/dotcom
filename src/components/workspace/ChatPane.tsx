@@ -439,6 +439,18 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-20 pb-8 lg:pt
 }
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
+const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+
+/** "Today", "Yesterday", "3 days ago" (up to a week), then the date. */
+function dayLabel(timestamp: Date): string {
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const then = new Date(timestamp);
+  const days = Math.round((startOfDay(new Date()) - startOfDay(then)) / 86_400_000);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return dateFormat.format(then);
+}
 
 /**
  * The visitor's question, set as the headline of its exchange: a short
@@ -453,7 +465,7 @@ function Question({ message }: { message: Message }) {
         <span aria-hidden="true" className="h-px w-5 bg-foreground" />
         <span className="sr-only">You asked at</span>
         <time dateTime={new Date(message.timestamp).toISOString()}>
-          {timeFormat.format(new Date(message.timestamp))}
+          {dayLabel(message.timestamp)} · {timeFormat.format(new Date(message.timestamp))}
         </time>
       </p>
       <p
