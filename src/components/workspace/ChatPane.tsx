@@ -189,14 +189,15 @@ export default function ChatPane({
       </div>
 
       <div className="flex min-h-0 flex-1">
-        {/* Jordi's card. Desktop only; folds away while the panel is open. */}
+        {/* Jordi's card, on the same ground as the chat: no fill, no rule.
+            Desktop only; folds away while the panel is open. */}
         <aside
           aria-label={`About ${name}`}
-          className={`hidden shrink-0 overflow-hidden border-background-inverse/10 bg-background-secondary/60 transition-[width,opacity] duration-[520ms] lg:block ${EASE} ${
-            panelOpen ? "w-0 border-r-0 opacity-0" : "w-[clamp(20rem,38%,34rem)] border-r opacity-100"
+          className={`hidden shrink-0 overflow-hidden transition-[width,opacity] duration-[520ms] lg:block ${EASE} ${
+            panelOpen ? "w-0 opacity-0" : "w-[clamp(20rem,38%,34rem)] opacity-100"
           }`}
         >
-          <div className="flex h-full w-[clamp(20rem,38vw,34rem)] flex-col gap-8 overflow-y-auto px-10 py-12">
+          <div className="flex h-full w-[clamp(20rem,38vw,34rem)] flex-col gap-8 overflow-y-auto px-10 pt-[2.375rem] pb-8">
             <p className="flex items-center gap-2 text-sm">
               <Online />
               Online · answers instantly
