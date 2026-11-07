@@ -175,7 +175,8 @@ export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) 
       {/* Once written: the summary, folding like the talking points, with
           its actions above the write-up. */}
       {summary && (
-        <section className="mt-6">
+        // A rule between the talking points and the summary.
+        <section className="mt-5 border-t border-background-inverse/10 pt-5">
         <div className="animate-suggestion-in">
           <SectionToggle label="Summary" open={summaryOpen} onToggle={() => setSummaryOpen(!summaryOpen)} />
           {summaryOpen && (
