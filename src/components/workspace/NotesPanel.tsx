@@ -109,18 +109,19 @@ export default function NotesPanel({ topics, messages, name, onJumpTo }: Props) 
 
   return (
     <div className="px-6 py-8">
-      {/* Before a summary: the button and what it does, first. */}
+      {/* Before a summary: a grey banner with what it is and the button. */}
       {!summary && (
-        <section>
+        <section className="rounded-lg bg-background-secondary p-5">
+          <h3 className="text-base font-bold text-foreground">Get a summary</h3>
+          <p className="mt-1.5 max-w-md text-sm leading-[1.6] text-foreground-secondary">{about}</p>
           <button
             type="button"
             onClick={writeSummary}
             disabled={!hasConversation || writing}
-            className="inline-flex items-center gap-2 rounded-full border border-background-inverse/15 px-4 py-2 text-xs transition-colors hover:bg-background-secondary cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-background-inverse px-4 py-2 text-xs text-background transition-opacity hover:opacity-85 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {writing ? <span className="shimmer-text">Writing your summary…</span> : "Create summary"}
+            {writing ? "Writing your summary…" : "Create summary"}
           </button>
-          <p className="mt-3 max-w-md text-xs leading-[1.6] text-foreground-secondary">{about}</p>
           {error && <p className="mt-3 text-xs text-foreground-secondary">{error}</p>}
         </section>
       )}

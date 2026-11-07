@@ -63,7 +63,25 @@ function Peek({ project, anchor }: { project: ProjectCardData | null; anchor: HT
         style={{ background: shown?.brandBackground || shown?.accent }}
       >
         {shown?.thumbnail ? (
-          <Image src={shown.thumbnail} alt="" width={448} height={280} className="block aspect-[16/10] w-full object-cover" />
+          <>
+            <Image
+              src={shown.thumbnail}
+              alt=""
+              width={448}
+              height={280}
+              className={`aspect-[16/10] w-full object-cover ${shown.thumbnailDark ? "block dark:hidden" : "block"}`}
+            />
+            {/* The dark capture, when the site has one, to match the theme. */}
+            {shown.thumbnailDark && (
+              <Image
+                src={shown.thumbnailDark}
+                alt=""
+                width={448}
+                height={280}
+                className="hidden aspect-[16/10] w-full object-cover dark:block"
+              />
+            )}
+          </>
         ) : (
           shown && (
             <div className="flex aspect-[16/10] items-center justify-center text-white/90">
