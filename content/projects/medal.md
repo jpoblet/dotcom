@@ -28,4 +28,10 @@ draft: true
 
 ## Status
 
-I started Medal in January 2024 and parked it in December 2024. It's still live. In the future it may merge with AthleteID and evolve together with it.
+I started Medal in January 2024 and parked it in December 2024, after a year of looking for product-market fit. It's still live.
+
+## Why I parked it
+
+It was the wrong time for a new social network. People understood the value of the product, but they couldn't see themselves using it: they already have enough social platforms. These days people are more interested in pure entertainment content than in social posts from people they know. The context has changed.
+
+I still see potential in it. In the future it may merge with AthleteID and evolve together with it, and I'm keeping that idea in the back of my mind.

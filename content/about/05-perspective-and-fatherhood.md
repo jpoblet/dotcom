@@ -6,4 +6,12 @@ On 20 November 2025, after a few months of a strange pain in my lower abdomen, I
 
 Since then I've been through two surgeries and a course of chemotherapy that started in February 2026 and finishes in November 2026. What I got from it is perspective on what really matters in life. As I come out of the tunnel, I can see how important that change of mentality was, and how I managed to turn it into a factory of resilience. It's given me a lot of strength to take on whatever comes next with maximum energy and motivation.
 
-In the middle of all this, our first child, Teo, was born in April 2026. When I was diagnosed, Chiara was almost five months pregnant. Becoming a dad has changed my focus in life. My priorities are completely different now, and I'm loving every bit of being a dad.
+## Work during treatment
+
+I've been on medical leave from Veriff since 22 November 2025. I'm following my doctors' advice on when to go back, and I'll return to my role as soon as they see me fit. In the meantime I'm always open to hearing about new collaborations, projects and opportunities to keep growing in my career.
+
+In the middle of all this, our first child, Teo, was born in April 2026. When I was diagnosed, Chiara was almost five months pregnant. His birth was the biggest boost of energy I had in the whole process. At some point I realised I wasn't doing it for me any more: I was fighting so he'd have a dad to grow up with. Becoming a dad has changed my focus in life. My priorities are completely different now, and I'm loving every bit of being a dad.
+
+## The book
+
+After the diagnosis I started writing a book about the experience. It began as my own reflections on the things I was discovering, both physically and emotionally: how to accept help, how to deal with pain and the effects of the treatment, how to ride the emotional ups and downs, and how to keep going despite everything else. I'm still writing it. When it's finished I'll share it first with my closest friends, and then make it publicly available.
