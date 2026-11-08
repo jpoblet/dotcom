@@ -95,10 +95,21 @@ the live domains only, plus these events: `Chat question` (with its
 
 ## Screenshots and device frames
 
-Project screenshots live in `public/images/projects/` (and `gallery/`). The
-browser and phone frames around them take a tint of each screenshot's
-background colour, read from `content/screen-colors.json`. After adding or
-replacing screenshots, regenerate it:
+Project screenshots live in `public/images/projects/` (and `gallery/`),
+shown in wireframe browser and phone frames. A screenshot `x.jpg` can have a
+dark-mode twin, `x-dark.jpg`, captured from the same spot of the same page;
+when this site is in dark mode the case studies show the twin instead.
+
+Sites with a dark mode of their own (AthleteID, What The Flag, Inverse) are
+captured in both themes by a script, listed in `scripts/capture-screens.mjs`.
+It drives your installed Chrome; run it when those sites change:
+
+```sh
+npm run capture-screens
+```
+
+Each screenshot's background colour is kept in `content/screen-colors.json`.
+After adding or replacing screenshots, regenerate it:
 
 ```sh
 npm run screen-colors

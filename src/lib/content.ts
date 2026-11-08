@@ -76,6 +76,11 @@ export interface Project {
   mobileGallery: string[];
   /** Background colour of each screenshot (see npm run screen-colors). */
   screenColors: Record<string, string>;
+  /**
+   * Dark-mode captures, by the light screenshot they replace: "x.jpg" pairs
+   * with "x-dark.jpg" when that file exists (see npm run capture-screens).
+   */
+  darkScreens: Record<string, string>;
   /** Cover colour (CSS colour) used while there is no thumbnail. */
   accent: string;
   /** Brand logo and the background it sits on, for the projects page. */
@@ -267,6 +272,12 @@ function readProjects(): Project[] {
       screenColors: Object.fromEntries(
         images.filter((src) => allColors[src]).map((src) => [src, allColors[src]]),
       ),
+      darkScreens: Object.fromEntries(
+        images.flatMap((src) => {
+          const dark = src.replace(/(\.\w+)$/, "-dark$1");
+          return fs.existsSync(path.join(process.cwd(), "public", dark)) ? [[src, dark]] : [];
+        }),
+      ),
       slug: file.replace(/\.md$/, ""),
       name: str(data.name),
       type: (PROJECT_TYPES.some((t) => t.type === data.type)
@@ -322,6 +333,7 @@ export function toProjectCard(project: Project): ProjectCardData {
     summary: project.summary,
     meta: projectMeta(project),
     thumbnail: project.thumbnail,
+    thumbnailDark: project.darkScreens[project.thumbnail],
     accent: project.accent,
     logo: project.logo,
     logoMark: project.logoMark,

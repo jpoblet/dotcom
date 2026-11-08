@@ -11,6 +11,8 @@ export interface ProjectCardData {
   /** "Company · Role · Year", whichever parts exist. */
   meta: string;
   thumbnail: string;
+  /** The same screen in dark mode, when the site has one. */
+  thumbnailDark?: string;
   /** Cover colour used while there is no thumbnail. */
   accent: string;
   /** Brand logo and its background (empty logo: use the cover). */

@@ -8,6 +8,8 @@ interface Props {
   mobileImage?: string;
   /** Background colour of each screenshot, for tinted frames. */
   colors?: Record<string, string>;
+  /** Dark-mode captures, by light screenshot. */
+  dark?: Record<string, string>;
 }
 
 /**
@@ -16,11 +18,12 @@ interface Props {
  * of the site, to show it's responsive. Sizes are relative, so the
  * composition scales down on phones.
  */
-export default function DeviceShowcase({ name, url, desktopImage, mobileImage, colors = {} }: Props) {
+export default function DeviceShowcase({ name, url, desktopImage, mobileImage, colors = {}, dark = {} }: Props) {
   return (
     <div className="relative aspect-[25/15]">
       <BrowserFrame
         src={desktopImage}
+        darkSrc={dark[desktopImage]}
         tint={colors[desktopImage]}
         url={url}
         alt={`${name} website on a desktop browser`}
@@ -31,6 +34,7 @@ export default function DeviceShowcase({ name, url, desktopImage, mobileImage, c
       {mobileImage && (
         <PhoneFrame
           src={mobileImage}
+          darkSrc={dark[mobileImage]}
           tint={colors[mobileImage]}
           url={url}
           alt={`${name} website on a phone`}
