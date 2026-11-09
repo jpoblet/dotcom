@@ -29,6 +29,8 @@ export interface TimelineEntry {
   role: string;
   start: string;
   end: string;
+  /** The company's website, when there is one. */
+  website?: string;
 }
 
 export type Widget =

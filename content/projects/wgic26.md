@@ -23,5 +23,13 @@ brand_background: "#2B4739"
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://wgic26.vercel.app"
 # While true, the case-study page isn't built and the AI doesn't link to it.
-draft: true
+draft: false
 ---
+
+## What it is
+
+The landing page for the World Green Infrastructure Congress 2026, a congress about sustainable architecture held in Barcelona.
+
+## The idea behind the design
+
+I designed the brand and built the landing page. Both try to capture the rational lines of a building, and use a dark green to stand for sustainability.

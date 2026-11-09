@@ -13,6 +13,6 @@ Now that I can build a product from start to finish by myself, I feel less like 
 Titles get confusing with a profile like mine, so here's how I think about them:
 
 - **Designer, Founder & Product Builder** is the broad description of what I do, in my day job and on my own.
-- **Staff Product Designer** is the level and role I fit in a company: someone who shapes product strategy and what gets built, not only how it looks, and who brings a founder's attitude to it.
+- **Staff Product Designer** is the level and role I fit in a company as an IC: someone who shapes product strategy and what gets built, not only how it looks, and who brings a founder's attitude to it. Having reached that level, my next step is the management track.
 - **Design Engineer** (or Frontend Designer) is how I describe the bridge I build between product design and front-end development. I design in code as much as in Figma.
 - **Inventor** is the side I care about most: coming up with the idea in the first place, and making sure it's well thought through.

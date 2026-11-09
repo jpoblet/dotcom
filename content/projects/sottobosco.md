@@ -3,7 +3,7 @@ name: Sottobosco
 # work: a case study from a job. personal: something I made myself. client: a site made for a client.
 type: client
 # One sentence shown on project cards and given to the AI.
-summary: "My wife Chiara's personal art project: I created the name, logo and brand, and helped direct the design of the website and the merch."
+summary: "A residence for artists in Cabrils, in the Maresme, and my wife Chiara's personal project: I created the name, logo and brand, and directed the website and the merch."
 company: "Sottobosco"
 role: "Naming, branding and art direction"
 year: "2025"
@@ -23,5 +23,13 @@ brand_background: "#212121"
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://sottobosco.art"
 # While true, the case-study page isn't built and the AI doesn't link to it.
-draft: true
+draft: false
 ---
+
+## What it is
+
+Sottobosco is a residence for artists in Cabrils, in the Maresme area near Barcelona. It's my wife Chiara's personal project, and I'm delighted to be part of it.
+
+## What I did
+
+I came up with the name, designed the logo and the brand, and gave the direction for the website and the merch. I'm happily watching it grow and succeed.

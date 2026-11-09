@@ -32,29 +32,20 @@ const QUESTION_TOP = 112;
 
 const ASIDES = [
   "the music I listen to",
-  "the time I herded cattle in Namibia",
-  "why the dung beetle is my favourite animal",
+  "herding cattle in Namibia",
+  "dung beetles",
   "five months crossing Africa overland",
   "surfing in Lanzarote",
   "rescuing kangaroos in Melbourne",
   "playing roller hockey for Australia",
-  "being an Espanyol fan in Barcelona",
-  "my love of Test cricket",
   "playing guitar at my own wedding",
   "my first triathlon at Elwood Beach",
   "running workshops with the Maasai",
-  "a summer at a camp in Hawai'i",
-  "kayaking with wild dolphins",
+  "kayaking with wild dolphins in Hawai'i",
   "van trips with my family and our dog",
-  "winning the Spanish championships at 13",
-  "playing Aussie rules for Spain",
-  "why I support the Carlton Blues",
-  "the e-bike rental I started in the Pyrenees",
-  "picking up Sicilian from my wife",
   "the four languages I speak",
   "designing furniture in Melbourne",
   "the LEGO set that started it all",
-  "the trips still on my list",
 ];
 
 /** Up to `count` random items (picked after mount, so hydration agrees). */

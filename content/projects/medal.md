@@ -23,15 +23,19 @@ brand_background: "#1C2229"
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://medal.io"
 # While true, the case-study page isn't built and the AI doesn't link to it.
-draft: true
+draft: false
 ---
 
 ## Status
 
 I started Medal in January 2024 and parked it in December 2024, after a year of looking for product-market fit. It's still live.
 
+## What went into it
+
+Medal wasn't a weekend experiment. Over the time I worked on it, I convinced four different CTOs to come on board, and worked on the go-to-market strategy with another partner.
+
 ## Why I parked it
 
-It was the wrong time for a new social network. People understood the value of the product, but they couldn't see themselves using it: they already have enough social platforms. These days people are more interested in pure entertainment content than in social posts from people they know. The context has changed.
+Stopping it was my decision. The idea was well executed, but it was the wrong time for a new social network. People understood the value of the product, but they couldn't see themselves using it: they already have enough social platforms. These days people are more interested in pure entertainment content than in social posts from people they know. The context has changed.
 
 I still see potential in it. In the future it may merge with AthleteID and evolve together with it, and I'm keeping that idea in the back of my mind.

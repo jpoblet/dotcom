@@ -32,7 +32,7 @@ brand_background: "#13161D"
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://legendnumbers.com"
 # While true, the case-study page isn't built and the AI doesn't link to it.
-draft: true
+draft: false
 ---
 
 ## What it is

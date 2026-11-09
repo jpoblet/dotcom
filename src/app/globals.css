@@ -289,6 +289,60 @@ body {
   animation: suggestion-in 0.35s ease-out both;
 }
 
+/* Career timeline in the chat: the rail draws downwards, each dot pops in
+   as the line reaches it, and the current role's dot keeps a soft pulse. */
+@keyframes timeline-rail {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes timeline-dot {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes timeline-pulse {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.animate-timeline-rail {
+  transform-origin: top;
+  animation: timeline-rail 0.9s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.animate-timeline-dot {
+  animation: timeline-dot 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-timeline-pulse {
+  animation: timeline-pulse 2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-timeline-rail,
+  .animate-timeline-dot,
+  .animate-timeline-pulse {
+    animation: none;
+  }
+}
+
 /* Hide scrollbar utility */
 .scrollbar-hide {
   -ms-overflow-style: none; /* Internet Explorer 10+ */

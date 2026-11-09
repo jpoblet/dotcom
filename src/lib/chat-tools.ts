@@ -177,27 +177,28 @@ export function runTool(name: string, input: unknown): ToolOutcome {
       }
       return {
         widget: { kind: "project", project: toProjectCard(project) },
-        result: `The card for "${project.name}" is now shown to the visitor below your reply.`,
+        result: `The card for "${project.name}" is now shown to the visitor below your reply. It doesn't replace your answer: write a full reply to the question, and mention what the card is for (e.g. it links to the case study).`,
       };
     }
     case "show_timeline":
       return {
         widget: {
           kind: "timeline",
-          roles: getExperience().map(({ company, role, start, end }) => ({
+          roles: getExperience().map(({ company, role, start, end, website }) => ({
             company,
             role,
             start,
             end,
+            ...(website ? { website } : {}),
           })),
         },
-        result: "The career timeline is now shown to the visitor below your reply.",
+        result: "The career timeline is now shown to the visitor below your reply. It doesn't replace your answer: write a full reply to the question and mention the timeline below.",
       };
     case "show_contact": {
       const { email, links } = getProfile();
       return {
         widget: { kind: "contact", email, links },
-        result: "The contact card is now shown to the visitor below your reply.",
+        result: "The contact card is now shown to the visitor below your reply. It doesn't replace your answer: write a full reply and say the card below has the ways to reach you.",
       };
     }
     default:

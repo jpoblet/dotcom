@@ -21,5 +21,13 @@ brand_background: "linear-gradient(135deg, #F6D9C2, #D4E9E4)"
 # suggested to visitors while the chat is busy, and the AI can share the link.
 live_url: "https://inverse-dotcom.vercel.app"
 # While true, the case-study page isn't built and the AI doesn't link to it.
-draft: true
+draft: false
 ---
+
+## What it is
+
+Inverse is a decentralised orderbook for inverse perpetual contracts: crypto futures that are collateralised and settled in BTC or ETH instead of dollars. They're the original crypto-native futures, but until now they only lived on centralised exchanges. Inverse brings them on-chain as an extension of Hyperliquid, so traders keep their margin and profits in crypto, with no custody and no KYC.
+
+## What I did
+
+I created the logo and the brand, and designed and built the landing page.

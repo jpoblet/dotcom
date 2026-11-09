@@ -177,25 +177,77 @@ function ProjectList({ projects }: { projects: ProjectCardData[] }) {
   );
 }
 
-/** Roles as a quiet table: years in the label face, then role and company. */
+/** Delay between one timeline row and the next, in ms. */
+const TIMELINE_STEP = 90;
+
+/**
+ * Roles on a vertical rail, newest first. The rail draws downwards and each
+ * dot pops in as it gets there; the current role's dot is filled and pulses.
+ * Company names link to their websites.
+ */
 function Timeline({ roles }: { roles: TimelineEntry[] }) {
   return (
-    <ol className="w-full space-y-3">
-      {roles.map((role, index) => (
-        <li
-          key={`${role.company}-${role.start}`}
-          className="animate-suggestion-in grid grid-cols-[7.5rem_1fr] gap-4 text-sm"
-          style={{ animationDelay: `${index * 60}ms` }}
-        >
-          <span className="font-mono text-xs leading-[1.6rem] tabular-nums text-foreground-secondary">
-            {role.start} – {role.end === "Present" ? "Now" : role.end}
-          </span>
-          <span className="leading-[1.6rem]">
-            <span className="font-bold">{role.role}</span>
-            <span className="text-foreground-secondary"> · {role.company}</span>
-          </span>
-        </li>
-      ))}
+    <ol className="relative w-full space-y-4">
+      {/* The rail: from the first dot's centre to the last one's. */}
+      {roles.length > 1 && (
+        <span
+          aria-hidden="true"
+          className="animate-timeline-rail absolute top-[0.8rem] bottom-[0.8rem] left-[5px] w-px bg-background-inverse/20"
+          style={{ animationDuration: `${Math.max(600, roles.length * TIMELINE_STEP + 200)}ms` }}
+        />
+      )}
+      {roles.map((role, index) => {
+        const current = role.end === "Present";
+        const delay = `${index * TIMELINE_STEP}ms`;
+        return (
+          <li
+            key={`${role.company}-${role.start}`}
+            className="relative grid grid-cols-[7.5rem_1fr] gap-4 pl-7 text-sm"
+          >
+            {/* The dot, centred on the rail and on the first line of text. */}
+            <span
+              aria-hidden="true"
+              className="absolute top-[0.8rem] left-0 size-[11px] -translate-y-1/2"
+            >
+              {current && (
+                <span className="animate-timeline-pulse absolute inset-0 rounded-full bg-foreground" />
+              )}
+              <span
+                className={`animate-timeline-dot absolute inset-0 rounded-full border-2 ${
+                  current ? "border-foreground bg-foreground" : "border-foreground-secondary bg-background"
+                }`}
+                style={{ animationDelay: delay }}
+              />
+            </span>
+            <span
+              className="animate-suggestion-in font-mono text-xs leading-[1.6rem] tabular-nums text-foreground-secondary"
+              style={{ animationDelay: delay }}
+            >
+              {role.start} – {current ? "Now" : role.end}
+            </span>
+            <span className="animate-suggestion-in leading-[1.6rem]" style={{ animationDelay: delay }}>
+              <span className="font-bold">{role.role}</span>
+              <span className="text-foreground-secondary"> · </span>
+              {role.website ? (
+                <a
+                  href={role.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-0.5 text-foreground-secondary underline decoration-background-inverse/20 decoration-1 underline-offset-2 transition-colors hover:text-foreground hover:decoration-foreground"
+                >
+                  {role.company}
+                  <ArrowUpRight
+                    size={12}
+                    className="transition-transform duration-300 group-hover:-translate-y-px group-hover:translate-x-px"
+                  />
+                </a>
+              ) : (
+                <span className="text-foreground-secondary">{role.company}</span>
+              )}
+            </span>
+          </li>
+        );
+      })}
     </ol>
   );
 }

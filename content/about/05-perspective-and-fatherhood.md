@@ -14,4 +14,10 @@ In the middle of all this, our first child, Teo, was born in April 2026. When I 
 
 ## The book
 
-After the diagnosis I started writing a book about the experience. It began as my own reflections on the things I was discovering, both physically and emotionally: how to accept help, how to deal with pain and the effects of the treatment, how to ride the emotional ups and downs, and how to keep going despite everything else. I'm still writing it. When it's finished I'll share it first with my closest friends, and then make it publicly available.
+After the diagnosis I started writing a book about the experience. It's called *Fas bona cara* (Catalan for "you look well").
+
+It's a collection of my own reflections on dealing with cancer: from the diagnosis to understanding the treatment, learning to accept help from others, dealing with pain and the effects of chemotherapy, and welcoming our first son, Teo, while I was still on chemo, among other topics.
+
+What ties it all together is the plants we have at home. Each chapter is about one specific plant species, and I link it to a reflection on something I lived through.
+
+I'm aiming to publish it in April 2027, for la Diada de Sant Jordi on 23 April: Catalonia's day of books and roses, and our own lovers' day. Before that, I'll share it first with my closest friends.
