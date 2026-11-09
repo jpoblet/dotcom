@@ -354,7 +354,8 @@ function sample<T>(items: T[], count: number): T[] {
 
 /** Up to `count` random projects that are live, as Markdown-ready links. */
 export function pickLiveProjects(count = 2): { name: string; url: string }[] {
-  const live = getProjects().filter((p) => p.liveUrl);
+  // Not this site itself: the visitor is already on it.
+  const live = getProjects().filter((p) => p.liveUrl && p.slug !== "jordipoblet-com");
   return sample(live, count).map((p) => ({ name: p.name, url: p.liveUrl }));
 }
 

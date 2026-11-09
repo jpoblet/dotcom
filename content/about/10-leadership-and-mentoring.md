@@ -18,4 +18,4 @@ At Rillet I hired a second designer for the team and led their onboarding and pr
 
 ## Leading without managing
 
-Most of my leadership has happened without a team reporting to me: setting the design direction on a project, raising the bar through design systems and reviews, and bringing engineers and product managers along with an idea. At Rillet, the way I worked with developers (described in the Rillet case study) was itself a form of leadership: I set up a system so that nine engineers could ship well-designed features without waiting for me.
+Most of my leadership has happened without a team reporting to me: setting the design direction on a project, raising the bar through design systems and reviews, and bringing engineers and product managers along with an idea. At Rillet, the way I worked with developers was itself a form of leadership: I set up a system so that nine engineers could ship well-designed features without waiting for me.

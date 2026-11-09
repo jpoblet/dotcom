@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { ArrowLeft, RotateCcw, X } from "lucide-react";
+import CursorPeek from "@/components/CursorPeek";
 import { track } from "@/lib/analytics";
 import type { Project } from "@/lib/content";
+import type { Article } from "@/lib/medium";
 import { useChatSession } from "@/lib/use-chat-session";
 import ChatPane from "./ChatPane";
 import ConfirmDialog from "./ConfirmDialog";
@@ -27,6 +29,8 @@ interface Props {
   starterQuestions: string[];
   caseStudies: Project[];
   websites: Project[];
+  /** Medium articles, newest first. */
+  articles: Article[];
 }
 
 /**
@@ -43,6 +47,7 @@ export default function Workspace({
   starterQuestions,
   caseStudies,
   websites,
+  articles,
 }: Props) {
   const session = useChatSession(email);
   const [tab, setTab] = useState<Tab>("work");
@@ -122,7 +127,29 @@ export default function Workspace({
     return () => document.removeEventListener("keydown", onKey);
   }, [projectOpen, closeProject, closePanel]);
 
-  const actions = useMemo(() => ({ openProject }), [openProject]);
+  // One floating preview for every case-study link in the chat and notes.
+  const [peekSlug, setPeekSlug] = useState<string | null>(null);
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => setCanHover(window.matchMedia("(hover: hover)").matches));
+    return () => clearTimeout(timeout);
+  }, []);
+  const peeked = useMemo(
+    () => (peekSlug ? caseStudies.find((p) => p.slug === peekSlug) ?? null : null),
+    [caseStudies, peekSlug],
+  );
+  const peekProject = useCallback((next: string | null) => setPeekSlug(next), []);
+
+  const actions = useMemo(
+    () => ({
+      openProject: (next: string) => {
+        setPeekSlug(null);
+        openProject(next);
+      },
+      peekProject,
+    }),
+    [openProject, peekProject],
+  );
 
   // From a talking point back to where it came up: scroll the chat to that
   // exchange (its question just under the header). On phones the panel is
@@ -303,7 +330,7 @@ export default function Workspace({
                   projectOpen ? "-translate-x-[8%] opacity-40" : "translate-x-0 opacity-100"
                 }`}
               >
-                <WorkOverview caseStudies={caseStudies} websites={websites} onOpen={openProject} />
+                <WorkOverview caseStudies={caseStudies} websites={websites} articles={articles} onOpen={openProject} />
               </div>
 
               {/* Project, sliding in from the right. */}
@@ -362,6 +389,22 @@ export default function Workspace({
         This clears our whole conversation and your AI Notes, and there&apos;s no way to get
         them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
       </ConfirmDialog>
+      {canHover && (
+        <CursorPeek
+          anchor={typeof document === "undefined" ? null : document.body}
+          project={
+            peeked && {
+              name: peeked.name,
+              thumbnail: peeked.thumbnail,
+              thumbnailDark: peeked.darkScreens[peeked.thumbnail],
+              accent: peeked.accent,
+              logo: peeked.logo,
+              logoMark: peeked.logoMark,
+              brandBackground: peeked.brandBackground,
+            }
+          }
+        />
+      )}
     </WorkspaceContext.Provider>
   );
 }

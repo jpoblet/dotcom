@@ -1,20 +1,36 @@
 ---
-name: This website
+name: AI-driven portfolio
 # work: a case study from a job. personal: something I made myself. client: a site made for a client.
 type: personal
 # One sentence shown on project cards and given to the AI.
 summary: "The site you're on: a portfolio you talk to, where an AI that knows my work, projects and life answers visitors' questions for me."
 company: ""
-role: "Founder, design and development"
+role: "Design and development"
 year: "2025 - 2026"
 tags: [AI, Conversational UI, Next.js, Claude, Product design]
 # Path under /public, e.g. /images/projects/jordipoblet-com.jpg
-thumbnail: ""
+thumbnail: "/images/projects/jordipoblet-com.jpg"
+# Phone-sized screenshot shown next to the desktop one on the project page.
+mobile_image: "/images/projects/jordipoblet-com-mobile.jpg"
+# More screenshots of the live site, shown between the sections of the case study.
+gallery:
+  - "/images/projects/gallery/jordipoblet-com-d1.jpg"
+  - "/images/projects/gallery/jordipoblet-com-d2.jpg"
+  - "/images/projects/gallery/jordipoblet-com-d3.jpg"
+mobile_gallery:
+  - "/images/projects/gallery/jordipoblet-com-m1.jpg"
+  - "/images/projects/gallery/jordipoblet-com-m2.jpg"
+  - "/images/projects/gallery/jordipoblet-com-m3.jpg"
 # Colour of the generated cover shown while there is no thumbnail.
 accent: "#FF6B6B"
+# Logo and background colour for the tile on the projects page.
+logo: "/images/logos/jordipoblet-com.svg"
+# Transparent single-colour version, for the workspace list.
+logo_mark: "/images/logos/marks/jordipoblet-com.svg"
+brand_background: "#030712"
 # Public URL if the project is live (website, App Store page...). Live projects are
 # suggested to visitors while the chat is busy, and the AI can share the link.
-live_url: ""
+live_url: "https://jordipoblet.com"
 # While true, the case-study page isn't built and the AI doesn't link to it.
 draft: false
 ---

@@ -14,6 +14,7 @@ import {
   pickConversationStarter,
   pickLiveProjects,
 } from "@/lib/content";
+import { type Article, getArticles, mediumFeedUrl } from "@/lib/medium";
 import {
   type ChatLogEntry,
   type ChatOutcome,
@@ -65,7 +66,19 @@ export type ChatStreamEvent =
   | { type: "refusal"; message: string }
   | { type: "error"; message: string };
 
-function buildSystemPrompt(): string {
+/** The Medium articles, as a knowledge-base section (empty when there are none). */
+function articlesSection(articles: Article[]): string {
+  if (!articles.length) return "";
+  const list = articles
+    .map((a) => {
+      const date = a.date ? a.date.slice(0, 10) : "date unknown";
+      return `### ${a.title}\n- Published on Medium: ${date}\n- Link: ${a.url}\n- How it starts: ${a.excerpt}`;
+    })
+    .join("\n\n");
+  return `\n\n## Articles I've written\n\nMy articles on Medium, newest first. Only the opening is known: don't claim more about what they say than that.\n\n${list}`;
+}
+
+function buildSystemPrompt(articles: Article[]): string {
   const profile = getProfile();
   const first = profile.name.split(" ")[0];
   return `You are the AI on ${profile.name}'s portfolio website. Instead of browsing case studies, visitors (often recruiters, hiring managers and fellow designers) ask about ${first}'s work, background and life, and you answer in the first person as ${first}.
@@ -80,29 +93,37 @@ How to answer:
 - Health: share only what the knowledge base says about the cancer diagnosis and treatment, calmly and without drama. Never guess at medical details, prognosis or anything left out.
 - Stop when the answer is complete. Don't close with offers or sign-offs such as "feel free to ask" or "email me if you have more questions". Mention the email address only when the visitor asks how to get in touch.
 - Every reply must actually answer the question in your own words. Never reply with only a link, only a card, or a one-liner like "Here you go" or "Check this out": the visitor should get a real answer even if they never click anything.
-- Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles listed below are fine.
+- Write in Markdown. Link to a project only when the knowledge base lists a page for it, as [Project name](/projects/slug). Links to ${first}'s public profiles and to the articles listed below are fine.
 - Whenever you include a link, say why it's there and what the visitor will find by clicking it, woven into the sentence (e.g. "if you want the full story, with the research and the final screens, have a look at the [case study](/projects/slug)"). Never drop a bare link or a link on its own line without context.
 - You have display tools that show the visitor a project card, the career timeline or a contact card under your reply. Use one when it genuinely helps the answer, not on every turn. Call the tools first, then write your reply. The card supports your answer, it doesn't replace it: still answer the question properly, adding what the card can't say (your role, what was interesting or hard, the outcome), and briefly point to the card and what it offers (e.g. "the card below links to the full case study") instead of describing its contents.
-- After your written reply, call wrap_up with two or three questions the visitor might want to ask next and the topics your reply covered. It's always the last call of a reply.
+- Every reply follows the same order: display tools if any, then your written reply, then wrap_up. Never call wrap_up in the same step as a display tool or before you've written the answer. wrap_up takes two or three questions the visitor might want to ask next and the topics your reply covered.
 - Earlier replies may start with a note like "[Shown to the visitor: ...]". It records cards you displayed; never write such notes yourself.
 - If a visitor asks whether they're talking to the real ${first}, be upfront: you're an AI that answers as ${first}, not ${first} typing live.
 - Stay on topic: ${first}, his work, design, and the things he would happily chat about. Politely steer unrelated requests (coding help, homework, general assistant tasks) back to ${first}.
 - Reply in the visitor's language. When you mention a Catalan title or phrase, such as the book's title, give the original in italics and its translation into the visitor's language, e.g. *Fas bona cara* ("you look well") in English.
 
 <knowledge_base>
-${buildKnowledgeBase()}
+${buildKnowledgeBase()}${articlesSection(articles)}
 </knowledge_base>`;
 }
 
 // The knowledge base and tools only change on deploy, so build them once per
-// server instance in production. In development, rebuild them on every
-// request so edits in /content show up without a restart.
-let cached: { system: string; tools: Anthropic.Beta.BetaTool[] } | undefined;
-function getPromptAndTools() {
+// server instance in production. The one exception is the Medium articles
+// (refreshed every few hours by the fetch cache): the prompt is rebuilt only
+// when they change, so it stays identical, and prompt-cached, in between.
+// In development, rebuild on every request so edits in /content show up
+// without a restart.
+let cached: { system: string; tools: Anthropic.Beta.BetaTool[]; articlesKey: string } | undefined;
+async function getPromptAndTools() {
+  const feed = getProfile().links.map((link) => mediumFeedUrl(link.href)).find(Boolean);
+  const articles = feed ? await getArticles(feed) : [];
   if (process.env.NODE_ENV !== "production") {
-    return { system: buildSystemPrompt(), tools: buildTools() };
+    return { system: buildSystemPrompt(articles), tools: buildTools() };
   }
-  cached ??= { system: buildSystemPrompt(), tools: buildTools() };
+  const articlesKey = JSON.stringify(articles);
+  if (cached?.articlesKey !== articlesKey) {
+    cached = { system: buildSystemPrompt(articles), tools: buildTools(), articlesKey };
+  }
   return cached;
 }
 
@@ -277,10 +298,13 @@ export async function POST(request: NextRequest) {
       try {
         // Reads ANTHROPIC_API_KEY (or another configured credential).
         const client = new Anthropic();
-        const { system, tools } = getPromptAndTools();
+        const { system, tools } = await getPromptAndTools();
         const conversation: Anthropic.Beta.BetaMessageParam[] = [...messages];
         let sentText = false;
         let lastStop: string | null = null;
+        // Follow-ups and topics are held back until the reply is written,
+        // so they always arrive after the text.
+        let pendingWrapUp: ChatStreamEvent[] = [];
 
         for (let step = 0; step < MAX_STEPS; step++) {
           const stream = client.beta.messages.stream(
@@ -331,10 +355,11 @@ export async function POST(request: NextRequest) {
           const toolCalls = final.content.filter((b) => b.type === "tool_use");
           const followUpCall = toolCalls.find((b) => b.name === WRAP_UP);
           if (followUpCall) {
+            pendingWrapUp = [];
             const questions = parseFollowUps(followUpCall.input);
-            if (questions.length) send({ type: "suggestions", questions });
+            if (questions.length) pendingWrapUp.push({ type: "suggestions", questions });
             const topics = parseTopics(followUpCall.input);
-            if (topics.length) send({ type: "topics", topics });
+            if (topics.length) pendingWrapUp.push({ type: "topics", topics });
           }
           // Follow-ups come last: once they're in and the reply is written,
           // the turn is over, with no extra model call.
@@ -345,10 +370,13 @@ export async function POST(request: NextRequest) {
           const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
           for (const block of toolCalls) {
             if (block.name === WRAP_UP) {
+              // Called before any reply was written: the card alone is not
+              // an answer, so ask for the full reply now.
               results.push({
                 type: "tool_result",
                 tool_use_id: block.id,
-                content: "Noted. Now write your reply to the visitor; don't call wrap_up again.",
+                content:
+                  "Follow-ups saved, but you haven't answered the visitor yet. Write your full reply to their question now, in your own words: the card under it doesn't replace the answer. Don't call wrap_up again.",
               });
               continue;
             }
@@ -367,6 +395,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        if (lastStop !== "refusal") pendingWrapUp.forEach(send);
         if (lastStop === "refusal") outcome = "refusal";
         send(
           lastStop === "refusal"

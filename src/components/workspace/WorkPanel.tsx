@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { BrowserFrame, PhoneFrame, displayUrl } from "@/components/DeviceFrames";
+import CursorPeek from "@/components/CursorPeek";
 import DeviceShowcase from "@/components/DeviceShowcase";
 import LogoMark from "@/components/LogoMark";
+import ProjectLogoTile from "@/components/ProjectLogoTile";
 import type { Project } from "@/lib/content";
+import type { Article } from "@/lib/medium";
 
 const meta = (p: Project) => [p.company, p.role, p.year].filter(Boolean).join(" · ");
 
@@ -20,104 +24,155 @@ function sections(markdown: string) {
     .filter((s) => s.body);
 }
 
+/** A section title over a hairline, with its count on the right. */
+function SectionHead({ title, count, className = "" }: { title: string; count: number; className?: string }) {
+  return (
+    <h2 className={`flex items-baseline justify-between border-b border-background-inverse/15 pb-3 text-xs font-medium ${className}`}>
+      {title}
+      <span className="font-mono tabular-nums text-foreground-secondary">
+        {String(count).padStart(2, "0")}
+      </span>
+    </h2>
+  );
+}
+
 /**
- * The default view, laid out like a product catalogue: cells divided by
- * hairlines. Case studies in two columns with their logo, details and a
- * short summary; websites in three smaller columns linking to the sites.
+ * The default view, as an open index rather than boxes, in the same
+ * language as the projects page: hairlines between rows, type doing the
+ * work. Case studies are rows with their mark in a margin column; hovering
+ * one slides it in, draws a line under it and floats a screenshot of the
+ * project beside the pointer. Websites sit below as a quiet wall of marks,
+ * and articles last, as plain links. Logos always show at full strength.
  */
 export function WorkOverview({
   caseStudies,
   websites,
+  articles = [],
   onOpen,
 }: {
   caseStudies: Project[];
   websites: Project[];
+  articles?: Article[];
   onOpen: (slug: string) => void;
 }) {
+  const [hovered, setHovered] = useState<Project | null>(null);
+  const [list, setList] = useState<HTMLOListElement | null>(null);
+  // Only pointers that hover get the floating preview; touch skips it.
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => setCanHover(window.matchMedia("(hover: hover)").matches));
+    return () => clearTimeout(timeout);
+  }, []);
   return (
-    <div className="px-6 py-8">
-      <p className="text-sm text-foreground-secondary">
+    <div className="px-6 sm:px-8 py-8">
+      <p className="max-w-sm text-sm text-foreground-secondary">
         {caseStudies.length} case studies and {websites.length} websites, most recent first.
       </p>
 
-      <h2 className="mt-10 text-xs font-medium text-foreground-secondary">Case studies</h2>
-      {/* Hairline grid: the gap shows the background-inverse layer beneath. */}
-      <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
-        {caseStudies.map((project, index) => (
-          <li
-            key={project.slug}
-            className="animate-suggestion-in bg-background"
-            style={{ animationDelay: `${index * 60}ms` }}
-          >
-            <button
-              type="button"
-              onClick={() => onOpen(project.slug)}
-              className="group relative flex h-full w-full flex-col p-5 text-left cursor-pointer transition-colors duration-300 hover:bg-background-secondary"
+      <SectionHead title="Case studies" count={caseStudies.length} className="mt-10" />
+      <ol ref={setList}>
+        {caseStudies.map((project, index) => {
+          return (
+            <li
+              key={project.slug}
+              onPointerEnter={() => canHover && setHovered(project)}
+              onPointerLeave={() => setHovered(null)}
             >
-              <span className="flex items-center justify-between text-xs tabular-nums text-foreground-secondary">
-                {String(index + 1).padStart(2, "0")}
+              <button
+                type="button"
+                onClick={() => {
+                  setHovered(null);
+                  onOpen(project.slug);
+                }}
+                className="animate-suggestion-in group relative grid w-full cursor-pointer grid-cols-[2.75rem_1fr_auto] items-start gap-x-4 border-b border-background-inverse/10 py-5 text-left"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                {/* A line that draws across the row on hover. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 -bottom-px h-px origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+                />
+                <span className="flex h-11 items-center">
+                  <LogoMark
+                    logo={project.logoMark}
+                    name={project.name}
+                    className="h-6 w-full text-foreground"
+                  />
+                </span>
+                <span className="min-w-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1.5">
+                  <span className="flex items-baseline gap-3">
+                    <span className="font-mono text-xs tabular-nums text-foreground-secondary">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-mono text-base font-bold">{project.name}</span>
+                  </span>
+                  <span className="mt-1 block font-mono text-xs text-foreground-secondary">{meta(project)}</span>
+                  {project.summary && (
+                    <span className="mt-2.5 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
+                      {project.summary}
+                    </span>
+                  )}
+                </span>
                 <ArrowRight
                   size={15}
-                  className="-translate-x-1 text-foreground opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                  className="mt-1 -translate-x-1 opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
                 />
-              </span>
-              <span className="flex h-24 items-center">
-                <LogoMark
-                  logo={project.logoMark}
-                  name={project.name}
-                  className="h-8 w-2/5 text-foreground/80 transition-[translate,color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1 group-hover:text-foreground"
-                />
-              </span>
-              <span className="font-mono text-sm font-bold">{project.name}</span>
-              <span className="mt-1 font-mono text-xs text-foreground-secondary">{meta(project)}</span>
-              {project.summary && (
-                <span className="mt-3 line-clamp-2 text-xs leading-[1.6] text-foreground-secondary">
-                  {project.summary}
-                </span>
-              )}
-            </button>
-          </li>
-        ))}
-        {/* An odd count leaves a gap: fill it so the hairline grid stays even. */}
-        {caseStudies.length % 2 === 1 && (
-          <li aria-hidden="true" className="hidden bg-background sm:block" />
-        )}
-      </ul>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {canHover && (
+        <CursorPeek
+          anchor={list}
+          project={
+            hovered && {
+              name: hovered.name,
+              thumbnail: hovered.thumbnail,
+              thumbnailDark: hovered.darkScreens[hovered.thumbnail],
+              accent: hovered.accent,
+              logo: hovered.logo,
+              logoMark: hovered.logoMark,
+              brandBackground: hovered.brandBackground,
+            }
+          }
+        />
+      )}
 
       {websites.length > 0 && (
         <>
-          <h2 className="mt-12 text-xs font-medium text-foreground-secondary">Websites</h2>
-          <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-px overflow-hidden rounded-sm border border-background-inverse/10 bg-background-inverse/10">
+          <SectionHead title="Websites" count={websites.length} className="mt-14" />
+          {/* A wall of marks: no frames, just the logo and a caption. */}
+          <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-6">
             {websites.map((site, index) => {
               const cell = (
                 <>
-                  <span className="flex h-5 items-center justify-end text-foreground-secondary">
-                    {site.liveUrl ? (
-                      <ArrowUpRight
-                        size={14}
-                        className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      />
-                    ) : (
-                      <span className="text-xs">Soon</span>
-                    )}
-                  </span>
-                  <span className="flex h-16 items-center">
+                  <span className="flex h-20 items-center">
                     <LogoMark
                       logo={site.logoMark}
                       name={site.name}
-                      className="h-5 w-3/5 text-foreground/75 transition-colors duration-300 group-hover:text-foreground"
+                      className="h-6 w-3/5 text-foreground transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-y-1"
                     />
                   </span>
-                  <span className="truncate font-mono text-sm">{site.name}</span>
-                  <span className="mt-0.5 font-mono text-xs text-foreground-secondary">{site.year}</span>
+                  <span className="flex items-baseline justify-between gap-2 border-t border-background-inverse/10 pt-2.5">
+                    <span className="truncate font-mono text-xs">{site.name}</span>
+                    {site.liveUrl ? (
+                      <ArrowUpRight
+                        size={12}
+                        className="shrink-0 text-foreground-secondary transition-[translate,color] duration-300 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-foreground"
+                      />
+                    ) : (
+                      <span className="shrink-0 font-mono text-xs text-foreground-secondary">Soon</span>
+                    )}
+                  </span>
+                  <span className="mt-0.5 block font-mono text-xs text-foreground-secondary">{site.year}</span>
                 </>
               );
-              const className =
-                "group flex h-full flex-col p-4 transition-colors duration-300 hover:bg-background-secondary";
+              const className = "group block pt-2 pb-5";
               return (
                 <li
                   key={site.slug}
-                  className="animate-suggestion-in bg-background"
+                  className="animate-suggestion-in"
                   style={{ animationDelay: `${(caseStudies.length + index) * 50}ms` }}
                 >
                   {site.liveUrl ? (
@@ -130,9 +185,48 @@ export function WorkOverview({
                 </li>
               );
             })}
-            {/* Fill the last row so the hairline grid stays even. */}
-            {Array.from({ length: (3 - (websites.length % 3)) % 3 }, (_, i) => (
-              <li key={`filler-${i}`} aria-hidden="true" className="hidden bg-background sm:block" />
+          </ul>
+        </>
+      )}
+
+      {articles.length > 0 && (
+        <>
+          <SectionHead title="Articles" count={articles.length} className="mt-14" />
+          {/* Quieter than the rest: plain links, no logos or frames. */}
+          <ul className="mt-2">
+            {articles.map((article, index) => (
+              <li
+                key={article.url}
+                className="animate-suggestion-in"
+                style={{ animationDelay: `${(caseStudies.length + websites.length + index) * 50}ms` }}
+              >
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block py-3"
+                >
+                  <span className="flex items-baseline justify-between gap-4">
+                    <span className="text-sm underline decoration-background-inverse/20 decoration-1 underline-offset-[3px] transition-[text-decoration-color] duration-300 group-hover:decoration-foreground">
+                      {article.title}
+                      <ArrowUpRight
+                        size={12}
+                        className="ml-1 inline-block align-[-1px] text-foreground-secondary transition-[translate,color] duration-300 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-foreground"
+                      />
+                    </span>
+                    {article.date && (
+                      <time dateTime={article.date} className="shrink-0 font-mono text-xs tabular-nums text-foreground-secondary">
+                        {new Date(article.date).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}
+                      </time>
+                    )}
+                  </span>
+                  {article.excerpt && (
+                    <span className="mt-1 block truncate text-xs leading-[1.6] text-foreground-secondary">
+                      {article.excerpt}
+                    </span>
+                  )}
+                </a>
+              </li>
             ))}
           </ul>
         </>
@@ -233,9 +327,8 @@ export function ProjectView({
               dark={project.darkScreens}
             />
           ) : (
-            <div className="flex aspect-[2/1] items-center justify-center rounded-sm bg-background-inverse/[0.03]">
-              <LogoMark logo={project.logoMark} name={project.name} align="center" className="h-14 w-1/2" />
-            </div>
+            // No screenshots yet: the brand's logo on its brand colour.
+            <ProjectLogoTile project={project} sizes="(min-width: 1024px) 760px, 100vw" className="aspect-[2/1] rounded-sm" />
           )}
         </div>
 

@@ -17,6 +17,8 @@ function MarkdownLink({ href = "", children }: { href?: string; children?: React
           event.preventDefault();
           workspace.openProject(slug);
         }}
+        onPointerEnter={() => workspace.peekProject(slug)}
+        onPointerLeave={() => workspace.peekProject(null)}
       >
         {children}
       </a>

@@ -5,6 +5,11 @@ import { createContext, useContext } from "react";
 export interface WorkspaceActions {
   /** Shows a project's case study in the side panel. */
   openProject: (slug: string) => void;
+  /**
+   * Floats a preview of a case study beside the pointer (null hides it).
+   * Ignored for slugs without a case study and on touch screens.
+   */
+  peekProject: (slug: string | null) => void;
 }
 
 /**

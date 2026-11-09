@@ -11,7 +11,7 @@ tags: [Mobile app, User research, UX, UI, iOS and Android]
 # Path under /public, e.g. /images/projects/glovo-delivery-flow.jpg
 thumbnail: ""
 # Colour of the generated cover shown while there is no thumbnail.
-accent: "#FFC244"
+accent: "#FFC042"
 # Logo and background colour for the tile on the projects page.
 logo: "/images/logos/glovo-delivery-flow.png"
 # Transparent single-colour version, for the workspace list.

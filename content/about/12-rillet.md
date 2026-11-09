@@ -1,22 +1,5 @@
 ---
-name: Rillet
-# work: a case study from a job. personal: something I made myself. client: a site made for a client.
-type: work
-# One sentence shown on project cards and given to the AI.
-summary: "Founding designer of Rillet, accounting software for accounting teams: the product, the brand and the design system, from zero to 40+ clients and $0.5M ARR, as the only designer next to nine engineers."
-company: "Rillet"
-role: "Founding Product Designer"
-year: "2021 - 2024"
-tags: [B2B SaaS, Fintech, Founding designer, Design system, Branding, 0 to 1]
-# Path under /public, e.g. /images/projects/rillet.jpg
-thumbnail: ""
-# Colour of the generated cover shown while there is no thumbnail.
-accent: "#1E293B"
-# Public URL if the project is live (website, App Store page...). Live projects are
-# suggested to visitors while the chat is busy, and the AI can share the link.
-live_url: ""
-# While true, the case-study page isn't built and the AI doesn't link to it.
-draft: false
+title: Rillet, as founding designer (November 2021 to August 2024)
 ---
 
 ## Context
