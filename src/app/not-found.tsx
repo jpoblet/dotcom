@@ -2,41 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import DungBeetle from "@/components/DungBeetle";
 import MissingPath from "@/components/MissingPath";
+import { BallDebris, NightSky } from "@/components/NotFoundScene";
 import { SiteFooterBar, SiteHeader } from "@/components/SiteChrome";
 import { getProfile } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: `Page not found | ${getProfile().name}`,
 };
-
-/**
- * The night sky above the horizon: dung beetles steer by the Milky Way.
- * About a third of the stars gather in a faint diagonal band; the rest are
- * spread across the sky. Seeded, so every render draws the same sky.
- */
-const SKY = (() => {
-  let seed = 7;
-  const rand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  return Array.from({ length: 130 }, (_, i) => {
-    const inBand = i % 3 === 0;
-    // The band runs from bottom left to top right.
-    const t = rand();
-    const x = inBand ? t * 100 : rand() * 100;
-    const y = inBand ? 95 - t * 85 + (rand() - 0.5) * 16 : rand() * 98;
-    const bright = rand() > 0.9;
-    return {
-      x,
-      y,
-      size: bright ? 2.5 : inBand ? 1 + rand() * 0.8 : 1 + rand() * 1.2,
-      bright,
-      delay: rand() * 5,
-      duration: 2.5 + rand() * 3.5,
-    };
-  });
-})();
 
 /**
  * The 404: a dung beetle pushing the "0" of 404 along the ground. They
@@ -78,24 +50,7 @@ export default function NotFound() {
               aria-hidden="true"
               className="pointer-events-none absolute bottom-[9.3%] left-1/2 h-[60dvh] w-screen -translate-x-1/2"
             >
-              {SKY.map((star, i) => (
-                <span
-                  key={i}
-                  className={`nf-star absolute rounded-full bg-foreground ${
-                    star.bright
-                      ? "shadow-[0_0_6px_1px_currentColor] text-foreground"
-                      : ""
-                  }`}
-                  style={{
-                    left: `${star.x}%`,
-                    top: `${star.y}%`,
-                    width: star.size,
-                    height: star.size,
-                    animationDelay: `${star.delay}s`,
-                    animationDuration: `${star.duration}s`,
-                  }}
-                />
-              ))}
+              <NightSky />
             </div>
             <svg
               viewBox="0 0 500 210"
@@ -124,7 +79,8 @@ export default function NotFound() {
 
               {/* The beetle and its ball, nudging back and forth: it's stuck. */}
               <g className="nf-push">
-                {/* The ball, rolling: a ring (the zero) with bits of straw in it. */}
+                {/* The ball, rolling: a ring (the zero) with what it picked
+                    up along the way in its hollow (random on each load). */}
                 <g className="nf-ball">
                   <circle
                     cx="300"
@@ -133,17 +89,7 @@ export default function NotFound() {
                     className="fill-none stroke-current"
                     strokeWidth="19"
                   />
-                  <g
-                    className="stroke-current"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    fill="none"
-                  >
-                    <path d="M285 112q8-6 16-2" />
-                    <path d="M306 140q6 5 13 1" />
-                    <path d="M290 146l6-8" />
-                    <path d="M311 113l4 7" />
-                  </g>
+                  <BallDebris />
                 </g>
 
                 <DungBeetle />
