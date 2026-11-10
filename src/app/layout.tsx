@@ -60,14 +60,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t
 // count.
 const UMAMI_WEBSITE_ID = "c9feed1a-4c35-42a6-96df-97d07e0bf709";
 
-export default function RootLayout({
-  children,
-  modal,
-}: {
-  children: React.ReactNode;
-  /** Project case studies opened as a modal (see app/@modal). */
-  modal: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <body>
@@ -78,7 +71,6 @@ export default function RootLayout({
         </Script>
         {children}
         <SiteFooter email={profile.email} links={profile.links} />
-        {modal}
         <Script
           src="https://cloud.umami.is/script.js"
           data-website-id={UMAMI_WEBSITE_ID}

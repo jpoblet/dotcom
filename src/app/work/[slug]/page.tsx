@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ProjectDetail from "@/components/ProjectDetail";
-import ProjectModal from "@/components/ProjectModal";
-import ProjectsIndex from "@/components/ProjectsIndex";
-import { getProfile, getProject, getProjects, hasPage } from "@/lib/content";
+import HomePage from "@/components/workspace/HomePage";
+import { getCaseStudies, getProfile, getProject, projectPath } from "@/lib/content";
 
-// Only projects with a page are built; any other slug is a 404.
+// Only case studies get an address; any other slug is a 404.
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getProjects()
-    .filter(hasPage)
-    .map((project) => ({ slug: project.slug }));
+  return getCaseStudies().map((project) => ({ slug: project.slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
@@ -30,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     openGraph: {
       type: "article",
-      url: `/projects/${project.slug}`,
+      url: projectPath(project),
       siteName: name,
       title,
       description,
@@ -39,19 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Opened directly (or reloaded): the case study opens as a modal over the
-// projects list. Navigating from inside the site uses the intercepting route
-// in app/@modal instead, which keeps the previous page underneath.
+// The home page, with this case study open in the side panel.
 export default async function ProjectPage({ params }: Props) {
-  const project = getProject((await params).slug);
-  if (!project || !hasPage(project)) notFound();
-
-  return (
-    <>
-      <ProjectsIndex />
-      <ProjectModal closeTo="/projects">
-        <ProjectDetail project={project} linkMode="hard" />
-      </ProjectModal>
-    </>
-  );
+  const { slug } = await params;
+  if (!getCaseStudies().some((p) => p.slug === slug)) notFound();
+  return <HomePage initialView={{ tab: "work", slug }} />;
 }

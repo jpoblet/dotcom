@@ -1,24 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import {
-  getProfile,
-  getProject,
-  getProjects,
-  hasPage,
-  projectMeta,
-} from "@/lib/content";
+import { getCaseStudies, getProfile, getProject, projectMeta } from "@/lib/content";
 import { BRAND, JLogo, brandFonts } from "@/lib/brand";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Project preview";
 
-// Prerender one image per built project page, like the page itself.
+// Prerender one image per case study, like the page itself.
 export function generateStaticParams() {
-  return getProjects()
-    .filter(hasPage)
-    .map((project) => ({ slug: project.slug }));
+  return getCaseStudies().map((project) => ({ slug: project.slug }));
 }
 
 const MIME: Record<string, string> = {

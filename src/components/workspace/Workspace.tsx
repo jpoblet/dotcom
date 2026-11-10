@@ -12,9 +12,7 @@ import ChatPane from "./ChatPane";
 import ConfirmDialog from "./ConfirmDialog";
 import NotesPanel from "./NotesPanel";
 import { ProjectView, WorkOverview } from "./WorkPanel";
-import { WorkspaceContext } from "./WorkspaceContext";
-
-type Tab = "work" | "notes";
+import { WorkspaceContext, pathFromView, viewFromPath, type Tab, type View } from "./WorkspaceContext";
 
 /** Matches the panel transitions' duration. */
 const SLIDE_MS = 520;
@@ -31,6 +29,13 @@ interface Props {
   websites: Project[];
   /** Medium articles, newest first. */
   articles: Article[];
+  /** What to show on arrival: the panel's tab and case study, from the address. */
+  initialView?: View;
+}
+
+/** Puts a path in the address bar, as a new history entry, if it changed. */
+function pushPath(path: string) {
+  if (window.location.pathname !== path) window.history.pushState(null, "", path);
 }
 
 /**
@@ -48,17 +53,21 @@ export default function Workspace({
   caseStudies,
   websites,
   articles,
+  initialView,
 }: Props) {
   const session = useChatSession(email);
-  const [tab, setTab] = useState<Tab>("work");
+  // Arriving on /work, /notes or /work/<slug>: the panel starts open there.
+  const startTab = initialView?.tab ?? null;
+  const startOn = caseStudies.some((p) => p.slug === initialView?.slug) ? initialView!.slug! : null;
+  const [tab, setTab] = useState<Tab>(startTab ?? "work");
   // Whether the side panel is showing (a sheet over the chat on phones).
-  const [panelOpen, setPanelOpenState] = useState(false);
-  const panelOpenRef = useRef(false);
+  const [panelOpen, setPanelOpenState] = useState(Boolean(startTab));
+  const panelOpenRef = useRef(Boolean(startTab));
 
   // The project on screen, and whether its panel is slid in. The slug
   // outlives the panel by one transition, so it can slide out with content.
-  const [slug, setSlug] = useState<string | null>(null);
-  const [projectOpen, setProjectOpen] = useState(false);
+  const [slug, setSlug] = useState<string | null>(startOn);
+  const [projectOpen, setProjectOpen] = useState(Boolean(startOn));
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const projectScroll = useRef<HTMLDivElement>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -94,6 +103,8 @@ export default function Workspace({
       if (!caseStudies.some((p) => p.slug === next)) return;
       clearTimeout(closeTimer.current);
       track("Project opened", { project: next });
+      // The case study gets its own address, to share or come back to.
+      pushPath(pathFromView({ tab: "work", slug: next }));
       setPanelOpen(true, () => {
         setTab("work");
         setSlug(next);
@@ -105,16 +116,42 @@ export default function Workspace({
     [caseStudies, setPanelOpen],
   );
 
-  const closeProject = useCallback(() => {
+  // Slides the case study out, leaving the address alone.
+  const hideProject = useCallback(() => {
     setProjectOpen(false);
     clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setSlug(null), SLIDE_MS);
   }, []);
 
+  // Back to the Work overview.
+  const closeProject = useCallback(() => {
+    pushPath(pathFromView({ tab: "work" }));
+    hideProject();
+  }, [hideProject]);
+
   const closePanel = useCallback(() => {
+    pushPath("/");
     setPanelOpen(false);
-    closeProject();
-  }, [setPanelOpen, closeProject]);
+    hideProject();
+  }, [setPanelOpen, hideProject]);
+
+  // Back and forward follow the address (see viewFromPath).
+  useEffect(() => {
+    const onPop = () => {
+      const view = viewFromPath(window.location.pathname);
+      if (view.slug) openProject(view.slug);
+      else if (!view.tab) {
+        setPanelOpen(false);
+        hideProject();
+      } else {
+        const next = view.tab;
+        setPanelOpen(true, () => setTab(next));
+        if (next === "work") hideProject();
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [openProject, hideProject, setPanelOpen]);
 
   // Escape steps back: project, then the panel.
   useEffect(() => {
@@ -175,6 +212,8 @@ export default function Workspace({
       closePanel();
       return;
     }
+    // Work keeps the case study that was open in it, if any.
+    pushPath(pathFromView({ tab: next, slug: projectOpen && slug ? slug : undefined }));
     setPanelOpen(true, () => setTab(next));
   };
 

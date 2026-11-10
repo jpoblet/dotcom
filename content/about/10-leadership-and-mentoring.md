@@ -12,9 +12,17 @@ At Glovo I led a mentorship programme for junior designers starting out in their
 - **Completely honest, open feedback**, in both directions.
 - **Listening to what the mentees wanted to learn**, and adapting their projects to it, rather than handing them a fixed plan.
 
+The moment that stayed with me came later. After I left Glovo, one of the mentees stayed on. About a year later he decided to leave to keep growing his career, found an opportunity and applied. While he was in the interview process he reached out and asked me to review his take-home exercise. Seeing that, after all that time, he still thought of me as someone he could trust with his work meant a lot.
+
 ## Rillet: hiring and working with a senior designer
 
 At Rillet I hired a second designer for the team and led their onboarding and project assignments. They were more senior than the juniors I'd mentored before, with their own established processes and experience, so I learnt to adapt to a colleague's strengths instead of teaching my own way of working. The role lasted about four months.
+
+## Everyone's voice weighs the same
+
+The first thing I do to raise the quality of a team, whether I manage it or not, is treat everybody the same. To me every person on a team has the same weight when it comes to opinions, feedback and ideas. Seniority only changes how much responsibility someone carries for the things they're assigned. That equality gives junior people the freedom to raise their points, and it humbles senior people out of their own fixed ideas.
+
+I see everybody I work with, designer or not, as a door into their knowledge and experience. It's a chance to learn from other people's experience for free, and I find it very rewarding. It brings the team closer too.
 
 ## Leading without managing
 

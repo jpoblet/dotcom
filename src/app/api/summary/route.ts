@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { NextRequest } from "next/server";
-import { getProfile, getProjects, hasPage } from "@/lib/content";
+import { getProfile, getProjects, hasPage, projectPath } from "@/lib/content";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -19,7 +19,8 @@ function buildSystemPrompt(origin: string): string {
   const first = profile.name.split(" ")[0];
   const links = getProjects()
     .map((p) => {
-      const page = hasPage(p) && !p.draft ? `${origin}/projects/${p.slug}` : "";
+      const path = hasPage(p) ? projectPath(p) : undefined;
+      const page = path ? `${origin}${path}` : "";
       return `- ${p.name}: ${[page && `case study ${page}`, p.liveUrl && `live at ${p.liveUrl}`].filter(Boolean).join(", ") || "no link"}`;
     })
     .join("\n");

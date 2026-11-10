@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, ArrowUpRight, Info } from "lucide-react";
+import { ArrowUp, Info } from "lucide-react";
 import ChatMarkdown from "@/components/ChatMarkdown";
 import ChatWidgets from "@/components/ChatWidgets";
-import Logo from "@/components/Logo";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { SiteFooterBar, SiteHeader } from "@/components/SiteChrome";
 import type { Message } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
 
@@ -175,40 +174,13 @@ export default function ChatPane({
     else turns[turns.length - 1].push(message);
   }
 
-  const footerLinks = (
-    <>
-      <a href={`mailto:${email}`} className="vt-foot-start truncate hover:text-foreground">
-        {email}
-      </a>
-      <div className="vt-foot-end flex items-center gap-3">
-        {links.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group/link inline-flex items-center hover:text-foreground"
-          >
-            {link.label}
-            {/* Opens elsewhere. */}
-            <ArrowUpRight size={13} aria-hidden="true" className="ml-0.5 transition-transform duration-200 group-hover/link:-translate-y-px group-hover/link:translate-x-px" />
-          </a>
-        ))}
-        <ThemeSwitcher />
-      </div>
-    </>
-  );
-
   return (
     <div className="relative flex h-full min-h-0 flex-col">
       {/* Header: transparent, floating over the chat, which scrolls right up
           to the top edge behind it. The controls move into the panel's
           header while it's open (desktop). */}
       {/* One size for the logo, panel open or closed. */}
-      <div className="absolute inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 px-4 sm:px-6">
-        <Logo className="vt-logo h-12 fill-current shrink-0" />
-        <div className="flex items-center gap-1">{headerControls}</div>
-      </div>
+      <SiteHeader>{headerControls}</SiteHeader>
 
       <div className="flex min-h-0 flex-1">
         {/* The thread */}
@@ -387,12 +359,7 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt
             </form>
           </div>
 
-          {/* Footer: email, profiles and the theme. Layered above the chat
-              input, so the theme menu, which opens upwards over it, can
-              always be clicked. */}
-          <div className="relative z-30 flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pb-3 text-xs text-foreground-secondary">
-            {footerLinks}
-          </div>
+          <SiteFooterBar email={email} links={links} />
         </div>
       </div>
     </div>

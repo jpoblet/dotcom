@@ -2,7 +2,7 @@
 title: Why my favourite animal is the dung beetle
 ---
 
-The dung beetle is my favourite animal because it represents a lot of the qualities I see in myself. I was lucky enough to see them in the wild in Africa, on the savannah, and it was a precious moment. The more I learnt about them, the more I realised how much they behave like entrepreneurs. I wrote about it on Medium, in an article called "Entrepreneurs and Dung Beetles share a common ancestor".
+The dung beetle is my favourite animal because it represents a lot of the qualities I see in myself. I was lucky enough to see them in the wild in Africa, on the savannah, and it was a precious moment. The more I learnt about them, the more I realised how much they behave like entrepreneurs. I've written an article about it, called "Entrepreneurs and Dung Beetles share a common ancestor". It isn't published yet, but I'm planning to put it on Medium.
 
 Dung beetles feed on dung. They make a ball of it, sometimes ten times their own size, and roll it away looking for the perfect place to bury it. The ancient Egyptians considered them sacred and painted them, balls and all, on the walls of their tombs and temples.
 

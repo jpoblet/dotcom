@@ -315,6 +315,19 @@ export function hasPage(project: Project): boolean {
   return !project.draft || process.env.NODE_ENV === "development";
 }
 
+/**
+ * Where a project's case study opens: the home page with the side panel on
+ * it. Websites (type "client") and drafts have no case study.
+ */
+export function projectPath(project: Project): string | undefined {
+  return !project.draft && project.type !== "client" ? `/work/${project.slug}` : undefined;
+}
+
+/** Projects with a case study, i.e. a /work/<slug> address. */
+export function getCaseStudies(): Project[] {
+  return getProjects().filter((p) => p.type !== "client" && hasPage(p));
+}
+
 export function projectMeta(project: Project): string {
   return [project.company, project.role, project.year]
     .filter(Boolean)
@@ -338,7 +351,7 @@ export function toProjectCard(project: Project): ProjectCardData {
     logo: project.logo,
     logoMark: project.logoMark,
     brandBackground: project.brandBackground,
-    href: project.draft ? undefined : `/projects/${project.slug}`,
+    href: projectPath(project),
   };
 }
 
@@ -446,11 +459,8 @@ export function buildKnowledgeBase(): string {
       const meta = projectMeta(project);
       parts.push(`\n### ${project.name}`);
       if (meta) parts.push(meta);
-      parts.push(
-        project.draft
-          ? "Page: none (no case-study page, do not link to one)"
-          : `Page: /projects/${project.slug}`,
-      );
+      const path = projectPath(project);
+      parts.push(path ? `Page: ${path}` : "Page: none (no case-study page, do not link to one)");
       if (project.liveUrl) parts.push(`Live at: ${project.liveUrl}`);
       if (project.summary) parts.push(project.summary);
       // Drafts only lack a page; their write-up is still useful to the AI.

@@ -6,6 +6,15 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/chat": ["./content/**/*"],
   },
+  // The projects page and the /projects/<slug> pages are gone: case studies
+  // now open in the home page's side panel, at /work/<slug>. Old links land
+  // in the right place.
+  async redirects() {
+    return [
+      { source: "/projects", destination: "/work", permanent: true },
+      { source: "/projects/:slug", destination: "/work/:slug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

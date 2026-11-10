@@ -28,11 +28,11 @@ draft: false
 
 ## Status
 
-I started Medal in January 2024 and parked it in December 2024, after a year of looking for product-market fit. It's still live.
+I'd been working on the concept of Medal for about two years before I started building it in earnest, dedicating much more of my spare time to it from January 2024. I parked it in December 2024, after a year of looking for product-market fit. It's still live.
 
 ## What went into it
 
-Medal wasn't a weekend experiment. Over the time I worked on it, I convinced four different CTOs to come on board, and worked on the go-to-market strategy with another partner.
+Medal wasn't a weekend experiment. Over those years, I convinced four different CTOs to come on board, and worked on the go-to-market strategy with another partner.
 
 ## Why I parked it
 

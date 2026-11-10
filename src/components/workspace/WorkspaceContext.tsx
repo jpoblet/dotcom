@@ -20,7 +20,35 @@ export const WorkspaceContext = createContext<WorkspaceActions | null>(null);
 
 export const useWorkspace = () => useContext(WorkspaceContext);
 
-/** "/projects/okasewa" -> "okasewa" */
+/**
+ * "/work/athleteid" -> "athleteid". Also reads the older "/projects/..." and
+ * "/project/..." forms, still found in conversations saved before the change.
+ */
 export function projectSlugFromHref(href: string): string | undefined {
-  return href.match(/^\/projects\/([a-z0-9-]+)\/?$/)?.[1];
+  return href.match(/^\/(?:work|projects?)\/([a-z0-9-]+)\/?$/)?.[1];
+}
+
+/** The address of a case study open in the side panel. */
+export const projectHref = (slug: string) => `/work/${slug}`;
+
+export type Tab = "work" | "notes";
+
+/**
+ * What the address says the screen shows: "/" the chat alone, "/work" and
+ * "/notes" the panel open on that tab, "/work/<slug>" a case study in it.
+ */
+export type View = { tab: Tab | null; slug?: string };
+
+export function viewFromPath(path: string): View {
+  const slug = projectSlugFromHref(path);
+  if (slug) return { tab: "work", slug };
+  if (/^\/work\/?$/.test(path)) return { tab: "work" };
+  if (/^\/notes\/?$/.test(path)) return { tab: "notes" };
+  return { tab: null };
+}
+
+export function pathFromView({ tab, slug }: View): string {
+  if (!tab) return "/";
+  if (tab === "notes") return "/notes";
+  return slug ? projectHref(slug) : "/work";
 }

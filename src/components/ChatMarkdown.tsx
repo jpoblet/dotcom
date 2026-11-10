@@ -24,7 +24,7 @@ function MarkdownLink({ href = "", children }: { href?: string; children?: React
       </a>
     );
   }
-  // Site pages (e.g. /projects/okasewa) navigate in-app; everything else
+  // Site pages (e.g. /work/athleteid) navigate in-app; everything else
   // opens in a new tab. No prefetch: answers can mention many pages.
   if (href.startsWith("/")) {
     return (
