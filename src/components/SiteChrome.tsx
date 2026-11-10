@@ -9,11 +9,15 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
  * exactly the same place everywhere.
  */
 
-/** Transparent, floating over the content; the logo left, `children` right. */
+/**
+ * Floating over the content; the logo left, `children` right. Transparent
+ * on desktop; on phones and tablets it has the page background, fading
+ * out below, so scrolled text doesn't run under the logo and controls.
+ */
 export function SiteHeader({ logoHref, children }: { logoHref?: string; children?: React.ReactNode }) {
   const logo = <Logo className="vt-logo h-12 fill-current shrink-0" />;
   return (
-    <div className="absolute inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 px-4 sm:px-6">
+    <div className="absolute inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 px-4 sm:px-6 max-lg:bg-background max-lg:after:pointer-events-none max-lg:after:absolute max-lg:after:inset-x-0 max-lg:after:top-full max-lg:after:h-6 max-lg:after:bg-gradient-to-b max-lg:after:from-background max-lg:after:to-transparent">
       {logoHref ? (
         <Link href={logoHref} aria-label="Home">
           {logo}

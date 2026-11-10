@@ -190,8 +190,9 @@ export default function ChatPane({
 className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt-28"
           >
             <div className="mx-auto max-w-[42rem]">
-              {/* The name opens the page. */}
-              <div className="mb-10">
+              {/* The name opens the page, a little way down (not on short
+                  screens, where the suggestions need the room). */}
+              <div className="mb-10 [@media(min-height:740px)]:mt-12">
                 <h1
                   className="font-mono text-5xl sm:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-balance"
                 >
@@ -211,8 +212,10 @@ className="relative min-h-0 flex-1 overflow-y-auto px-4 sm:px-8 pt-24 pb-8 lg:pt
                 </span>{" "}
                 – anything, really.
               </p>
+              {/* Plenty of room above the suggestions, except on short
+                  screens, where it would push them under the input. */}
               {empty && starters.length > 0 && (
-                <div ref={suggestionsRef} className="mt-12">
+                <div ref={suggestionsRef} className="mt-12 [@media(min-height:740px)]:mt-24">
                   <RotatingStarter questions={starters} onPick={(q) => submit(q, "starter")} />
                 </div>
               )}
