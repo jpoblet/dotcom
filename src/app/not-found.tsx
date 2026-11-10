@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * The night sky behind the page: dung beetles steer by the Milky Way. About
- * a third of the stars gather in a faint diagonal band; the rest are spread
- * across the page. Seeded, so every render draws the same sky.
+ * The night sky above the horizon: dung beetles steer by the Milky Way.
+ * About a third of the stars gather in a faint diagonal band; the rest are
+ * spread across the sky. Seeded, so every render draws the same sky.
  */
 const SKY = (() => {
   let seed = 7;
@@ -20,12 +20,12 @@ const SKY = (() => {
     seed = (seed * 16807) % 2147483647;
     return (seed - 1) / 2147483646;
   };
-  return Array.from({ length: 110 }, (_, i) => {
+  return Array.from({ length: 130 }, (_, i) => {
     const inBand = i % 3 === 0;
     // The band runs from bottom left to top right.
     const t = rand();
     const x = inBand ? t * 100 : rand() * 100;
-    const y = inBand ? 85 - t * 75 + (rand() - 0.5) * 18 : rand() * 100;
+    const y = inBand ? 95 - t * 85 + (rand() - 0.5) * 16 : rand() * 98;
     const bright = rand() > 0.9;
     return {
       x,
@@ -69,93 +69,95 @@ export default function NotFound() {
         ))}
       </SiteHeader>
 
-      {/* Faded out around the text, so no star lands between the words. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:radial-gradient(ellipse_22rem_12rem_at_50%_calc(50%+9rem),transparent_70%,black_100%)]"
-      >
-        {SKY.map((star, i) => (
-          <span
-            key={i}
-            className={`nf-star absolute rounded-full bg-foreground ${
-              star.bright
-                ? "shadow-[0_0_6px_1px_currentColor] text-foreground"
-                : ""
-            }`}
-            style={{
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: star.size,
-              height: star.size,
-              animationDelay: `${star.delay}s`,
-              animationDuration: `${star.duration}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <main className="relative min-h-0 flex-1 overflow-y-auto px-4 pt-24 pb-10 sm:px-8 lg:pt-28">
+      <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pt-24 pb-10 sm:px-8 lg:pt-28">
         <div className="mx-auto flex min-h-full w-full max-w-xl flex-col justify-center gap-10">
-          <svg
-            viewBox="0 0 500 210"
-            role="img"
-            aria-label="404: a dung beetle pushing the zero like a ball"
-            className="nf-scene w-full overflow-visible text-foreground"
-          >
-            <text
-              x="10"
-              y="190"
-              className="fill-current font-mono"
-              fontSize="168"
-              fontWeight="500"
+          <div className="relative">
+            {/* The night sky, from the illustration's ground line up and
+                across the whole width of the page. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-[9.3%] left-1/2 h-[60dvh] w-screen -translate-x-1/2"
             >
-              4
-            </text>
-            <text
-              x="384"
-              y="190"
-              className="fill-current font-mono"
-              fontSize="168"
-              fontWeight="500"
-            >
-              4
-            </text>
-
-            {/* The beetle and its ball, nudging back and forth: it's stuck. */}
-            <g className="nf-push">
-              {/* The ball, rolling: a ring (the zero) with bits of straw in it. */}
-              <g className="nf-ball">
-                <circle
-                  cx="300"
-                  cy="129"
-                  r="51"
-                  className="fill-none stroke-current"
-                  strokeWidth="19"
+              {SKY.map((star, i) => (
+                <span
+                  key={i}
+                  className={`nf-star absolute rounded-full bg-foreground ${
+                    star.bright
+                      ? "shadow-[0_0_6px_1px_currentColor] text-foreground"
+                      : ""
+                  }`}
+                  style={{
+                    left: `${star.x}%`,
+                    top: `${star.y}%`,
+                    width: star.size,
+                    height: star.size,
+                    animationDelay: `${star.delay}s`,
+                    animationDuration: `${star.duration}s`,
+                  }}
                 />
-                <g
-                  className="stroke-current"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  fill="none"
-                >
-                  <path d="M285 112q8-6 16-2" />
-                  <path d="M306 140q6 5 13 1" />
-                  <path d="M290 146l6-8" />
-                  <path d="M311 113l4 7" />
+              ))}
+            </div>
+            <svg
+              viewBox="0 0 500 210"
+              role="img"
+              aria-label="404: a dung beetle pushing the zero like a ball"
+              className="nf-scene relative w-full overflow-visible text-foreground"
+            >
+              <text
+                x="10"
+                y="190"
+                className="fill-current font-mono"
+                fontSize="168"
+                fontWeight="500"
+              >
+                4
+              </text>
+              <text
+                x="384"
+                y="190"
+                className="fill-current font-mono"
+                fontSize="168"
+                fontWeight="500"
+              >
+                4
+              </text>
+
+              {/* The beetle and its ball, nudging back and forth: it's stuck. */}
+              <g className="nf-push">
+                {/* The ball, rolling: a ring (the zero) with bits of straw in it. */}
+                <g className="nf-ball">
+                  <circle
+                    cx="300"
+                    cy="129"
+                    r="51"
+                    className="fill-none stroke-current"
+                    strokeWidth="19"
+                  />
+                  <g
+                    className="stroke-current"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    fill="none"
+                  >
+                    <path d="M285 112q8-6 16-2" />
+                    <path d="M306 140q6 5 13 1" />
+                    <path d="M290 146l6-8" />
+                    <path d="M311 113l4 7" />
+                  </g>
                 </g>
+
+                <DungBeetle />
               </g>
 
-              <DungBeetle />
-            </g>
-
-            {/* The ground. */}
-            <path
-              d="M0 190.5h500"
-              className="stroke-current"
-              strokeWidth="1.5"
-              opacity="0.25"
-            />
-          </svg>
+              {/* The ground. */}
+              <path
+                d="M0 190.5h500"
+                className="stroke-current"
+                strokeWidth="1.5"
+                opacity="0.25"
+              />
+            </svg>
+          </div>
 
           <div className="flex flex-col gap-4">
             <MissingPath />

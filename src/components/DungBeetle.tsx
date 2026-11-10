@@ -1,61 +1,67 @@
 /**
- * A dung beetle in a headstand, front legs on the ground and back legs
- * reaching up over its ball, drawn in the 404 scene's coordinates (viewBox 0 0 500
- * 210, ground at y 190.5, ball centred at 300,129). The body is drawn level
- * and tilted into place; the legs are jointed (femur, toothed tibia, tarsus),
- * with the far ones lighter for depth. Generated once, so it's static paths.
- * Colours come from currentColor and the page background.
+ * A dung beetle in a headstand, after a photo of one at work: front legs
+ * planted under the head, spiny middle legs angled back to the ground, and
+ * the back legs gripping the ball from the side. The near back leg crosses
+ * the ball's face; the far one grips the far side, a little higher, and is
+ * lighter for depth. The whole beetle is a mid grey, so it reads against
+ * the background and against the numbers, in light and dark mode.
+ * Drawn in the 404 scene's coordinates (viewBox 0 0 500 210, ground at
+ * y 190.5, ball centred at 300,129). Generated once, so it's static paths.
+ * The legs walk in a tripod gait: nf-leg-a and nf-leg-b are the two
+ * alternating sets of three (see globals.css).
  */
 export default function DungBeetle() {
   return (
-    <g>
+    <g className="text-[var(--boulder-500)]">
       <g
         className="nf-leg-b stroke-current"
-        style={{ transformOrigin: "190.9px 175.2px" }}
+        style={{ transformOrigin: "195.2px 175.6px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity="0.5"
       >
-        <path d="M190.9 175.2 L189.0 182.5" strokeWidth="4.2" />
-        <path d="M189.0 182.5 L197.0 189.5" strokeWidth="3" />
-        <path d="M191.2 184.4 l-1.0 3.4" strokeWidth="1.3" />
-        <path d="M193.4 186.4 l-1.0 3.4" strokeWidth="1.3" />
-        <path d="M195.7 188.3 l-1.0 3.4" strokeWidth="1.3" />
-        <path d="M197.0 189.5 L203.0 190.5" strokeWidth="1.4" />
+        <path d="M195.2 175.6 L189.2 178.5" strokeWidth="4.4" />
+        <path d="M189.2 178.5 Q191.2 183.5 193.2 188.5" strokeWidth="3.6" />
+        <path d="M190.2 181.2 l-2.2 2.6" strokeWidth="1.3" />
+        <path d="M191.3 183.9 l-2.2 2.6" strokeWidth="1.3" />
+        <path d="M192.4 186.6 l-2.2 2.6" strokeWidth="1.3" />
+        <path d="M193.2 188.5 L198.2 190.5" strokeWidth="1.5" />
       </g>
       <g
         className="nf-leg-a stroke-current"
-        style={{ transformOrigin: "212.1px 160.7px" }}
+        style={{ transformOrigin: "218.2px 158.3px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity="0.5"
       >
-        <path d="M212.1 160.7 L222.0 170.5" strokeWidth="4.2" />
-        <path d="M222.0 170.5 L230.0 182.5" strokeWidth="3" />
-        <path d="M224.2 173.8 l-1.8 3.0" strokeWidth="1.3" />
-        <path d="M226.4 177.2 l-1.8 3.0" strokeWidth="1.3" />
-        <path d="M228.7 180.5 l-1.8 3.0" strokeWidth="1.3" />
-        <path d="M230.0 182.5 L237.0 188.5" strokeWidth="1.4" />
+        <path d="M218.2 158.3 L228.2 166.3" strokeWidth="4.4" />
+        <path d="M228.2 166.3 Q231.6 177.2 238.2 186.5" strokeWidth="3.0" />
+        <path d="M229.8 170.9 l3.4 0.4" strokeWidth="1.3" />
+        <path d="M231.7 175.3 l3.4 0.2" strokeWidth="1.3" />
+        <path d="M233.9 179.6 l3.4 -0.0" strokeWidth="1.3" />
+        <path d="M236.4 183.7 l3.4 -0.3" strokeWidth="1.3" />
+        <path d="M238.2 186.5 L243.2 190.5" strokeWidth="1.5" />
       </g>
       <g
         className="nf-leg-b stroke-current"
-        style={{ transformOrigin: "234.6px 135.0px" }}
+        style={{ transformOrigin: "236.4px 132.6px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity="0.5"
       >
-        <path d="M234.6 135.0 L246.0 98.0" strokeWidth="4.2" />
-        <path d="M246.0 98.0 L262.0 67.0" strokeWidth="3" />
-        <path d="M249.5 91.3 l3.5 0.1" strokeWidth="1.3" />
-        <path d="M253.0 84.5 l3.5 0.1" strokeWidth="1.3" />
-        <path d="M256.4 77.8 l3.5 0.1" strokeWidth="1.3" />
-        <path d="M259.9 71.0 l3.5 0.1" strokeWidth="1.3" />
-        <path d="M262.0 67.0 L280.0 75.0" strokeWidth="1.4" />
+        <path d="M236.4 132.6 L237.4 123.6" strokeWidth="4.4" />
+        <path d="M237.4 123.6 Q235.6 115.5 237.1 107.3" strokeWidth="3.0" />
+        <path d="M236.8 120.2 l2.8 -2.0" strokeWidth="1.3" />
+        <path d="M236.5 116.7 l2.9 -1.7" strokeWidth="1.3" />
+        <path d="M236.5 113.3 l3.1 -1.5" strokeWidth="1.3" />
+        <path d="M236.8 109.8 l3.2 -1.2" strokeWidth="1.3" />
+        <path d="M237.1 107.3 L244.5 107.7" strokeWidth="1.5" />
+        <path d="M244.5 107.7 L248.8 102.9" strokeWidth="1.3" />
       </g>
-      <g transform="translate(172 190) rotate(-38) scale(0.8) translate(0 -44)">
+      <g transform="translate(178 190) rotate(-40) scale(0.8) translate(0 -44)">
         <path
           className="fill-current"
           d="M1 41 L-2 38 L2 36.5 L-1 33.5 L3 32 L1 29 L7 28 Q15 24.5 21 29 L21 43 Q11 45.5 1 41Z"
@@ -81,53 +87,55 @@ export default function DungBeetle() {
       </g>
       <g
         className="nf-leg-a stroke-current"
-        style={{ transformOrigin: "187.8px 177.7px" }}
+        style={{ transformOrigin: "191.5px 178.7px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M187.8 177.7 L176.0 184.5" strokeWidth="4.2" />
-        <path d="M176.0 184.5 L167.0 190.5" strokeWidth="3" />
-        <path d="M173.5 186.2 l-3.0 -1.8" strokeWidth="1.3" />
-        <path d="M171.0 187.8 l-3.0 -1.8" strokeWidth="1.3" />
-        <path d="M168.5 189.5 l-3.0 -1.8" strokeWidth="1.3" />
-        <path d="M167.0 190.5 L159.0 190.5" strokeWidth="1.4" />
+        <path d="M191.5 178.7 L183.5 180.5" strokeWidth="4.4" />
+        <path d="M183.5 180.5 Q184.0 185.0 184.5 189.5" strokeWidth="3.8" />
+        <path d="M183.8 182.9 l-2.8 1.9" strokeWidth="1.3" />
+        <path d="M184.0 185.4 l-2.8 1.9" strokeWidth="1.3" />
+        <path d="M184.3 187.8 l-2.8 1.9" strokeWidth="1.3" />
+        <path d="M184.5 189.5 L190.5 190.5" strokeWidth="1.5" />
       </g>
       <g
         className="nf-leg-b stroke-current"
-        style={{ transformOrigin: "208.9px 163.2px" }}
+        style={{ transformOrigin: "214.6px 161.4px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M208.9 163.2 L209.0 176.5" strokeWidth="4.2" />
-        <path d="M209.0 176.5 L207.0 189.5" strokeWidth="3" />
-        <path d="M208.4 180.1 l-3.4 1.0" strokeWidth="1.3" />
-        <path d="M207.9 183.7 l-3.4 1.0" strokeWidth="1.3" />
-        <path d="M207.3 187.3 l-3.4 1.0" strokeWidth="1.3" />
-        <path d="M207.0 189.5 L214.0 190.5" strokeWidth="1.4" />
+        <path d="M214.6 161.4 L218.6 173.4" strokeWidth="4.4" />
+        <path d="M218.6 173.4 Q223.4 181.4 230.6 187.5" strokeWidth="3.0" />
+        <path d="M220.7 176.7 l3.4 -0.4" strokeWidth="1.3" />
+        <path d="M223.1 179.9 l3.3 -0.6" strokeWidth="1.3" />
+        <path d="M225.7 182.8 l3.3 -0.9" strokeWidth="1.3" />
+        <path d="M228.5 185.6 l3.2 -1.1" strokeWidth="1.3" />
+        <path d="M230.6 187.5 L236.6 190.5" strokeWidth="1.5" />
       </g>
       <g
         className="nf-leg-a stroke-current"
-        style={{ transformOrigin: "236.6px 137.5px" }}
+        style={{ transformOrigin: "231.0px 148.6px" }}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M236.6 137.5 L239.0 105.0" strokeWidth="4.2" />
-        <path d="M239.0 105.0 L251.0 77.0" strokeWidth="3" />
-        <path d="M241.6 98.9 l3.5 -0.1" strokeWidth="1.3" />
-        <path d="M244.2 92.8 l3.5 -0.1" strokeWidth="1.3" />
-        <path d="M246.8 86.7 l3.5 -0.1" strokeWidth="1.3" />
-        <path d="M249.4 80.7 l3.5 -0.1" strokeWidth="1.3" />
-        <path d="M251.0 77.0 L266.0 85.0" strokeWidth="1.4" />
+        <path d="M231.0 148.6 L238.6 130.4" strokeWidth="4.4" />
+        <path d="M238.6 130.4 Q243.2 127.3 248.6 126.3" strokeWidth="3.0" />
+        <path d="M240.6 129.2 l2.8 1.9" strokeWidth="1.3" />
+        <path d="M242.6 128.2 l2.7 2.1" strokeWidth="1.3" />
+        <path d="M244.8 127.3 l2.5 2.3" strokeWidth="1.3" />
+        <path d="M247.0 126.7 l2.3 2.5" strokeWidth="1.3" />
+        <path d="M248.6 126.3 L254.8 123.5" strokeWidth="1.5" />
+        <path d="M254.8 123.5 L260.1 117.6" strokeWidth="1.3" />
       </g>
       <path
         className="stroke-current"
         fill="none"
         strokeWidth="1.6"
         strokeLinecap="round"
-        d="M172.8 183.3 q-6 6 -11 5 M172.8 183.3 q-4 8 -9 10"
+        d="M178.6 183.2 q-6 6 -11 5 M178.6 183.2 q-4 8 -9 10"
       />
     </g>
   );
