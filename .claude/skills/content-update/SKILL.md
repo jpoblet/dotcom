@@ -23,7 +23,11 @@ It prints one JSON document:
 - `since`: the last update (top entry of `content/updates/log.md`).
 - `site.chat`: what visitors asked since then. `gaps` are replies where
   the chat said it didn't know, or that failed: the best source of
-  questions. `typed` are questions people wrote themselves (starters and
+  questions. The `unsure` flag only catches English phrasing and the chat
+  replies in the visitor's language, so read every reply in `typed`
+  yourself and spot the ones that dodged or didn't know (e.g. "techno
+  isn't something I've ever thought about", or a polite deflection in
+  Italian). `typed` are questions people wrote themselves (starters and
   follow-up chips are the site's own suggestions, so they say less).
   `cardsShown` shows which projects people looked at.
 - `site.analytics`: Umami page views, top pages and events (`Project

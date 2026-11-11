@@ -19,10 +19,11 @@ export const dynamic = "force-dynamic";
 /**
  * Replies where the chat said it didn't know: the system prompt tells it to
  * answer like a person who doesn't recall, so these phrases mark gaps in
- * the content. Approximate on purpose; the interview reads the replies.
+ * the content. English only and approximate on purpose (the chat replies
+ * in the visitor's language): the interview reads every reply anyway.
  */
 const UNSURE =
-  /\b(don'?t|do not) (really )?(remember|recall|know)\b|\bnot (really |entirely |totally )?sure\b|\bhaven'?t (really )?(thought|given|decided|looked)\b|\bnot something I'?ve\b|\bno idea\b|\bcan'?t (really )?(say|tell|share)\b|\brather (talk|chat|discuss)\b/i;
+  /\b(don'?t|do not) (really )?(remember|recall|know)\b|\bnot (really |entirely |totally )?sure\b|\bhaven'?t (really |ever )*(thought|given|decided|looked)\b|\b(not|isn'?t|wasn'?t) (really )?something I'?ve\b|\bnever (really )?(thought|given)\b|\bno idea\b|\bcan'?t (really )?(say|tell|share)\b|\brather (not|talk|chat|discuss)\b/i;
 
 const PAGE = 200;
 /** Enough for a quarter of a busy portfolio; older questions are dropped. */
