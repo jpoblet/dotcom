@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "screen-colors": "node scripts/screen-colors.mjs",
     "capture-screens": "node scripts/capture-screens.mjs",
-    "content-signals": "node scripts/content-signals.mjs"
+    "content-signals": "node scripts/content-signals.mjs",
+    "cv": "node scripts/build-cv.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",

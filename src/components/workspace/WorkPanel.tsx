@@ -24,6 +24,14 @@ function sections(markdown: string) {
     .filter((s) => s.body);
 }
 
+/** "6 case studies, 6 websites and 4 articles": skips empty ones, singular for one. */
+function countLine(counts: [number, string, string][]) {
+  const parts = counts
+    .filter(([n]) => n > 0)
+    .map(([n, one, many]) => `${n} ${n === 1 ? one : many}`);
+  return parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : parts.join("");
+}
+
 /** A section title over a hairline, with its count on the right. */
 function SectionHead({ title, count, className = "" }: { title: string; count: number; className?: string }) {
   return (
@@ -65,9 +73,15 @@ export function WorkOverview({
   }, []);
   return (
     <div className="px-6 sm:px-8 py-8">
-      <p className="max-w-sm text-sm text-foreground-secondary">
-        {caseStudies.length} case studies and {websites.length} websites, most recent first.
-      </p>
+      {/* The overview's title, in the same face as a case study's. */}
+      <h1 className="text-balance font-mono text-lg sm:text-xl font-bold tracking-tight">
+        {countLine([
+          [caseStudies.length, "case study", "case studies"],
+          [websites.length, "website", "websites"],
+          [articles.length, "article", "articles"],
+        ])}
+        , most recent first.
+      </h1>
 
       <SectionHead title="Case studies" count={caseStudies.length} className="mt-10" />
       <ol ref={setList}>

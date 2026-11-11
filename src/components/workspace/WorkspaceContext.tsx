@@ -10,6 +10,8 @@ export interface WorkspaceActions {
    * Ignored for slugs without a case study and on touch screens.
    */
   peekProject: (slug: string | null) => void;
+  /** Opens the CV in a viewer over the page. */
+  openCv: () => void;
 }
 
 /**

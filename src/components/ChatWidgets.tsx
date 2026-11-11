@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Download, FileText } from "lucide-react";
 import CursorPeek from "@/components/CursorPeek";
 import LogoMark from "@/components/LogoMark";
 import { useWorkspace } from "@/components/workspace/WorkspaceContext";
+import { track } from "@/lib/analytics";
+import { CV_FILENAME, CV_HTML, CV_PDF } from "@/lib/cv";
 import type { MusicData, ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
 /**
@@ -283,6 +285,52 @@ function Music({ music }: { music: MusicData }) {
 }
 
 /**
+ * The CV, as a row like the project list: open it again in the viewer (or
+ * in a new tab outside the workspace), or download the PDF.
+ */
+function Cv() {
+  const workspace = useWorkspace();
+  const button =
+    "flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs transition-colors cursor-pointer";
+  return (
+    <div className="animate-suggestion-in flex w-full items-center gap-4 rounded-md bg-background-inverse/[0.04] px-4 py-3.5">
+      <span className="flex w-14 shrink-0 items-center justify-center text-foreground">
+        <FileText size={22} strokeWidth={1.5} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-mono text-base font-bold">Curriculum Vitae</span>
+        <span className="mt-0.5 block font-mono text-xs text-foreground-secondary">2 pages · A4 · PDF</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-1">
+        {workspace ? (
+          <button
+            type="button"
+            onClick={workspace.openCv}
+            className={`${button} bg-background-inverse text-background hover:opacity-85`}
+          >
+            View
+          </button>
+        ) : (
+          <a href={CV_HTML} target="_blank" rel="noopener noreferrer" className={`${button} bg-background-inverse text-background hover:opacity-85`}>
+            View
+          </a>
+        )}
+        <a
+          href={CV_PDF}
+          download={CV_FILENAME}
+          onClick={() => track("CV downloaded", { from: "chat card" })}
+          aria-label="Download CV (PDF)"
+          className={`${button} text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground`}
+        >
+          <Download size={14} />
+          <span className="hidden sm:inline">Download PDF</span>
+        </a>
+      </span>
+    </div>
+  );
+}
+
+/**
  * Rich blocks under an AI reply. Projects shown in the same reply are
  * gathered into one list.
  */
@@ -301,6 +349,8 @@ export default function ChatWidgets({ widgets }: { widgets: Widget[] }) {
             return <Contact key={index} email={widget.email} links={widget.links} />;
           case "music":
             return <Music key={index} music={widget.music} />;
+          case "cv":
+            return <Cv key={index} />;
         }
       })}
     </div>

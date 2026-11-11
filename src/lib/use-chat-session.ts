@@ -12,6 +12,7 @@ import {
 } from "@/lib/chat-client";
 import type { QuestionSource } from "@/lib/chat-log";
 import { NOTICES } from "@/lib/notices";
+import type { Widget } from "@/lib/widgets";
 
 /** A topic in the visitor's notes, with every note recorded for it. */
 export interface NoteTopic {
@@ -49,7 +50,12 @@ function collectTopics(messages: Message[]): NoteTopic[] {
  * The chat's state and actions: history (kept in localStorage), streaming
  * replies with their cards, follow-ups and topics, and resetting.
  */
-export function useChatSession(email: string) {
+export function useChatSession(email: string, onWidget?: (widget: Widget) => void) {
+  // Called for cards arriving live (not ones restored from history).
+  const onWidgetRef = useRef(onWidget);
+  useEffect(() => {
+    onWidgetRef.current = onWidget;
+  }, [onWidget]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -107,6 +113,7 @@ export function useChatSession(email: string) {
               track("Project card shown", { project: event.widget.project.slug });
             }
             update((m) => ({ ...m, widgets: [...(m.widgets ?? []), event.widget] }));
+            onWidgetRef.current?.(event.widget);
           } else if (event.type === "suggestions") {
             update((m) => ({ ...m, suggestions: event.questions }));
           } else if (event.type === "topics") {

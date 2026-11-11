@@ -91,6 +91,8 @@ function describeWidget(widget: Widget): string {
       return "contact card";
     case "music":
       return "music card (Last.fm)";
+    case "cv":
+      return "CV (opened in a viewer, with a download)";
   }
 }
 

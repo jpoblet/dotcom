@@ -62,4 +62,6 @@ export type Widget =
   | { kind: "project"; project: ProjectCardData }
   | { kind: "timeline"; roles: TimelineEntry[] }
   | { kind: "contact"; email: string; links: { label: string; href: string }[] }
-  | { kind: "music"; music: MusicData };
+  | { kind: "music"; music: MusicData }
+  /** Opens the CV in a viewer over the page; the card reopens or downloads it. */
+  | { kind: "cv" };

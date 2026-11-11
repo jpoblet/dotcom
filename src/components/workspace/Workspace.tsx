@@ -10,6 +10,8 @@ import type { Article } from "@/lib/medium";
 import { useChatSession } from "@/lib/use-chat-session";
 import ChatPane from "./ChatPane";
 import ConfirmDialog from "./ConfirmDialog";
+import CvMenu from "./CvMenu";
+import CvModal from "./CvModal";
 import NotesPanel from "./NotesPanel";
 import { ProjectView, WorkOverview } from "./WorkPanel";
 import { WorkspaceContext, pathFromView, viewFromPath, type Tab, type View } from "./WorkspaceContext";
@@ -55,7 +57,16 @@ export default function Workspace({
   articles,
   initialView,
 }: Props) {
-  const session = useChatSession(email);
+  // The CV viewer. It opens by itself when the chat shows the CV.
+  const [cvOpen, setCvOpen] = useState(false);
+  const openCv = useCallback((from: string) => {
+    track("CV viewed", { from });
+    setCvOpen(true);
+  }, []);
+  const session = useChatSession(
+    email,
+    useCallback((widget: { kind: string }) => widget.kind === "cv" && openCv("chat"), [openCv]),
+  );
   // Arriving on /work, /notes or /work/<slug>: the panel starts open there.
   const startTab = initialView?.tab ?? null;
   const startOn = caseStudies.some((p) => p.slug === initialView?.slug) ? initialView!.slug! : null;
@@ -156,13 +167,13 @@ export default function Workspace({
   // Escape steps back: project, then the panel.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || cvOpen) return;
       if (projectOpen) closeProject();
       else if (panelOpenRef.current) closePanel();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [projectOpen, closeProject, closePanel]);
+  }, [projectOpen, closeProject, closePanel, cvOpen]);
 
   // One floating preview for every case-study link in the chat and notes.
   const [peekSlug, setPeekSlug] = useState<string | null>(null);
@@ -184,8 +195,9 @@ export default function Workspace({
         openProject(next);
       },
       peekProject,
+      openCv: () => openCv("chat card"),
     }),
-    [openProject, peekProject],
+    [openProject, peekProject, openCv],
   );
 
   // From a talking point back to where it came up: scroll the chat to that
@@ -343,13 +355,16 @@ export default function Workspace({
               {/* Desktop: the controls, carried over from the chat header. */}
               {panelOpen && desktopControls}
             </div>
-            <div className="hidden items-center gap-1 lg:flex">
+            <div className="flex items-center gap-1">
+              {/* The CV: view it over the page, or download the PDF. */}
+              <CvMenu onView={() => openCv("panel")} />
+              <span aria-hidden="true" className="mx-1 hidden h-4 w-px bg-background-inverse/15 lg:block" />
               <button
                 type="button"
                 onClick={closePanel}
                 aria-label="Close panel"
                 title="Close"
-                className="-mr-1 flex size-8 items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer"
+                className="-mr-1 hidden size-8 lg:flex items-center justify-center rounded-md text-foreground-secondary hover:bg-background-inverse/6 hover:text-foreground cursor-pointer"
               >
                 <X size={15} />
               </button>
@@ -428,6 +443,7 @@ export default function Workspace({
         This clears our whole conversation and your AI Notes, and there&apos;s no way to get
         them back. If you&apos;d like to keep them, write up the conversation in AI Notes first.
       </ConfirmDialog>
+      <CvModal open={cvOpen} onClose={() => setCvOpen(false)} />
       {canHover && (
         <CursorPeek
           anchor={typeof document === "undefined" ? null : document.body}

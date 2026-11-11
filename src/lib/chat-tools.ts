@@ -65,6 +65,13 @@ export function buildTools(): Tool[] {
       eager_input_streaming: true,
     },
     {
+      name: "show_cv",
+      description: `Open ${first}'s CV (résumé) for the visitor: it opens in a viewer over the page, with a button to download it as a PDF, and a card under your reply lets them open it again. Use it whenever the visitor asks for the CV or résumé, a PDF or printable version of the experience, or something to share with a hiring team.`,
+      input_schema: NO_INPUT,
+      strict: true,
+      eager_input_streaming: true,
+    },
+    {
       name: "show_contact",
       description: `Show the visitor a contact card with ${first}'s email and public profiles. Use it when the visitor wants to get in touch, hire, collaborate, or asks how to reach ${first}.`,
       input_schema: NO_INPUT,
@@ -231,6 +238,11 @@ export async function runTool(name: string, input: unknown): Promise<ToolOutcome
           })),
         },
         result: "The career timeline is now shown to the visitor below your reply. It doesn't replace your answer: write a full reply to the question and mention the timeline below.",
+      };
+    case "show_cv":
+      return {
+        widget: { kind: "cv" },
+        result: "The CV is now open in a viewer over the page, and a card under your reply lets the visitor open it again or download it as a PDF. It doesn't replace your answer: write a short reply in your own words with a quick overview of your experience (current role and the highlights), and mention the card below for opening or downloading the CV.",
       };
     case "show_contact": {
       const { email, links } = getProfile();
