@@ -4,6 +4,7 @@ import Script from "next/script";
 import SiteFooter from "@/components/SiteFooter";
 import { fontVariables } from "./fonts";
 import { getProfile } from "@/lib/content";
+import { UMAMI_WEBSITE_ID } from "@/lib/umami";
 
 const profile = getProfile();
 
@@ -55,10 +56,8 @@ export const viewport: Viewport = {
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
 
 
-// Umami analytics (cookieless). The website id is public by design. Events
-// are only recorded on the live domains, so local runs and previews don't
-// count.
-const UMAMI_WEBSITE_ID = "c9feed1a-4c35-42a6-96df-97d07e0bf709";
+// Umami analytics (cookieless; see lib/umami.ts). Events are only recorded
+// on the live domains, so local runs and previews don't count.
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

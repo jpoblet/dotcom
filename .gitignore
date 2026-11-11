@@ -43,3 +43,6 @@ next-env.d.ts
 # tempo
 **/tempobook/dynamic/
 **/tempobook/storyboards/
+
+# local Claude Code permissions
+.claude/settings.local.json
