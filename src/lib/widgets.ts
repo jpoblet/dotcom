@@ -33,7 +33,33 @@ export interface TimelineEntry {
   website?: string;
 }
 
+export interface MusicTrack {
+  artist: string;
+  name: string;
+  /** The track's Last.fm page. */
+  url: string;
+  /** When it was played (ms); absent while it's playing. */
+  playedAt?: number;
+  nowPlaying?: boolean;
+}
+
+/** Jordi's listening, from Last.fm (see lib/lastfm.ts). */
+export interface MusicData {
+  user: string;
+  profileUrl: string;
+  totalPlays: number;
+  /** When the Last.fm account started (ms). */
+  since: number;
+  /** Most played artists over the last three months. */
+  topArtists: { name: string; plays: number; url: string }[];
+  /** Genres, from the top artists' tags weighted by plays. */
+  genres: string[];
+  recent: MusicTrack[];
+  nowPlaying?: MusicTrack;
+}
+
 export type Widget =
   | { kind: "project"; project: ProjectCardData }
   | { kind: "timeline"; roles: TimelineEntry[] }
-  | { kind: "contact"; email: string; links: { label: string; href: string }[] };
+  | { kind: "contact"; email: string; links: { label: string; href: string }[] }
+  | { kind: "music"; music: MusicData };

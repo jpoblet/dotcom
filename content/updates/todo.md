@@ -34,5 +34,9 @@ content. Settled decisions go at the bottom so nobody asks again.
   concentrix.com/catalyst/.
 - Medal: ~2 years on the concept, built in spare time Jan-Dec 2024.
 - Live Strava and Spotify data in the chat: their terms forbid it (Strava
-  API Policy §2.3/§5.3; Spotify Developer Policy III.14); Last.fm needs
-  written approval. Don't propose again without a new angle.
+  API Policy §2.3/§5.3; Spotify Developer Policy III.14). Don't propose
+  again without a new angle.
+- Last.fm: live in the chat's music card since 2026-11-11 (lib/lastfm.ts).
+  Jordi chose to launch without the written approval Last.fm's API terms
+  (clause 2.7) ask for public pages; the card credits Last.fm and links
+  to its pages as the terms require.

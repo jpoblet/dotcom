@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CursorPeek from "@/components/CursorPeek";
 import LogoMark from "@/components/LogoMark";
 import { useWorkspace } from "@/components/workspace/WorkspaceContext";
-import type { ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
+import type { MusicData, ProjectCardData, TimelineEntry, Widget } from "@/lib/widgets";
 
 /**
  * Projects as a list, like a contents page: the mark, the name, what I
@@ -194,6 +194,94 @@ function Contact({ email, links }: { email: string; links: { label: string; href
   );
 }
 
+const quietLink =
+  "underline decoration-background-inverse/20 decoration-1 underline-offset-2 transition-colors hover:decoration-foreground";
+
+/**
+ * What I've been listening to, live from Last.fm: what's on right now,
+ * then the most played artists, genres and recent tracks as plain text. Text only (Last.fm's licence excludes images); artists and
+ * tracks link to their Last.fm pages, and the card credits Last.fm.
+ */
+function Music({ music }: { music: MusicData }) {
+  const label = "font-mono text-xs text-foreground-secondary";
+  return (
+    <div className="animate-suggestion-in w-full space-y-6 text-sm">
+      {music.nowPlaying && (
+        <p className="flex items-center gap-3">
+          {/* Three bars bouncing: something's playing. */}
+          <span aria-hidden="true" className="flex h-3.5 items-end gap-[2px]">
+            {[0, 1, 2].map((bar) => (
+              <span
+                key={bar}
+                className="animate-eq w-[3px] rounded-full bg-foreground"
+                style={{ animationDelay: `${bar * -0.35}s` }}
+              />
+            ))}
+          </span>
+          <span className={label}>Now playing</span>
+          <span className="min-w-0 truncate">
+            <a href={music.nowPlaying.url} target="_blank" rel="noopener noreferrer" className={quietLink}>
+              {music.nowPlaying.name}
+            </a>
+            <span className="text-foreground-secondary"> · {music.nowPlaying.artist}</span>
+          </span>
+        </p>
+      )}
+
+      {/* The rest as plain lines of text: a label, then the names. */}
+      <dl className="space-y-3">
+        {music.topArtists.length > 0 && (
+          <div>
+            <dt className={label}>Most played, last 3 months</dt>
+            <dd className="mt-1 leading-relaxed">
+              {music.topArtists.map((artist, index) => (
+                <span key={artist.url}>
+                  {index > 0 && <span className="text-foreground-secondary">, </span>}
+                  <a href={artist.url} target="_blank" rel="noopener noreferrer" className={quietLink}>
+                    {artist.name}
+                  </a>
+                </span>
+              ))}
+            </dd>
+          </div>
+        )}
+        {music.genres.length > 0 && (
+          <div>
+            <dt className={label}>Genres</dt>
+            <dd className="mt-1 leading-relaxed text-foreground-secondary">{music.genres.join(", ")}</dd>
+          </div>
+        )}
+        {music.recent.length > 0 && (
+          <div>
+            <dt className={label}>Recently played</dt>
+            <dd className="mt-1 leading-relaxed">
+              {music.recent.map((track, index) => (
+                <span key={`${track.url}-${track.playedAt}`}>
+                  {index > 0 && <span className="text-foreground-secondary">, </span>}
+                  <a href={track.url} target="_blank" rel="noopener noreferrer" className={quietLink}>
+                    {track.name}
+                  </a>
+                  <span className="text-foreground-secondary"> by {track.artist}</span>
+                </span>
+              ))}
+            </dd>
+          </div>
+        )}
+      </dl>
+
+      {/* Credit, as Last.fm's API terms ask: the profile and Last.fm itself. */}
+      <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-secondary">
+        <a href={music.profileUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          {music.user} on Last.fm ↗
+        </a>
+        <a href="https://www.last.fm" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          Powered by AudioScrobbler
+        </a>
+      </p>
+    </div>
+  );
+}
+
 /**
  * Rich blocks under an AI reply. Projects shown in the same reply are
  * gathered into one list.
@@ -211,6 +299,8 @@ export default function ChatWidgets({ widgets }: { widgets: Widget[] }) {
             return <Timeline key={index} roles={widget.roles} />;
           case "contact":
             return <Contact key={index} email={widget.email} links={widget.links} />;
+          case "music":
+            return <Music key={index} music={widget.music} />;
         }
       })}
     </div>

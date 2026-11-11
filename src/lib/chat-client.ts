@@ -89,6 +89,8 @@ function describeWidget(widget: Widget): string {
       return "career timeline";
     case "contact":
       return "contact card";
+    case "music":
+      return "music card (Last.fm)";
   }
 }
 

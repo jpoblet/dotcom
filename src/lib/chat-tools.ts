@@ -1,8 +1,9 @@
 /**
  * Display tools for the chat. Claude calls them to show a rich block (a
- * project card, the career timeline, a contact card) under its reply. They
- * don't fetch anything new - everything is already in the knowledge base -
- * they only decide what the visitor sees. Server-only.
+ * project card, the career timeline, a contact card, the music card) under
+ * its reply. Most only decide what the visitor sees, from the knowledge
+ * base; show_music also fetches live listening data from Last.fm and hands
+ * it to Claude in the tool result. Server-only.
  */
 import type Anthropic from "@anthropic-ai/sdk";
 import {
@@ -12,7 +13,8 @@ import {
   getProjects,
   toProjectCard,
 } from "./content";
-import type { Widget } from "./widgets";
+import { getMusic, isLastfmConfigured } from "./lastfm";
+import type { MusicData, Widget } from "./widgets";
 
 type Tool = Anthropic.Beta.BetaTool;
 
@@ -70,6 +72,17 @@ export function buildTools(): Tool[] {
       eager_input_streaming: true,
     },
   );
+
+  // Only when Last.fm is set up (fixed per deployment, so still cacheable).
+  if (isLastfmConfigured()) {
+    tools.push({
+      name: "show_music",
+      description: `Show the visitor a card with what ${first} has been listening to lately, live from Last.fm: most played artists over the last three months, genres, recent tracks and what's playing right now. Use it when the visitor asks about ${first}'s music taste, favourite artists, bands or genres, or what he's listening to. The tool result gives you the data to talk about.`,
+      input_schema: NO_INPUT,
+      strict: true,
+      eager_input_streaming: true,
+    });
+  }
 
   tools.push({
     name: WRAP_UP,
@@ -166,8 +179,33 @@ export interface ToolOutcome {
   isError?: boolean;
 }
 
+const ago = (ms: number) => {
+  const minutes = Math.round((Date.now() - ms) / 60000);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  return hours < 48 ? `${hours} h ago` : `${Math.round(hours / 24)} days ago`;
+};
+
+/** The listening data, as Claude reads it in the tool result. */
+function describeMusic(music: MusicData): string {
+  const month = new Date(music.since).toLocaleString("en-GB", { month: "long", year: "numeric" });
+  return [
+    music.nowPlaying
+      ? `Playing right now: "${music.nowPlaying.name}" by ${music.nowPlaying.artist}.`
+      : "",
+    `Most played artists, last three months: ${music.topArtists.map((a) => `${a.name} (${a.plays})`).join(", ")}.`,
+    music.genres.length ? `Genres, from those artists' tags: ${music.genres.join(", ")}.` : "",
+    music.recent.length
+      ? `Recently played: ${music.recent.map((t) => `"${t.name}" by ${t.artist}${t.playedAt ? `, ${ago(t.playedAt)}` : ""}`).join("; ")}.`
+      : "",
+    `Scrobbling on Last.fm since ${month}: ${music.totalPlays} plays so far, so this shows recent listening, not a lifetime of it.`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 /** Runs a display tool. Inputs are validated here, not trusted. */
-export function runTool(name: string, input: unknown): ToolOutcome {
+export async function runTool(name: string, input: unknown): Promise<ToolOutcome> {
   switch (name) {
     case "show_project": {
       const slug = (input as { slug?: unknown } | null)?.slug;
@@ -199,6 +237,19 @@ export function runTool(name: string, input: unknown): ToolOutcome {
       return {
         widget: { kind: "contact", email, links },
         result: "The contact card is now shown to the visitor below your reply. It doesn't replace your answer: write a full reply and say the card below has the ways to reach you.",
+      };
+    }
+    case "show_music": {
+      const music = await getMusic();
+      if (!music) {
+        return {
+          result: "Last.fm couldn't be reached, so there's no music card this time. Answer from the knowledge base and don't mention the card.",
+          isError: true,
+        };
+      }
+      return {
+        widget: { kind: "music", music },
+        result: `The music card is now shown to the visitor below your reply, live from Last.fm. Here's what it shows:\n${describeMusic(music)}\n\nAnswer in your own words as ${getProfile().name.split(" ")[0]}: what you've had on lately and the thread running through it. Stick to what the data shows and what the knowledge base says; don't invent memories or opinions about specific artists. Mention the card below in passing.`,
       };
     }
     default:
