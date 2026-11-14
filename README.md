@@ -83,10 +83,22 @@ chip, project page), the visitor's country and city, and a random id per
 conversation. No IP addresses. Entries never expire. Rate-limited questions
 only count in the totals. See [`src/lib/chat-log.ts`](src/lib/chat-log.ts).
 
-**Reading it.** Open `/admin` and log in with any username and the
-`ADMIN_PASSWORD` environment variable. Without that variable, `/admin`
-returns 404. It shows monthly and all-time totals and every conversation,
-newest first.
+**Reading it.** Open `/admin` and sign in with the `ADMIN_PASSWORD`
+environment variable (a session cookie keeps you signed in for 30 days;
+scripts can still use HTTP Basic Auth). Without that variable, `/admin`
+returns 404. Three sections, each for the last 7, 30 or 90 days or all time:
+
+- **Dashboard** (`/admin`): totals against the period before, questions per
+  day, topics, countries and cities, hours, how questions were asked, answers
+  the chat couldn't give, projects shown, and site traffic from Umami (needs
+  `UMAMI_API_KEY`).
+- **Questions** (`/admin/questions`): every question sorted by topic, with
+  search, a "typed only" filter and repeated questions folded together.
+- **Conversations** (`/admin/conversations`): the full log, newest first.
+
+Topics are picked by Claude the first time a question shows up in the admin
+and kept in Redis (`chatlog:<env>:topics`), so each question is sorted once.
+The list of topics is in [`src/lib/question-topics.ts`](src/lib/question-topics.ts).
 
 **Analytics.** [Umami](https://cloud.umami.is) (cookieless) records visits on
 the live domains only, plus these events: `Chat question` (with its

@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   // make sure they are bundled with the serverless function on deploy.
   outputFileTracingIncludes: {
     "/api/chat": ["./content/**/*"],
+    // The admin reads the projects and roles to sort questions into topics.
+    "/admin": ["./content/**/*"],
+    "/admin/**/*": ["./content/**/*"],
   },
   // The projects page and the /projects/<slug> pages are gone: case studies
   // now open in the home page's side panel, at /work/<slug>. Old links land

@@ -133,3 +133,43 @@ export async function getEntries(
 export function isRedisConfigured(): boolean {
   return redis !== null;
 }
+
+const PAGE = 200;
+
+/**
+ * Every entry since a date, newest first, paging through the log until it
+ * passes that date. Stops at `max` (truncated: true) so a busy log can't
+ * make a page slow.
+ */
+export async function getEntriesSince(
+  since: Date | null,
+  max = 2000,
+): Promise<{ entries: ChatLogEntry[]; truncated: boolean }> {
+  const entries: ChatLogEntry[] = [];
+  if (!redis) return { entries, truncated: false };
+  for (let offset = 0; ; offset += PAGE) {
+    const { entries: page } = await getEntries(offset, PAGE);
+    const recent = since ? page.filter((entry) => new Date(entry.at) >= since) : page;
+    entries.push(...recent);
+    if (recent.length < page.length || page.length < PAGE) break;
+    if (entries.length >= max) return { entries: entries.slice(0, max), truncated: true };
+  }
+  return { entries, truncated: false };
+}
+
+/** A stable id for an entry: they have none of their own. */
+export const entryKey = (entry: Pick<ChatLogEntry, "conversationId" | "at">) =>
+  `${entry.conversationId}|${entry.at}`;
+
+/**
+ * Replies where the chat said it didn't know: the system prompt tells it to
+ * answer like a person who doesn't recall, so these phrases mark gaps in
+ * the content. English only and approximate on purpose (the chat replies
+ * in the visitor's language).
+ */
+const UNSURE =
+  /\b(don'?t|do not) (really )?(remember|recall|know)\b|\bnot (really |entirely |totally )?sure\b|\bhaven'?t (really |ever )*(thought|given|decided|looked)\b|\b(not|isn'?t|wasn'?t) (really )?something I'?ve\b|\bnever (really )?(thought|given)\b|\bno idea\b|\bcan'?t (really )?(say|tell|share)\b|\brather (not|talk|chat|discuss)\b/i;
+
+/** An answer the chat couldn't really give: a gap in the content. */
+export const isUnsure = (entry: Pick<ChatLogEntry, "outcome" | "reply">) =>
+  entry.outcome === "answered" && UNSURE.test(entry.reply);
